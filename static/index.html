@@ -3,13 +3,47 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title></title>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="css/base.css" rel="stylesheet" media="screen">
+    <script src="bootstrap/js/jquery-2.1.0.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="js/client.js"></script>
 </head>
 <body>
-    HELLO WORLD@!!
-    <button type="button" onclick="postPlayerData()">
-        Начать
-    </button>
+    <div class="container padded">
+        <div class="row">
+            <div class="span12">
+                <input type="text" id="player_name" placeholder="Your nickname">
+            </div>
+        </div>
+        <div class="row">
+            <div class="span12 text-center">
+                <h2>Choose your side!</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="span6">
+                <button class="btn btn-success btn-large relative-width-100" type="button" onclick="selectSide('leaf')">
+                    <i class="icon-leaf icon-white"></i>
+                </button>
+            </div>
+            <div class="span6">
+                <button class="btn btn-danger btn-large relative-width-100" type="button" onclick="selectSide('fire')">
+                    <i class="icon-fire icon-white"></i>
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="span12 text-center">
+                <button class="btn relative-width-100" type="button" onclick="inBattle()">В БОЙ!</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="span12">
+
+            </div>
+        </div>
+    </div>
 </body>
 </html>
