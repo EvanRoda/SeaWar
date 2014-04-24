@@ -48,11 +48,17 @@
                 <button class="btn relative-width-100" type="button" onclick="inBattle('second')">Второй</button>
             </div>
         </div>
-        <div class="row">
+        <div class="row command_row hiddenRow">
             <div class="span12">
-                <canvas id="game_field" width="1024" height="810"></canvas>
+                <input type="text" placeholder="Type command" id="command_line" class="relative-width-100">
             </div>
         </div>
+        <div class="row">
+            <div class="span12">
+                <canvas id="game_field" width="954" height="810" style="border: 1px solid"></canvas>
+            </div>
+        </div>
+
     </div>
     <script type="text/javascript" src="js/client.js"></script>
 </body>

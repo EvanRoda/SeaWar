@@ -12,7 +12,7 @@ var server = http.createServer(app);
 /**
  * Игровые переменные
  */
-var gameDelay = 1500;  // пока полторы чтобы не часто
+var gameDelay = 100;  // пока полторы чтобы не часто
 var players = [];
 
 //Координаты сетки
@@ -55,11 +55,18 @@ function createShip(player, shipType){
         };
         if(obj.type == 'canon'){
             newObj.direction = 90;
+            newObj.given_direction = 90;
+            newObj.delta_direction = 0;
+            newObj.angle_speed = 20;
         }else if(obj.type == 'hull'){
             newObj.direction = 0;
         }
         player.ship.push(newObj);
     });
+}
+
+function markOfNumber(number){
+    return number<0 ? -1 : 1;
 }
 
 app.use(express.static(path.join(__dirname, 'static')));
@@ -87,13 +94,68 @@ io.sockets.on('connection', function(socket){
         var player = _.findWhere(players, {_id: data.parent_id});
         createShip(player, data.ship_type);
     });
+
+    //Прием команды от игрока
+    socket.on('command', function(data){
+        var player = _.findWhere(players, {_id: data.player_id});
+        console.log(data);
+        var command =  data.command.split(' ', 2);
+        console.log('РАЗОБРАННАЯ КОМАНДА');
+        console.log(command);
+        if(command[0].toUpperCase() == 'НАПРАВЛЕНИЕ'){
+            player.ship.forEach(function(obj){
+                if(obj.type == 'canon'){
+                    obj.given_direction = parseInt(command[1]) - obj.delta_direction;
+                }
+            });
+        }else if(command[0].toUpperCase() == 'СВЕДЕНИЕ'){
+            var range = parseInt(command[1]);
+            if(range>0){
+                player.ship.forEach(function(obj){
+                    if(obj.type == 'canon'){
+                        var dy = player.y - obj.y;
+                        obj.delta_direction = Math.atan(-1*dy/range)*180/Math.PI;
+                        obj.given_direction = obj.given_direction - obj.delta_direction;
+                    }
+                });
+            }else{
+                player.ship.forEach(function(obj){
+                    if(obj.type == 'canon'){
+                        obj.given_direction = obj.given_direction + obj.delta_direction;
+                        obj.delta_direction = 0;
+                    }
+                });
+            }
+        }else if(command[0].toUpperCase() == 'ДАЛЬНОСТЬ'){
+            player.distance = parseInt(command[1]);
+        }else if(command[0].toUpperCase() == 'ОГОНЬ'){
+            player.ship.forEach(function(obj){
+                if(obj.type == 'canon'){
+                    var ammo = {
+                        type: 'ammo'
+                    };
+                    player.ship.push(ammo);
+                }
+            });
+        }
+    });
 });
 
 var intId = setInterval(function(){
     if(players.length){
         players.forEach(function(player){
             player.ship.forEach(function(obj){
-                obj.direction = obj.direction + 10;
+                if(obj.type == 'canon'){
+                    var delta = obj.given_direction - obj.direction;
+                    if(delta){
+                        var trueAngleSpeed = obj.angle_speed*(gameDelay/1000);
+                        if(Math.abs(delta) > trueAngleSpeed){
+                            obj.direction = obj.direction + markOfNumber(delta)*trueAngleSpeed;
+                        }else{
+                            obj.direction = obj.given_direction;
+                        }
+                    }
+                }
             });
         });
     }
@@ -108,8 +170,7 @@ var intId = setInterval(function(){
  * side
  * x
  * y
- * reload               // Время перезарядки орудий
- * reload_counter       // Счетчик перезарядки
+ * distance
  * ship [
  *      ... //Список объектов игрока (корпус пушки снаряды)
  * ]
@@ -122,8 +183,12 @@ var intId = setInterval(function(){
  * x
  * y
  * direction
+ * given_direction      // заданное направление
  * delta_direction      // угол сведения, только для пушек, по умолчанию 0
+ * angle_speed          // Скорость поворота
+ * reload               // Время перезарядки орудий
+ * reload_counter       // Счетчик перезарядки
  * status               // только для пушек, цела/поврежденв == true/false
- * distance             //for ammo
+ * distance             // for ammo
  * distance_counter     // for ammo
  */

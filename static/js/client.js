@@ -5,13 +5,15 @@ var itIsYou = {
     _id: ''
 };
 
+var commandField = $('#command_line');
+
 var canon = new Image();
 canon.src = 'images/canon1.png';
 
 var world = Physics();
 var renderer = Physics.renderer('canvas', {
     el: 'game_field',
-    width: 1024,
+    width: 954,
     height: 810,
     meta: false, // don't display meta data
     styles: {
@@ -44,7 +46,7 @@ socket.on('gamedata', function (players) {
 
                 //Переворачиваем координаты для противников
                 if(itIsYou.side != player.side){
-                    obj.x = 1024 - obj.x;
+                    obj.x = 954 - obj.x;
                     obj.y = 810 - obj.y;
                     obj.direction = obj.direction - 180;
                 }
@@ -74,6 +76,8 @@ socket.on('gamedata', function (players) {
 
 function inBattle(shipType){
     $('.choose_player_ship').addClass('hiddenRow');
+    $('.command_row').removeClass('hiddenRow');
+    commandField.focus();
     socket.emit('create_player_object', {parent_id: itIsYou._id, ship_type: shipType});
 }
 
@@ -88,3 +92,13 @@ function selectSide(side){
     $('.choose_player_ship').removeClass('hiddenRow');
     socket.emit('new_player', itIsYou);
 }
+
+commandField.keydown(function(event){
+    if (event.which == 13){
+        var command = commandField.val();
+        if(command){
+            socket.emit('command', {command: command, player_id: itIsYou._id});
+        }
+        commandField.val('').focus();
+    }
+});
