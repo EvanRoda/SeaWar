@@ -40,8 +40,9 @@ var shipsTemplates = {
         {type: 'canon', dx: 0, dy: 0}
     ],
     second: [
-        {type: 'canon', dx: 0, dy: -50},
-        {type: 'canon', dx: 0, dy: 50}
+        {type: 'hull', dx: 0, dy: 0},
+        {type: 'canon', dx: 1, dy: -55},
+        {type: 'canon', dx: 1, dy: 75}
     ]
 };
 

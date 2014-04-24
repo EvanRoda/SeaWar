@@ -8,7 +8,9 @@ var itIsYou = {
 var commandField = $('#command_line');
 
 var canon = new Image();
-canon.src = 'images/canon1.png';
+var hull = new Image();
+canon.src = 'images/canon.png';
+hull.src = 'images/hull.png';
 
 var world = Physics();
 var renderer = Physics.renderer('canvas', {
@@ -51,18 +53,20 @@ socket.on('gamedata', function (players) {
                     obj.direction = obj.direction - 180;
                 }
 
-                //Рисуем (пока только пушки)
+                //Рисуем
+                newObject = Physics.body('circle', {
+                    mass: 100,
+                    radius: 21,
+                    x: obj.x,
+                    y: obj.y
+                });
                 if(obj.type == 'canon'){
-                    newObject = Physics.body('circle', {
-                        mass: 100,
-                        radius: 21,
-                        x: obj.x,
-                        y: obj.y
-                    });
                     newObject.view = canon;
-                    newObject.state.angular.pos = Math.PI*obj.direction/180;
-                    gameObjects.push(newObject);
+                }else if(obj.type == 'hull'){
+                    newObject.view = hull;
                 }
+                newObject.state.angular.pos = Math.PI*obj.direction/180;
+                gameObjects.push(newObject);
                 console.log('GAME OBJECTS');
                 console.log(gameObjects);
             });
