@@ -1,18 +1,75 @@
 var socket = io.connect();
-
-socket.on('gamedata', function (data) {
-    console.log(data);
-    /* socket.emit('my other event', { my: 'data' });*/
-});
-
 var itIsYou = {
     nickName: '',
     side: '',
     _id: ''
 };
 
-function inBattle(){
-    socket.emit('create_player_object', {parent_id: itIsYou._id, ship_type: 1});
+var canon = new Image();
+canon.src = 'images/canon1.png';
+
+var world = Physics();
+var renderer = Physics.renderer('canvas', {
+    el: 'game_field',
+    width: 1024,
+    height: 810,
+    meta: false, // don't display meta data
+    styles: {
+        // set colors for the circle bodies
+        'circle' : {
+            strokeStyle: '#351024',
+            lineWidth: 1,
+            fillStyle: '#d33682',
+            angleIndicator: '#351024'
+        }
+    }
+});
+
+world.add( renderer );
+
+var gameObjects = [];
+
+socket.on('gamedata', function (players) {
+    console.log('PLAYERS');
+    console.log(players);
+    var newObject = null;
+    if(gameObjects.length){
+        world.remove(gameObjects);
+    }
+    gameObjects = [];
+    if(players.length){
+        players.forEach(function(player){
+            player.ship.forEach(function(obj){
+                newObject = null;
+                if(itIsYou.side != player.side){
+                    obj.x = 1024 - obj.x;
+                    obj.y = 810 - obj.y;
+                    obj.direction = obj.direction - 180;
+                }
+                if(obj.type == 'canon'){
+                    newObject = Physics.body('circle', {
+                        mass: 100,
+                        radius: 21,
+                        x: obj.x,
+                        y: obj.y
+                    });
+                    newObject.view = canon;
+                    newObject.state.angular.pos = Math.PI*obj.direction/180;
+                    gameObjects.push(newObject);
+                }
+                console.log('GAME OBJECTS');
+                console.log(gameObjects);
+            });
+        });
+    }
+    if(gameObjects.length){
+        world.add(gameObjects);
+    }
+    world.render();
+});
+
+function inBattle(shipType){
+    socket.emit('create_player_object', {parent_id: itIsYou._id, ship_type: shipType});
 }
 
 function selectSide(side){

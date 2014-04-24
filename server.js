@@ -14,42 +14,52 @@ var server = http.createServer(app);
  */
 var gameDelay = 1500;  // пока полторы чтобы не часто
 var players = [];
-var game_objects = [];
 
 //Координаты сетки
 var grid_start = 135;
 var grid_delta = 270;
 
 var grid = [
-    {x: 135, y: 135, side: 'leaf', is_free: true, number: 0},
-    {x: 135, y: 405, side: 'leaf', is_free: false, number: 1},
-    {x: 135, y: 675, side: 'leaf', is_free: true, number: 2},
-    {x: 405, y: 135, side: 'leaf', is_free: true, number: 3},
-    {x: 405, y: 405, side: 'leaf', is_free: true, number: 4},
-    {x: 405, y: 675, side: 'leaf', is_free: true, number: 5},
+    {x: 135, y: 135, side: 'leaf', is_free: true, number: 0, child_id: ''},
+    {x: 135, y: 405, side: 'leaf', is_free: false, number: 1, child_id: ''},
+    {x: 135, y: 675, side: 'leaf', is_free: true, number: 2, child_id: ''},
+    {x: 405, y: 135, side: 'leaf', is_free: true, number: 3, child_id: ''},
+    {x: 405, y: 405, side: 'leaf', is_free: true, number: 4, child_id: ''},
+    {x: 405, y: 675, side: 'leaf', is_free: true, number: 5, child_id: ''},
 
-    {x: 135, y: 135, side: 'fire', is_free: true, number: 0},
-    {x: 135, y: 405, side: 'fire', is_free: false, number: 1},
-    {x: 135, y: 675, side: 'fire', is_free: true, number: 2},
-    {x: 405, y: 135, side: 'fire', is_free: true, number: 3},
-    {x: 405, y: 405, side: 'fire', is_free: true, number: 4},
-    {x: 405, y: 675, side: 'fire', is_free: true, number: 5}
+    {x: 135, y: 135, side: 'fire', is_free: true, number: 0, child_id: ''},
+    {x: 135, y: 405, side: 'fire', is_free: false, number: 1, child_id: ''},
+    {x: 135, y: 675, side: 'fire', is_free: true, number: 2, child_id: ''},
+    {x: 405, y: 135, side: 'fire', is_free: true, number: 3, child_id: ''},
+    {x: 405, y: 405, side: 'fire', is_free: true, number: 4, child_id: ''},
+    {x: 405, y: 675, side: 'fire', is_free: true, number: 5, child_id: ''}
 ];
 
-function CreateGameObject(type, x, y, parent_id){
-    var player = _.findWhere(players, {_id: parent_id});
-    if(player){
-        this.type = type;
-        this.x = x;
-        this.y = y;
-        this.parent_id = parent_id;
-        this.side = player.side;
-        if(type == 'canon'){
-            this.direction = 90;
-        }else if(type == 'hull'){
-            this.direction = 0;
+var shipsTemplates = {
+    first: [
+        {type: 'canon', dx: 0, dy: 0}
+    ],
+    second: [
+        {type: 'canon', dx: 0, dy: -50},
+        {type: 'canon', dx: 0, dy: 50}
+    ]
+};
+
+function createShip(player, shipType){
+    player.ship = [];
+    shipsTemplates[shipType].forEach(function(obj){
+        var newObj = {
+            type: obj.type,
+            x: player.x + obj.dx,
+            y: player.y + obj.dy
+        };
+        if(obj.type == 'canon'){
+            newObj.direction = 90;
+        }else if(obj.type == 'hull'){
+            newObj.direction = 0;
         }
-    }
+        player.ship.push(newObj);
+    });
 }
 
 app.use(express.static(path.join(__dirname, 'static')));
@@ -61,14 +71,57 @@ server.listen(3000, function(){
 io = require('socket.io').listen(server);
 
 io.sockets.on('connection', function(socket){
+    // Создание нового игрока
     socket.on('new_player', function(data){
+        var grid_cell = _.findWhere(grid, {side: data.side, is_free: true});
+        grid_cell.is_free = false;
+        grid_cell.child_id = data._id;
+        data.x = grid_cell.x;
+        data.y = grid_cell.y;
+        data.ship = [];
         players.push(data);
     });
+
+    // Создание объектов для игрока
     socket.on('create_player_object', function(data){
-        game_objects.push(new CreateGameObject('canon', 405, 405, data.parent_id));
+        var player = _.findWhere(players, {_id: data.parent_id});
+        createShip(player, data.ship_type);
     });
 });
 
 var intId = setInterval(function(){
-    io.sockets.emit('gamedata', game_objects);
+    if(players.length){
+        players.forEach(function(player){
+            player.ship.forEach(function(obj){
+                obj.direction = obj.direction + 10;
+            });
+        });
+    }
+    io.sockets.emit('gamedata', players);
 }, gameDelay);
+
+/**
+ * Модель player (Игрок)
+ *
+ * _id
+ * name
+ * side
+ * x
+ * y
+ * reload               // Время перезарядки орудий
+ * reload_counter       // Счетчик перезарядки
+ * ship [
+ *      ... //Список объектов игрока (корпус пушки снаряды)
+ * ]
+ */
+
+/**
+ * Игровой объект
+ *
+ * type //hull canon ammo
+ * x
+ * y
+ * direction
+ * distance //for ammo
+ * distance_counter // for ammo
+ */

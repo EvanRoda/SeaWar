@@ -7,8 +7,9 @@
     <link href="css/base.css" rel="stylesheet" media="screen">
     <script src="bootstrap/js/jquery-2.1.0.min.js"></script>
     <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="bootstrap/js/physicsjs-full-0.6.0.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="js/client.js"></script>
+
 </head>
 <body>
     <div class="container padded">
@@ -35,15 +36,19 @@
             </div>
         </div>
         <div class="row">
-            <div class="span12 text-center">
-                <button class="btn relative-width-100" type="button" onclick="inBattle()">В БОЙ!</button>
+            <div class="span6 text-center">
+                <button class="btn relative-width-100" type="button" onclick="inBattle('first')">Первый</button>
+            </div>
+            <div class="span6 text-center">
+                <button class="btn relative-width-100" type="button" onclick="inBattle('second')">Второй</button>
             </div>
         </div>
         <div class="row">
             <div class="span12">
-
+                <canvas id="game_field" width="1024" height="810"></canvas>
             </div>
         </div>
     </div>
+    <script type="text/javascript" src="js/client.js"></script>
 </body>
 </html>
