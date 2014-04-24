@@ -5,3 +5,7 @@
 .padded {
     padding: 20px;
 }
+
+.hiddenRow {
+    display: none;
+}

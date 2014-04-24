@@ -118,10 +118,12 @@ var intId = setInterval(function(){
 /**
  * Игровой объект
  *
- * type //hull canon ammo
+ * type                 //hull canon ammo
  * x
  * y
  * direction
- * distance //for ammo
- * distance_counter // for ammo
+ * delta_direction      // угол сведения, только для пушек, по умолчанию 0
+ * status               // только для пушек, цела/поврежденв == true/false
+ * distance             //for ammo
+ * distance_counter     // for ammo
  */

@@ -41,11 +41,15 @@ socket.on('gamedata', function (players) {
         players.forEach(function(player){
             player.ship.forEach(function(obj){
                 newObject = null;
+
+                //Переворачиваем координаты для противников
                 if(itIsYou.side != player.side){
                     obj.x = 1024 - obj.x;
                     obj.y = 810 - obj.y;
                     obj.direction = obj.direction - 180;
                 }
+
+                //Рисуем (пока только пушки)
                 if(obj.type == 'canon'){
                     newObject = Physics.body('circle', {
                         mass: 100,
@@ -69,6 +73,7 @@ socket.on('gamedata', function (players) {
 });
 
 function inBattle(shipType){
+    $('.choose_player_ship').addClass('hiddenRow');
     socket.emit('create_player_object', {parent_id: itIsYou._id, ship_type: shipType});
 }
 
@@ -79,5 +84,7 @@ function selectSide(side){
         side: side,
         _id: name.val()
     };
+    $('.enter_player_name').addClass('hiddenRow');
+    $('.choose_player_ship').removeClass('hiddenRow');
     socket.emit('new_player', itIsYou);
 }

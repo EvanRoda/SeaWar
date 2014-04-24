@@ -13,17 +13,17 @@
 </head>
 <body>
     <div class="container padded">
-        <div class="row">
+        <div class="row enter_player_name" id="enter_player_name">
             <div class="span12">
                 <input type="text" id="player_name" placeholder="Your nickname">
             </div>
         </div>
-        <div class="row">
+        <div class="row enter_player_name">
             <div class="span12 text-center">
                 <h2>Choose your side!</h2>
             </div>
         </div>
-        <div class="row">
+        <div class="row enter_player_name">
             <div class="span6">
                 <button class="btn btn-success btn-large relative-width-100" type="button" onclick="selectSide('leaf')">
                     <i class="icon-leaf icon-white"></i>
@@ -35,7 +35,12 @@
                 </button>
             </div>
         </div>
-        <div class="row">
+        <div class="row hiddenRow choose_player_ship">
+            <div class="span12 text-center">
+                <h2>Choose your ship!</h2>
+            </div>
+        </div>
+        <div class="row hiddenRow choose_player_ship">
             <div class="span6 text-center">
                 <button class="btn relative-width-100" type="button" onclick="inBattle('first')">Первый</button>
             </div>
