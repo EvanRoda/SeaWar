@@ -34,8 +34,6 @@ world.add( renderer );
 var gameObjects = [];
 
 socket.on('gamedata', function (players) {
-    console.log('PLAYERS');
-    console.log(players);
     var newObject = null;
     if(gameObjects.length){
         world.remove(gameObjects);
@@ -56,19 +54,20 @@ socket.on('gamedata', function (players) {
                 //Рисуем
                 newObject = Physics.body('circle', {
                     mass: 100,
-                    radius: 21,
+                    radius: 2,
                     x: obj.x,
                     y: obj.y
                 });
                 if(obj.type == 'canon'){
                     newObject.view = canon;
+                    if(!obj.status){
+                        console.log('УБИТ');
+                    }
                 }else if(obj.type == 'hull'){
                     newObject.view = hull;
                 }
                 newObject.state.angular.pos = Math.PI*obj.direction/180;
                 gameObjects.push(newObject);
-                console.log('GAME OBJECTS');
-                console.log(gameObjects);
             });
         });
     }

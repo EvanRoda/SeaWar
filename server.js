@@ -14,6 +14,10 @@ var server = http.createServer(app);
  */
 var gameDelay = 100;  // пока полторы чтобы не часто
 var players = [];
+var windForce = 0.1; // _.random(-1, 1, true) / 100;
+var AMMO_SPEED = 80;
+
+console.log(windForce);
 
 //Координаты сетки
 var grid_start = 135;
@@ -59,6 +63,10 @@ function createShip(player, shipType){
             newObj.given_direction = 90;
             newObj.delta_direction = 0;
             newObj.angle_speed = 20;
+            newObj.ammo_speed = AMMO_SPEED;
+            newObj.reload = 10;
+            newObj.reload_counter = 10;
+            newObj.status = true;
         }else if(obj.type == 'hull'){
             newObj.direction = 0;
         }
@@ -131,9 +139,15 @@ io.sockets.on('connection', function(socket){
             player.distance = parseInt(command[1]);
         }else if(command[0].toUpperCase() == 'ОГОНЬ'){
             player.ship.forEach(function(obj){
-                if(obj.type == 'canon'){
+                if(obj.type == 'canon' && obj.status){
                     var ammo = {
-                        type: 'ammo'
+                        type: 'ammo',
+                        x: obj.x, // нужно посчитать начальную точку сейчас выставлен в центр орудия
+                        y: obj.y,
+                        direction: obj.direction,
+                        ammo_speed: obj.ammo_speed,
+                        distance: player.distance,
+                        distance_counter: 0
                     };
                     player.ship.push(ammo);
                 }
@@ -145,9 +159,13 @@ io.sockets.on('connection', function(socket){
 var intId = setInterval(function(){
     if(players.length){
         players.forEach(function(player){
-            player.ship.forEach(function(obj){
+            var deleteList = [];
+            player.ship.forEach(function(obj, index){
+                var delta = null;
+
+                //расчет пушки
                 if(obj.type == 'canon'){
-                    var delta = obj.given_direction - obj.direction;
+                    delta = obj.given_direction - obj.direction;
                     if(delta){
                         var trueAngleSpeed = obj.angle_speed*(gameDelay/1000);
                         if(Math.abs(delta) > trueAngleSpeed){
@@ -157,6 +175,61 @@ var intId = setInterval(function(){
                         }
                     }
                 }
+                //расчет снаряда
+                else if(obj.type == 'ammo'){
+                    var angle = obj.direction*Math.PI/180;
+                    delta = obj.distance - obj.distance_counter;
+                    var trueAmmoSpeed = obj.ammo_speed*gameDelay/1000;
+
+                    if(delta > trueAmmoSpeed){
+                        obj.x = obj.x + Math.sin(angle)*trueAmmoSpeed;
+                        obj.y = obj.y - Math.cos(angle)*trueAmmoSpeed;
+                        obj.distance_counter = obj.distance_counter + trueAmmoSpeed;
+                        obj.direction = obj.direction + windForce;
+                    }else{
+                        obj.x = obj.x + Math.sin(angle)*delta;
+                        obj.y = obj.y - Math.cos(angle)*delta;
+                        obj.distance_counter = obj.distance;
+                        // ... Совершаем действия по проверке столкновений
+                        players.forEach(function(t_player){
+                            var vir_x, vir_y;
+                            if(player.side != t_player.side){
+                                vir_x = 954 - t_player.x;
+                                vir_y = 810 - t_player.y;
+                            }else{
+                                vir_x = t_player.x;
+                                vir_y = t_player.y;
+                            }
+                            var hull_range = Math.sqrt(Math.pow(vir_x - obj.x, 2) + Math.pow(vir_y - obj.y, 2));
+
+                            if(hull_range < 100){
+                                t_player.ship.forEach(function(target){
+                                    if(player.side != t_player.side){
+                                        vir_x = 954 - target.x;
+                                        vir_y = 810 - target.y;
+                                    }else{
+                                        vir_x = target.x;
+                                        vir_y = target.y;
+                                    }
+                                    var target_range = null;
+                                    if(target.type == 'canon'){
+                                        target_range = Math.sqrt(Math.pow(vir_x - obj.x, 2) + Math.pow(vir_y - obj.y, 2));
+                                        if(target_range < 20){
+                                            target.status = false;
+                                        }
+                                    }
+                                });
+                            }
+                        });
+
+                        // ... Рисуем круги на воде или повреждения
+
+                        deleteList.push(index);
+                    }
+                }
+            });
+            deleteList.forEach(function(obj_index, index){
+                player.ship.splice(obj_index - index, 1);
             });
         });
     }
@@ -190,6 +263,7 @@ var intId = setInterval(function(){
  * reload               // Время перезарядки орудий
  * reload_counter       // Счетчик перезарядки
  * status               // только для пушек, цела/поврежденв == true/false
+ * ammo_speed           // скорость снаряда ( пушки и снаряды )
  * distance             // for ammo
  * distance_counter     // for ammo
  */
