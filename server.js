@@ -12,31 +12,33 @@ var server = http.createServer(app);
 /**
  * Игровые переменные
  */
-var gameDelay = 100;  // пока полторы чтобы не часто
 var players = [];
-var windForce = 0.1; // _.random(-1, 1, true) / 100;
-var AMMO_SPEED = 80;
-
-console.log(windForce);
+var opt = { //gameField
+    width: 954,
+    height: 810,
+    delay: 100,
+    windForce: 0.1, // _.random(-1, 1, true) / 10;
+    ammoSpeed: 80
+};
 
 //Координаты сетки
 var grid_start = 135;
 var grid_delta = 270;
 
 var grid = [
-    {x: 135, y: 135, side: 'leaf', is_free: true, number: 0, child_id: ''},
-    {x: 135, y: 405, side: 'leaf', is_free: false, number: 1, child_id: ''},
-    {x: 135, y: 675, side: 'leaf', is_free: true, number: 2, child_id: ''},
-    {x: 405, y: 135, side: 'leaf', is_free: true, number: 3, child_id: ''},
-    {x: 405, y: 405, side: 'leaf', is_free: true, number: 4, child_id: ''},
-    {x: 405, y: 675, side: 'leaf', is_free: true, number: 5, child_id: ''},
+    {x: 60, y: 135, side: 'leaf', is_free: true, number: 0, child_id: ''},
+    {x: 70, y: 405, side: 'leaf', is_free: false, number: 1, child_id: ''},
+    {x: 60, y: 675, side: 'leaf', is_free: true, number: 2, child_id: ''},
+    {x: 210, y: 135, side: 'leaf', is_free: true, number: 3, child_id: ''},
+    {x: 220, y: 405, side: 'leaf', is_free: true, number: 4, child_id: ''},
+    {x: 210, y: 675, side: 'leaf', is_free: true, number: 5, child_id: ''},
 
-    {x: 135, y: 135, side: 'fire', is_free: true, number: 0, child_id: ''},
-    {x: 135, y: 405, side: 'fire', is_free: false, number: 1, child_id: ''},
-    {x: 135, y: 675, side: 'fire', is_free: true, number: 2, child_id: ''},
-    {x: 405, y: 135, side: 'fire', is_free: true, number: 3, child_id: ''},
-    {x: 405, y: 405, side: 'fire', is_free: true, number: 4, child_id: ''},
-    {x: 405, y: 675, side: 'fire', is_free: true, number: 5, child_id: ''}
+    {x: 60,  y: 135, side: 'fire', is_free: true, number: 0, child_id: ''},
+    {x: 70,  y: 405, side: 'fire', is_free: false, number: 1, child_id: ''},
+    {x: 60,  y: 675, side: 'fire', is_free: true, number: 2, child_id: ''},
+    {x: 210, y: 135, side: 'fire', is_free: true, number: 3, child_id: ''},
+    {x: 220, y: 405, side: 'fire', is_free: true, number: 4, child_id: ''},
+    {x: 210, y: 675, side: 'fire', is_free: true, number: 5, child_id: ''}
 ];
 
 var shipsTemplates = {
@@ -63,7 +65,7 @@ function createShip(player, shipType){
             newObj.given_direction = 90;
             newObj.delta_direction = 0;
             newObj.angle_speed = 20;
-            newObj.ammo_speed = AMMO_SPEED;
+            newObj.ammo_speed = opt.ammoSpeed;
             newObj.reload = 10;
             newObj.reload_counter = 10;
             newObj.status = true;
@@ -87,6 +89,8 @@ server.listen(3000, function(){
 io = require('socket.io').listen(server);
 
 io.sockets.on('connection', function(socket){
+    socket.emit('options', opt);
+
     // Создание нового игрока
     socket.on('new_player', function(data){
         var grid_cell = _.findWhere(grid, {side: data.side, is_free: true});
@@ -164,10 +168,10 @@ var intId = setInterval(function(){
                 var delta = null;
 
                 //расчет пушки
-                if(obj.type == 'canon'){
+                if(obj.type == 'canon' && obj.status){
                     delta = obj.given_direction - obj.direction;
                     if(delta){
-                        var trueAngleSpeed = obj.angle_speed*(gameDelay/1000);
+                        var trueAngleSpeed = obj.angle_speed*(opt.delay/1000);
                         if(Math.abs(delta) > trueAngleSpeed){
                             obj.direction = obj.direction + markOfNumber(delta)*trueAngleSpeed;
                         }else{
@@ -179,39 +183,41 @@ var intId = setInterval(function(){
                 else if(obj.type == 'ammo'){
                     var angle = obj.direction*Math.PI/180;
                     delta = obj.distance - obj.distance_counter;
-                    var trueAmmoSpeed = obj.ammo_speed*gameDelay/1000;
+                    var trueAmmoSpeed = obj.ammo_speed*opt.delay/1000;
 
                     if(delta > trueAmmoSpeed){
                         obj.x = obj.x + Math.sin(angle)*trueAmmoSpeed;
                         obj.y = obj.y - Math.cos(angle)*trueAmmoSpeed;
                         obj.distance_counter = obj.distance_counter + trueAmmoSpeed;
-                        obj.direction = obj.direction + windForce;
+                        obj.direction = obj.direction + opt.windForce;
                     }else{
                         obj.x = obj.x + Math.sin(angle)*delta;
                         obj.y = obj.y - Math.cos(angle)*delta;
                         obj.distance_counter = obj.distance;
-                        // ... Совершаем действия по проверке столкновений
+                        // Совершаем действия по проверке столкновений
                         players.forEach(function(t_player){
-                            var vir_x, vir_y;
+                            var vir_x, vir_y, hull_range;
                             if(player.side != t_player.side){
-                                vir_x = 954 - t_player.x;
-                                vir_y = 810 - t_player.y;
+                                vir_x = gameField.width - t_player.x;
+                                vir_y = gameField.height - t_player.y;
                             }else{
                                 vir_x = t_player.x;
                                 vir_y = t_player.y;
                             }
-                            var hull_range = Math.sqrt(Math.pow(vir_x - obj.x, 2) + Math.pow(vir_y - obj.y, 2));
+                            hull_range = Math.sqrt(Math.pow(vir_x - obj.x, 2) + Math.pow(vir_y - obj.y, 2));
 
                             if(hull_range < 100){
                                 t_player.ship.forEach(function(target){
+                                    var target_range = null;
+
                                     if(player.side != t_player.side){
-                                        vir_x = 954 - target.x;
-                                        vir_y = 810 - target.y;
+                                        vir_x = gameField.width - target.x;
+                                        vir_y = gameField.height - target.y;
                                     }else{
                                         vir_x = target.x;
                                         vir_y = target.y;
                                     }
-                                    var target_range = null;
+
                                     if(target.type == 'canon'){
                                         target_range = Math.sqrt(Math.pow(vir_x - obj.x, 2) + Math.pow(vir_y - obj.y, 2));
                                         if(target_range < 20){
@@ -233,8 +239,8 @@ var intId = setInterval(function(){
             });
         });
     }
-    io.sockets.emit('gamedata', players);
-}, gameDelay);
+    io.sockets.emit('gamedata', {options: opt, players: players});
+}, opt.delay);
 
 /**
  * Модель player (Игрок)
