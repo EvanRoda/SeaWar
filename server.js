@@ -47,7 +47,8 @@ var grid = [
 
 var shipsTemplates = {
     destroyer: [
-        {type: 'canon', dx: 0, dy: 0, direction: 0},
+        {type: 'hull', dx: 0, dy: 0},
+        {type: 'canon', dx: 1, dy: -20, direction: 0},
         {type: 'flag', dx: 0, dy: 0}
     ],
     light_cruiser: [
@@ -83,6 +84,7 @@ function createShip(player, shipType){
             newObj.reload_counter = 10;
             newObj.status = true;
         }else if(obj.type == 'hull'){
+            newObj.kind = shipType;
             newObj.direction = 0;
         }
         player.ship.push(newObj);
@@ -292,7 +294,8 @@ var intId = setInterval(function(){
  * type                 //hull canon ammo miss
  * x
  * y
- * direction
+ * kind                 // только для hull тип карабля
+ * direction            // текущее направление
  * given_direction      // заданное направление
  * delta_direction      // угол сведения, только для пушек, по умолчанию 0
  * angle_speed          // Скорость поворота

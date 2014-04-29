@@ -13,14 +13,32 @@ var misses = [];
 var flags = [];
 var renderer = null;
 
+var hull = {
+    leaf:{
+        destroyer: new Image(),
+        light_cruiser: new Image(),
+        heavy_cruiser: new Image()
+    },
+    fire:{
+        destroyer: new Image(),
+        light_cruiser: new Image(),
+        heavy_cruiser: new Image()
+    }
+};
+hull.leaf.destroyer.src = 'images/leaf_destroyer.png';
+hull.leaf.light_cruiser.src = 'images/leaf_light_cruiser.png';
+hull.leaf.light_cruiser.src = 'images/leaf_light_cruiser.png'; // Надо нарисовать пока шкурка от легкого
+
+hull.fire.destroyer.src = 'images/leaf_destroyer.png';      //
+hull.fire.light_cruiser.src = 'images/leaf_light_cruiser.png';   // Надо нарисовать отдельные шкурки
+hull.fire.light_cruiser.src = 'images/leaf_light_cruiser.png';   //
+
 var canon = new Image();
 var damagedCanon = new Image();
-var hull = new Image();
 var miss = new Image();
 var ammo = new Image();
 canon.src = 'images/canon.png';
 damagedCanon.src = 'images/damagedCanon.png';
-hull.src = 'images/hull.png';
 miss.src = 'images/miss.png';
 ammo.src = 'images/ammo.png';
 
@@ -86,7 +104,7 @@ socket.on('gamedata', function (data) {
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     canons.push(newObject);
                 }else if(obj.type == 'hull'){
-                    newObject.view = hull;
+                    newObject.view = hull[player.side][obj.kind];
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     hulls.push(newObject);
                 }else if(obj.type == 'ammo'){
