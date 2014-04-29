@@ -9,6 +9,7 @@ var commandField = $('#command_line');
 var hulls = [];
 var canons = [];
 var bullets = [];
+var misses = [];
 var renderer = null;
 
 var canon = new Image();
@@ -43,9 +44,11 @@ socket.on('gamedata', function (data) {
     if(hulls.length){world.remove(hulls);}
     if(canons.length){world.remove(canons);}
     if(bullets.length){world.remove(bullets);}
+    if(misses.length){world.remove(misses);}
     hulls = [];
     canons = [];
     bullets = [];
+    misses = [];
     if(players.length){
         players.forEach(function(player){
             player.ship.forEach(function(obj){
@@ -64,6 +67,7 @@ socket.on('gamedata', function (data) {
                     x: obj.x,
                     y: obj.y
                 });
+                //console.log(newObject);
                 if(obj.type == 'canon' && obj.status){ // [временно] поврежденная башня тупо не рисуется
                     newObject.view = canon;
                     // ... нарисовать поврежденную башню
@@ -79,10 +83,15 @@ socket.on('gamedata', function (data) {
                 }else if(obj.type == 'ammo'){
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     bullets.push(newObject);
+                }else if(obj.type == 'miss'){
+                    newObject.view = canon; // Заменить на картинку с кругами
+                    newObject.state.angular.pos = Math.PI*obj.direction/180;
+                    misses.push(newObject);
                 }
             });
         });
     }
+    if(misses.length){world.add(misses);}
     if(hulls.length){world.add(hulls);}
     if(canons.length){world.add(canons);}
     if(bullets.length){world.add(bullets);}

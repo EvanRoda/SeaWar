@@ -19,7 +19,9 @@ var opt = { //gameField
     delay: 100,
     maxWind: 0.1,
     windForce: null,
-    ammoSpeed: 80
+    ammoSpeed: 80,
+    missLifeTime: 5000,  // ms милисекунды
+    canonRadius: 20
 };
 
 opt.windForce = _.random(-opt.maxWind, opt.maxWind, true);
@@ -198,7 +200,7 @@ var intId = setInterval(function(){
 
                         // Проверка столкновений
                         players.forEach(function(t_player){
-                            var vir_x, vir_y, hull_range;
+                            var vir_x, vir_y, hull_range, isMiss = true;
                             if(player.side != t_player.side){
                                 vir_x = opt.width - t_player.x;
                                 vir_y = opt.height - t_player.y;
@@ -222,16 +224,28 @@ var intId = setInterval(function(){
 
                                     if(target.type == 'canon'){
                                         target_range = Math.sqrt(Math.pow(vir_x - obj.x, 2) + Math.pow(vir_y - obj.y, 2));
-                                        if(target_range < 20){
+                                        if(target_range < opt.canonRadius){
                                             target.status = false;
+                                            isMiss = false;
                                         }
+                                    }else if(target.type == 'hull'){
+                                        // ... Проверяем попадание в корпус
                                     }
                                 });
                             }
+                            if(isMiss){
+                                // Заменяем объект ammo на miss ("круги на воде")
+                                obj.type = 'miss';
+                                obj.reload = opt.missLifeTime;
+                                obj.reload_counter = 0;
+                            }
                         });
-
-                        // ... Рисуем круги на воде или повреждения
-
+                    }
+                }else if(obj.type == 'miss'){
+                    delta = obj.reload - obj.reload_counter;
+                    if(delta > opt.delay){
+                        obj.reload_counter = obj.reload_counter + opt.delay;
+                    }else{
                         deleteList.push(index);
                     }
                 }
@@ -261,14 +275,14 @@ var intId = setInterval(function(){
 /**
  * Игровой объект
  *
- * type                 //hull canon ammo
+ * type                 //hull canon ammo miss
  * x
  * y
  * direction
  * given_direction      // заданное направление
  * delta_direction      // угол сведения, только для пушек, по умолчанию 0
  * angle_speed          // Скорость поворота
- * reload               // Время перезарядки орудий
+ * reload               // Время перезарядки орудий (для кругов время отображения круга)
  * reload_counter       // Счетчик перезарядки
  * status               // только для пушек, цела/поврежденв == true/false
  * ammo_speed           // скорость снаряда ( пушки и снаряды )
