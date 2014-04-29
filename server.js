@@ -22,7 +22,7 @@ var opt = { //gameField
     ammoSpeed: 80
 };
 
-opt.windForce = _.random(opt.maxWind, -opt.maxWind, true);
+opt.windForce = _.random(-opt.maxWind, opt.maxWind, true);
 
 //Игровая сетка
 
