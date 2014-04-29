@@ -49,13 +49,13 @@ var shipsTemplates = {
     destroyer: [
         {type: 'hull', dx: 0, dy: 0},
         {type: 'canon', dx: 1, dy: -20, direction: 0},
-        {type: 'flag', dx: 0, dy: 0}
+        {type: 'flag', dx: 0, dy: 81}
     ],
     light_cruiser: [
         {type: 'hull', dx: 0, dy: 0},
         {type: 'canon', dx: 1, dy: -55, direction: 0},
         {type: 'canon', dx: 1, dy: 75, direction: 180},
-        {type: 'flag', dx: 0, dy: 0}
+        {type: 'flag', dx: 0, dy: 125}
     ],
     heavy_cruiser: [
         {type: 'hull', dx: 0, dy: 0},

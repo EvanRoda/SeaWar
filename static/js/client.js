@@ -25,21 +25,31 @@ var hull = {
         heavy_cruiser: new Image()
     }
 };
-hull.leaf.destroyer.src = 'images/leaf_destroyer.png';
-hull.leaf.light_cruiser.src = 'images/leaf_light_cruiser.png';
-hull.leaf.light_cruiser.src = 'images/leaf_light_cruiser.png'; // Надо нарисовать пока шкурка от легкого
+hull.leaf.destroyer.src = 'images/hulls/leaf_destroyer.png';
+hull.leaf.light_cruiser.src = 'images/hulls/leaf_light_cruiser.png';
+hull.leaf.light_cruiser.src = 'images/hulls/leaf_light_cruiser.png'; // Надо нарисовать пока шкурка от легкого
 
-hull.fire.destroyer.src = 'images/leaf_destroyer.png';      //
-hull.fire.light_cruiser.src = 'images/leaf_light_cruiser.png';   // Надо нарисовать отдельные шкурки
-hull.fire.light_cruiser.src = 'images/leaf_light_cruiser.png';   //
+hull.fire.destroyer.src = 'images/hulls/leaf_destroyer.png';      //
+hull.fire.light_cruiser.src = 'images/hulls/leaf_light_cruiser.png';   // Надо нарисовать отдельные шкурки
+hull.fire.light_cruiser.src = 'images/hulls/leaf_light_cruiser.png';   //
+
+var flag = {
+    you: new Image(),
+    friend: new Image(),
+    enemy: new Image()
+};
+
+flag.you.src = 'images/flags/flag_you.png';
+flag.friend.src = 'images/flags/flag_friend.png';
+flag.enemy.src = 'images/flags/flag_enemy.png';
 
 var canon = new Image();
-var damagedCanon = new Image();
-var miss = new Image();
-var ammo = new Image();
 canon.src = 'images/canon.png';
+var damagedCanon = new Image();
 damagedCanon.src = 'images/damagedCanon.png';
+var miss = new Image();
 miss.src = 'images/miss.png';
+var ammo = new Image();
 ammo.src = 'images/ammo.png';
 
 var world = Physics();
@@ -116,7 +126,15 @@ socket.on('gamedata', function (data) {
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     misses.push(newObject);
                 }else if(obj.type == 'flag'){
-                    //newObject.view = miss; //Зафигачить картинку флага соответствующего цвета
+                    if(player._id == itIsYou._id){
+                        newObject.view = flag.you;
+                    }else{
+                        if(player.side == itIsYou.side){
+                            newObject.view = flag.friend;
+                        }else{
+                            newObject.view = flag.enemy;
+                        }
+                    }
                     flags.push(newObject);
                 }
             });
