@@ -47,18 +47,18 @@ var grid = [
 
 var shipsTemplates = {
     destroyer: [
-        {type: 'canon', dx: 0, dy: 0}
+        {type: 'canon', dx: 0, dy: 0, direction: 0}
     ],
     light_cruiser: [
         {type: 'hull', dx: 0, dy: 0},
-        {type: 'canon', dx: 1, dy: -55},
-        {type: 'canon', dx: 1, dy: 75}
+        {type: 'canon', dx: 1, dy: -55, direction: 0},
+        {type: 'canon', dx: 1, dy: 75, direction: 180}
     ],
     heavy_cruiser: [
         {type: 'hull', dx: 0, dy: 0},
-        {type: 'canon', dx: 0, dy: 0},
-        {type: 'canon', dx: 1, dy: -55},
-        {type: 'canon', dx: 1, dy: 75}
+        {type: 'canon', dx: 0, dy: 0, direction: 0},
+        {type: 'canon', dx: 1, dy: -55, direction: 0},
+        {type: 'canon', dx: 1, dy: 75, direction: 180}
     ]
 };
 
@@ -71,8 +71,8 @@ function createShip(player, shipType){
             y: player.y + obj.dy
         };
         if(obj.type == 'canon'){
-            newObj.direction = 90;
-            newObj.given_direction = 90;
+            newObj.direction = obj.direction;
+            newObj.given_direction = obj.direction;
             newObj.delta_direction = 0;
             newObj.angle_speed = 20;
             newObj.ammo_speed = opt.ammoSpeed;
