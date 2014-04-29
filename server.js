@@ -13,6 +13,7 @@ var server = http.createServer(app);
  * Игровые переменные
  */
 var players = [];
+// Настройки
 var opt = { //gameField
     width: 954,
     height: 810,
@@ -20,7 +21,7 @@ var opt = { //gameField
     maxWind: 0.1,
     windForce: null,
     ammoSpeed: 80,
-    missLifeTime: 5000,  // ms милисекунды
+    missLifeTime: 3000,  // ms милисекунды
     canonRadius: 20
 };
 
@@ -45,11 +46,17 @@ var grid = [
 ];
 
 var shipsTemplates = {
-    first: [
+    destroyer: [
         {type: 'canon', dx: 0, dy: 0}
     ],
-    second: [
+    light_cruiser: [
         {type: 'hull', dx: 0, dy: 0},
+        {type: 'canon', dx: 1, dy: -55},
+        {type: 'canon', dx: 1, dy: 75}
+    ],
+    heavy_cruiser: [
+        {type: 'hull', dx: 0, dy: 0},
+        {type: 'canon', dx: 0, dy: 0},
         {type: 'canon', dx: 1, dy: -55},
         {type: 'canon', dx: 1, dy: 75}
     ]
@@ -102,6 +109,7 @@ io.sockets.on('connection', function(socket){
         data.x = grid_cell.x;
         data.y = grid_cell.y;
         data.ship = [];
+        data.isDefeat = false;
         players.push(data);
     });
 
@@ -169,9 +177,10 @@ var intId = setInterval(function(){
             var deleteList = [];
             player.ship.forEach(function(obj, index){
                 var delta = null;
-
+                player.isDefeat = true;
                 //расчет пушки
                 if(obj.type == 'canon' && obj.status){
+                    player.isDefeat = false;
                     delta = obj.given_direction - obj.direction;
                     if(delta){
                         var trueAngleSpeed = obj.angle_speed*(opt.delay/1000);
@@ -182,6 +191,7 @@ var intId = setInterval(function(){
                         }
                     }
                 }
+
                 //расчет снаряда
                 else if(obj.type == 'ammo'){
                     var angle = obj.direction*Math.PI/180;
@@ -267,6 +277,7 @@ var intId = setInterval(function(){
  * x
  * y
  * distance
+ * isDefeat
  * ship [
  *      ... //Список объектов игрока (корпус пушки снаряды)
  * ]

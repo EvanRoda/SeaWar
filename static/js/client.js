@@ -13,9 +13,15 @@ var misses = [];
 var renderer = null;
 
 var canon = new Image();
+var damagedCanon = new Image();
 var hull = new Image();
+var miss = new Image();
+var ammo = new Image();
 canon.src = 'images/canon.png';
+damagedCanon.src = 'images/damagedCanon.png';
 hull.src = 'images/hull.png';
+miss.src = 'images/miss.png';
+ammo.src = 'images/ammo.png';
 
 var world = Physics();
 
@@ -68,12 +74,12 @@ socket.on('gamedata', function (data) {
                     y: obj.y
                 });
                 //console.log(newObject);
-                if(obj.type == 'canon' && obj.status){ // [временно] поврежденная башня тупо не рисуется
-                    newObject.view = canon;
-                    // ... нарисовать поврежденную башню
-                    /*if(!obj.status){
-                        console.log('УБИТ');
-                    }*/
+                if(obj.type == 'canon'){
+                    if(obj.status){
+                        newObject.view = canon;
+                    }else{
+                        newObject.view = damagedCanon;
+                    }
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     canons.push(newObject);
                 }else if(obj.type == 'hull'){
@@ -81,10 +87,11 @@ socket.on('gamedata', function (data) {
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     hulls.push(newObject);
                 }else if(obj.type == 'ammo'){
+                    newObject.view = ammo;
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     bullets.push(newObject);
                 }else if(obj.type == 'miss'){
-                    newObject.view = canon; // Заменить на картинку с кругами
+                    newObject.view = miss;
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     misses.push(newObject);
                 }
