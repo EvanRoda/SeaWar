@@ -17,13 +17,14 @@ var opt = { //gameField
     width: 954,
     height: 810,
     delay: 100,
-    windForce: 0.1, // _.random(-1, 1, true) / 10;
+    maxWind: 0.1,
+    windForce: null,
     ammoSpeed: 80
 };
 
-//Координаты сетки
-var grid_start = 135;
-var grid_delta = 270;
+opt.windForce = _.random(opt.maxWind, -opt.maxWind, true);
+
+//Игровая сетка
 
 var grid = [
     {x: 60, y: 135, side: 'leaf', is_free: true, number: 0, child_id: ''},
@@ -189,17 +190,18 @@ var intId = setInterval(function(){
                         obj.x = obj.x + Math.sin(angle)*trueAmmoSpeed;
                         obj.y = obj.y - Math.cos(angle)*trueAmmoSpeed;
                         obj.distance_counter = obj.distance_counter + trueAmmoSpeed;
-                        obj.direction = obj.direction + opt.windForce;
+                        obj.direction = obj.direction + (player.side == 'leaf' ? 1 : -1)*opt.windForce;
                     }else{
                         obj.x = obj.x + Math.sin(angle)*delta;
                         obj.y = obj.y - Math.cos(angle)*delta;
                         obj.distance_counter = obj.distance;
-                        // Совершаем действия по проверке столкновений
+
+                        // Проверка столкновений
                         players.forEach(function(t_player){
                             var vir_x, vir_y, hull_range;
                             if(player.side != t_player.side){
-                                vir_x = gameField.width - t_player.x;
-                                vir_y = gameField.height - t_player.y;
+                                vir_x = opt.width - t_player.x;
+                                vir_y = opt.height - t_player.y;
                             }else{
                                 vir_x = t_player.x;
                                 vir_y = t_player.y;
@@ -211,8 +213,8 @@ var intId = setInterval(function(){
                                     var target_range = null;
 
                                     if(player.side != t_player.side){
-                                        vir_x = gameField.width - target.x;
-                                        vir_y = gameField.height - target.y;
+                                        vir_x = opt.width - target.x;
+                                        vir_y = opt.height - target.y;
                                     }else{
                                         vir_x = target.x;
                                         vir_y = target.y;
