@@ -14,14 +14,14 @@ var server = http.createServer(app);
  */
 var players = [];
 // Настройки
-var opt = { //gameField
+var opt = {
     width: 954,
     height: 810,
     delay: 100,
     maxWind: 0.1,
     windForce: null,
-    ammoSpeed: 80,
-    missLifeTime: 3000,  // ms милисекунды
+    ammoSpeed: 100,
+    missLifeTime: 2500,  // ms милисекунды
     canonRadius: 20
 };
 
@@ -47,18 +47,21 @@ var grid = [
 
 var shipsTemplates = {
     destroyer: [
-        {type: 'canon', dx: 0, dy: 0, direction: 0}
+        {type: 'canon', dx: 0, dy: 0, direction: 0},
+        {type: 'flag', dx: 0, dy: 0}
     ],
     light_cruiser: [
         {type: 'hull', dx: 0, dy: 0},
         {type: 'canon', dx: 1, dy: -55, direction: 0},
-        {type: 'canon', dx: 1, dy: 75, direction: 180}
+        {type: 'canon', dx: 1, dy: 75, direction: 180},
+        {type: 'flag', dx: 0, dy: 0}
     ],
     heavy_cruiser: [
         {type: 'hull', dx: 0, dy: 0},
-        {type: 'canon', dx: 0, dy: 0, direction: 0},
+        {type: 'canon', dx: 1, dy: 0, direction: 0},
         {type: 'canon', dx: 1, dy: -55, direction: 0},
-        {type: 'canon', dx: 1, dy: 75, direction: 180}
+        {type: 'canon', dx: 1, dy: 75, direction: 180},
+        {type: 'flag', dx: 0, dy: 0}
     ]
 };
 

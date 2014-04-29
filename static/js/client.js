@@ -10,6 +10,7 @@ var hulls = [];
 var canons = [];
 var bullets = [];
 var misses = [];
+var flags = [];
 var renderer = null;
 
 var canon = new Image();
@@ -51,10 +52,12 @@ socket.on('gamedata', function (data) {
     if(canons.length){world.remove(canons);}
     if(bullets.length){world.remove(bullets);}
     if(misses.length){world.remove(misses);}
+    if(flags.length){world.remove(flags);}
     hulls = [];
     canons = [];
     bullets = [];
     misses = [];
+    flags = [];
     if(players.length){
         players.forEach(function(player){
             player.ship.forEach(function(obj){
@@ -94,12 +97,16 @@ socket.on('gamedata', function (data) {
                     newObject.view = miss;
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     misses.push(newObject);
+                }else if(obj.type == 'flag'){
+                    //newObject.view = miss; //Зафигачить картинку флага соответствующего цвета
+                    flags.push(newObject);
                 }
             });
         });
     }
     if(misses.length){world.add(misses);}
     if(hulls.length){world.add(hulls);}
+    if(flags.length){world.add(flags);}
     if(canons.length){world.add(canons);}
     if(bullets.length){world.add(bullets);}
     world.render();
