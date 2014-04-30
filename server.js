@@ -8,6 +8,7 @@ var _ = require('lodash');
 
 var app = express();
 var server = http.createServer(app);
+var sockets = [];
 
 /**
  * Игровые переменные
@@ -161,22 +162,24 @@ server.listen(3000, function(){
 io = require('socket.io').listen(server);
 
 io.sockets.on('connection', function(socket){
-    socket.emit('options', {options: opt, templates: shipsTemplates});
-
+    socket.emit('options', {options: opt, templates: shipsTemplates, player_id: socket.id});
+    sockets.push(socket);
     // Создание нового игрока
     socket.on('new_player', function(data){
         var grid_cell = _.findWhere(grid, {side: data.side, is_free: true});
         grid_cell.is_free = false;
-        grid_cell.child_id = data._id;
+        grid_cell.child_id = socket.id;
         data.x = grid_cell.x;
         data.y = grid_cell.y;
         data.ship = [];
         data.isDefeat = false;
+        data._id = socket.id;
         players.push(data);
     });
 
     // Создание объектов для игрока
     socket.on('create_player_object', function(data){
+        console.log(data);
         var player = _.findWhere(players, {_id: data.parent_id});
         createShip(player, data.ship_type);
     });
@@ -184,10 +187,7 @@ io.sockets.on('connection', function(socket){
     //Прием команды от игрока
     socket.on('command', function(data){
         var player = _.findWhere(players, {_id: data.player_id});
-        console.log(data);
         var command =  data.command.split(' ', 2);
-        console.log('РАЗОБРАННАЯ КОМАНДА');
-        console.log(command);
         if(command[0].toUpperCase() == 'НАПРАВЛЕНИЕ'){
             player.ship.forEach(function(obj){
                 if(obj.type == 'canon'){

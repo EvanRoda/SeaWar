@@ -40,7 +40,8 @@ ammo.src = 'images/ammo.png';
 var world = Physics();
 
 socket.on('options', function(data){
-    console.log(data.options);
+    itIsYou._id = data.player_id;
+    console.log(data);
     data.templates.forEach(function(template){
         skins[template.side][template.kind] = {hull: new Image(), canon: new Image()};
         skins[template.side][template.kind].hull.src = 'images/hulls/' + template.hull_img;
@@ -148,11 +149,8 @@ function inBattle(shipType){
 
 function selectSide(side){
     var name = $('#player_name');
-    itIsYou = {
-        nickName: name.val(),
-        side: side,
-        _id: name.val()
-    };
+    itIsYou.nickName = name.val();
+    itIsYou.side = side;
     $('.enter_player_name').addClass('hiddenRow');
     $('.choose_player_ship').removeClass('hiddenRow');
     socket.emit('new_player', itIsYou);
