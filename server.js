@@ -45,30 +45,86 @@ var grid = [
     {x: 210, y: 675, side: 'fire', is_free: true, number: 5, child_id: ''}
 ];
 
-var shipsTemplates = {
-    destroyer: [
-        {type: 'hull', dx: 0, dy: 0},
-        {type: 'canon', dx: 1, dy: -20, direction: 0},
-        {type: 'flag', dx: 0, dy: 81}
-    ],
-    light_cruiser: [
-        {type: 'hull', dx: 0, dy: 0},
-        {type: 'canon', dx: 1, dy: -55, direction: 0},
-        {type: 'canon', dx: 1, dy: 75, direction: 180},
-        {type: 'flag', dx: 0, dy: 125}
-    ],
-    heavy_cruiser: [
-        {type: 'hull', dx: 0, dy: 0},
-        {type: 'canon', dx: 1, dy: 0, direction: 0},
-        {type: 'canon', dx: 1, dy: -55, direction: 0},
-        {type: 'canon', dx: 1, dy: 75, direction: 180},
-        {type: 'flag', dx: 0, dy: 0}
-    ]
-};
+//Шаблоны кораблей
+var shipsTemplates = [
+    {
+        side: 'leaf',
+        kind: 'destroyer',
+        hull_img: 'leaf_destroyer.png',
+        canon_img: 'canon.png',
+        objects: [
+            {type: 'hull', dx: 0, dy: 0},
+            {type: 'canon', dx: 1, dy: -20, direction: 0},
+            {type: 'flag', dx: 0, dy: 81}
+        ]
+    },
+    {
+        side: 'leaf',
+        kind: 'light_cruiser',
+        hull_img: 'leaf_light_cruiser.png',
+        canon_img: 'canon.png',
+        objects: [
+            {type: 'hull', dx: 0, dy: 0},
+            {type: 'canon', dx: 1, dy: -55, direction: 0},
+            {type: 'canon', dx: 1, dy: 75, direction: 180},
+            {type: 'flag', dx: 0, dy: 125}
+        ]
+    },
+    {
+        side: 'leaf',
+        kind: 'heavy_cruiser',
+        hull_img: 'leaf_light_cruiser.png',
+        canon_img: 'canon.png',
+        objects: [
+            {type: 'hull', dx: 0, dy: 0},
+            {type: 'canon', dx: 1, dy: -55, direction: 0},
+            {type: 'canon', dx: 1, dy: 0, direction: 0},
+            {type: 'canon', dx: 1, dy: 75, direction: 180},
+            {type: 'flag', dx: 0, dy: 125}
+        ]
+    },
+    {
+        side: 'fire',
+        kind: 'destroyer',
+        hull_img: 'leaf_destroyer.png',
+        canon_img: 'canon.png',
+        objects: [
+            {type: 'hull', dx: 0, dy: 0},
+            {type: 'canon', dx: 1, dy: -20, direction: 0},
+            {type: 'flag', dx: 0, dy: 81}
+        ]
+    },
+    {
+        side: 'fire',
+        kind: 'light_cruiser',
+        hull_img: 'leaf_light_cruiser.png',
+        canon_img: 'canon.png',
+        objects: [
+            {type: 'hull', dx: 0, dy: 0},
+            {type: 'canon', dx: 1, dy: -55, direction: 0},
+            {type: 'canon', dx: 1, dy: 75, direction: 180},
+            {type: 'flag', dx: 0, dy: 125}
+        ]
+    },
+    {
+        side: 'fire',
+        kind: 'heavy_cruiser',
+        hull_img: 'leaf_light_cruiser.png',
+        canon_img: 'canon.png',
+        objects: [
+            {type: 'hull', dx: 0, dy: 0},
+            {type: 'canon', dx: 1, dy: -55, direction: 0},
+            {type: 'canon', dx: 1, dy: 0, direction: 0},
+            {type: 'canon', dx: 1, dy: 75, direction: 180},
+            {type: 'flag', dx: 0, dy: 125}
+        ]
+    }
+];
 
 function createShip(player, shipType){
     player.ship = [];
-    shipsTemplates[shipType].forEach(function(obj){
+    var template = _.findWhere(shipsTemplates, {side: player.side, kind: shipType});
+    template.objects.forEach(function(obj){
         var newObj = {
             type: obj.type,
             x: player.x + obj.dx,
@@ -83,6 +139,7 @@ function createShip(player, shipType){
             newObj.reload = 10;
             newObj.reload_counter = 10;
             newObj.status = true;
+            newObj.kind = shipType;
         }else if(obj.type == 'hull'){
             newObj.kind = shipType;
             newObj.direction = 0;
@@ -104,7 +161,7 @@ server.listen(3000, function(){
 io = require('socket.io').listen(server);
 
 io.sockets.on('connection', function(socket){
-    socket.emit('options', opt);
+    socket.emit('options', {options: opt, templates: shipsTemplates});
 
     // Создание нового игрока
     socket.on('new_player', function(data){

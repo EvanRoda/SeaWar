@@ -13,25 +13,10 @@ var misses = [];
 var flags = [];
 var renderer = null;
 
-var hull = {
-    leaf:{
-        destroyer: new Image(),
-        light_cruiser: new Image(),
-        heavy_cruiser: new Image()
-    },
-    fire:{
-        destroyer: new Image(),
-        light_cruiser: new Image(),
-        heavy_cruiser: new Image()
-    }
+var skins = {
+    leaf: {},
+    fire: {}
 };
-hull.leaf.destroyer.src = 'images/hulls/leaf_destroyer.png';
-hull.leaf.light_cruiser.src = 'images/hulls/leaf_light_cruiser.png';
-hull.leaf.light_cruiser.src = 'images/hulls/leaf_light_cruiser.png'; // Надо нарисовать пока шкурка от легкого
-
-hull.fire.destroyer.src = 'images/hulls/leaf_destroyer.png';      //
-hull.fire.light_cruiser.src = 'images/hulls/leaf_light_cruiser.png';   // Надо нарисовать отдельные шкурки
-hull.fire.light_cruiser.src = 'images/hulls/leaf_light_cruiser.png';   //
 
 var flag = {
     you: new Image(),
@@ -54,11 +39,17 @@ ammo.src = 'images/ammo.png';
 
 var world = Physics();
 
-socket.on('options', function(opt){
+socket.on('options', function(data){
+    console.log(data.options);
+    data.templates.forEach(function(template){
+        skins[template.side][template.kind] = {hull: new Image(), canon: new Image()};
+        skins[template.side][template.kind].hull.src = 'images/hulls/' + template.hull_img;
+        skins[template.side][template.kind].canon.src = 'images/' + template.canon_img;
+    });
     renderer = Physics.renderer('canvas', {
         el: 'game_field',
-        width: opt.width,
-        height: opt.height,
+        width: data.options.width,
+        height: data.options.height,
         meta: false, // don't display meta data
         styles: {
             'circle' : {
@@ -107,14 +98,14 @@ socket.on('gamedata', function (data) {
                 //console.log(newObject);
                 if(obj.type == 'canon'){
                     if(obj.status){
-                        newObject.view = canon;
+                        newObject.view = skins[player.side][obj.kind].canon;
                     }else{
                         newObject.view = damagedCanon;
                     }
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     canons.push(newObject);
                 }else if(obj.type == 'hull'){
-                    newObject.view = hull[player.side][obj.kind];
+                    newObject.view = skins[player.side][obj.kind].hull;
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     hulls.push(newObject);
                 }else if(obj.type == 'ammo'){
