@@ -23,7 +23,8 @@ var opt = {
     windForce: null,
     ammoSpeed: 100,
     missLifeTime: 2500,  // ms милисекунды
-    canonRadius: 20
+    canonRadius: 20,
+    barrelLength: 25
 };
 
 opt.windForce = _.random(-opt.maxWind, opt.maxWind, true);
@@ -52,10 +53,10 @@ var shipsTemplates = [
         side: 'leaf',
         kind: 'destroyer',
         hull_img: 'leaf_destroyer.png',
-        canon_img: 'canon.png',
+        canon_img: 'uno.png',
         objects: [
             {type: 'hull', dx: 0, dy: 0},
-            {type: 'canon', dx: 1, dy: -20, direction: 0},
+            {type: 'canon', dx: 0, dy: -20, barrels: [0], direction: 0},
             {type: 'flag', dx: 0, dy: 81}
         ]
     },
@@ -63,11 +64,11 @@ var shipsTemplates = [
         side: 'leaf',
         kind: 'light_cruiser',
         hull_img: 'leaf_light_cruiser.png',
-        canon_img: 'canon.png',
+        canon_img: 'uno.png',
         objects: [
             {type: 'hull', dx: 0, dy: 0},
-            {type: 'canon', dx: 1, dy: -55, direction: 0},
-            {type: 'canon', dx: 1, dy: 75, direction: 180},
+            {type: 'canon', dx: 0, dy: -55, barrels: [0], direction: 0},
+            {type: 'canon', dx: 0, dy: 75, barrels: [0], direction: 180},
             {type: 'flag', dx: 0, dy: 125}
         ]
     },
@@ -75,12 +76,11 @@ var shipsTemplates = [
         side: 'leaf',
         kind: 'heavy_cruiser',
         hull_img: 'leaf_light_cruiser.png',
-        canon_img: 'canon.png',
+        canon_img: 'double.png',
         objects: [
             {type: 'hull', dx: 0, dy: 0},
-            {type: 'canon', dx: 1, dy: -55, direction: 0},
-            {type: 'canon', dx: 1, dy: 0, direction: 0},
-            {type: 'canon', dx: 1, dy: 75, direction: 180},
+            {type: 'canon', dx: 0, dy: -55, barrels: [4, -4], direction: 0},
+            {type: 'canon', dx: 0, dy: 75, barrels: [4, -4], direction: 180},
             {type: 'flag', dx: 0, dy: 125}
         ]
     },
@@ -88,10 +88,10 @@ var shipsTemplates = [
         side: 'fire',
         kind: 'destroyer',
         hull_img: 'leaf_destroyer.png',
-        canon_img: 'canon.png',
+        canon_img: 'uno.png',
         objects: [
             {type: 'hull', dx: 0, dy: 0},
-            {type: 'canon', dx: 1, dy: -20, direction: 0},
+            {type: 'canon', dx: 0, dy: -20, barrels: [0], direction: 0},
             {type: 'flag', dx: 0, dy: 81}
         ]
     },
@@ -99,11 +99,11 @@ var shipsTemplates = [
         side: 'fire',
         kind: 'light_cruiser',
         hull_img: 'leaf_light_cruiser.png',
-        canon_img: 'canon.png',
+        canon_img: 'uno.png',
         objects: [
             {type: 'hull', dx: 0, dy: 0},
-            {type: 'canon', dx: 1, dy: -55, direction: 0},
-            {type: 'canon', dx: 1, dy: 75, direction: 180},
+            {type: 'canon', dx: 0, dy: -55, barrels: [0], direction: 0},
+            {type: 'canon', dx: 0, dy: 75, barrels: [0], direction: 180},
             {type: 'flag', dx: 0, dy: 125}
         ]
     },
@@ -111,12 +111,11 @@ var shipsTemplates = [
         side: 'fire',
         kind: 'heavy_cruiser',
         hull_img: 'leaf_light_cruiser.png',
-        canon_img: 'canon.png',
+        canon_img: 'double.png',
         objects: [
             {type: 'hull', dx: 0, dy: 0},
-            {type: 'canon', dx: 1, dy: -55, direction: 0},
-            {type: 'canon', dx: 1, dy: 0, direction: 0},
-            {type: 'canon', dx: 1, dy: 75, direction: 180},
+            {type: 'canon', dx: 0, dy: -55, barrels: [4, -4], direction: 0},
+            {type: 'canon', dx: 0, dy: 75, barrels: [4, -4], direction: 180},
             {type: 'flag', dx: 0, dy: 125}
         ]
     }
@@ -141,6 +140,7 @@ function createShip(player, shipType){
             newObj.reload_counter = 10;
             newObj.status = true;
             newObj.kind = shipType;
+            newObj.barrels = obj.barrels;
         }else if(obj.type == 'hull'){
             newObj.kind = shipType;
             newObj.direction = 0;
@@ -217,16 +217,23 @@ io.sockets.on('connection', function(socket){
         }else if(command[0].toUpperCase() == 'ОГОНЬ'){
             player.ship.forEach(function(obj){
                 if(obj.type == 'canon' && obj.status){
-                    var ammo = {
-                        type: 'ammo',
-                        x: obj.x, // нужно посчитать начальную точку сейчас выставлен в центр орудия
-                        y: obj.y,
-                        direction: obj.direction,
-                        ammo_speed: obj.ammo_speed,
-                        distance: player.distance,
-                        distance_counter: 0
-                    };
-                    player.ship.push(ammo);
+                    var dy = opt.barrelLength;
+                    obj.barrels.forEach(function(dx){
+                        var c = Math.sqrt(dx*dx + dy*dy);
+                        var alfa = obj.direction * Math.PI / 180;
+                        var beta = Math.asin(dy/c);
+                        //beta = ;
+                        var ammo = {
+                            type: 'ammo', // (dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2))
+                            x: obj.x + c * Math.sin((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
+                            y: obj.y - c * Math.cos((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
+                            direction: obj.direction,
+                            ammo_speed: obj.ammo_speed,
+                            distance: player.distance,
+                            distance_counter: 0
+                        };
+                        player.ship.push(ammo);
+                    });
                 }
             });
         }

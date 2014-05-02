@@ -45,7 +45,7 @@ socket.on('options', function(data){
     data.templates.forEach(function(template){
         skins[template.side][template.kind] = {hull: new Image(), canon: new Image()};
         skins[template.side][template.kind].hull.src = 'images/hulls/' + template.hull_img;
-        skins[template.side][template.kind].canon.src = 'images/' + template.canon_img;
+        skins[template.side][template.kind].canon.src = 'images/canons/' + template.canon_img;
     });
     renderer = Physics.renderer('canvas', {
         el: 'game_field',
