@@ -153,6 +153,11 @@ function markOfNumber(number){
     return number<0 ? -1 : 1;
 }
 
+function getRandom(value, percent){
+    var dv = value * percent / 100;
+    return _.random(-dv, dv, true);
+}
+
 app.use(express.static(path.join(__dirname, 'static')));
 
 server.listen(3000, function(){
@@ -222,14 +227,13 @@ io.sockets.on('connection', function(socket){
                         var c = Math.sqrt(dx*dx + dy*dy);
                         var alfa = obj.direction * Math.PI / 180;
                         var beta = Math.asin(dy/c);
-                        //beta = ;
                         var ammo = {
-                            type: 'ammo', // (dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2))
+                            type: 'ammo',
                             x: obj.x + c * Math.sin((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
                             y: obj.y - c * Math.cos((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
-                            direction: obj.direction,
+                            direction: obj.direction + getRandom(0.5, 100),
                             ammo_speed: obj.ammo_speed,
-                            distance: player.distance,
+                            distance: player.distance + getRandom(player.distance, 0.5),
                             distance_counter: 0
                         };
                         player.ship.push(ammo);
