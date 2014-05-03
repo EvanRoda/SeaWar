@@ -75,12 +75,13 @@ var shipsTemplates = [
     {
         side: 'leaf',
         kind: 'heavy_cruiser',
-        hull_img: 'leaf_light_cruiser.png',
-        canon_img: 'double.png',
+        hull_img: 'monstro.png',
+        canon_img: 'triple.png',
         objects: [
             {type: 'hull', dx: 0, dy: 0},
-            {type: 'canon', dx: 0, dy: -55, barrels: [4, -4], direction: 0},
-            {type: 'canon', dx: 0, dy: 75, barrels: [4, -4], direction: 180},
+            {type: 'canon', dx: -8, dy: -55, barrels: [6, 0, -6], direction: 0},
+            {type: 'canon', dx: 12, dy: 5, barrels: [6, 0, -6], direction: 0},
+            {type: 'canon', dx: -8, dy: 57, barrels: [6, 0, -6], direction: 180},
             {type: 'flag', dx: 0, dy: 125}
         ]
     },
