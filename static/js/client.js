@@ -1,7 +1,7 @@
 var socket = io.connect();
 var itIsYou = {
     nickName: '',
-    side: '',
+    side: 'leaf',
     _id: ''
 };
 
@@ -140,6 +140,11 @@ socket.on('gamedata', function (data) {
     world.render();
 });
 
+socket.on('to_start_screen', function(){
+    $('.enter_player_name').removeClass('hiddenRow');
+    $('.command_row').addClass('hiddenRow');
+});
+
 function inBattle(shipType){
     $('.choose_player_ship').addClass('hiddenRow');
     $('.command_row').removeClass('hiddenRow');
@@ -154,6 +159,10 @@ function selectSide(side){
     $('.enter_player_name').addClass('hiddenRow');
     $('.choose_player_ship').removeClass('hiddenRow');
     socket.emit('new_player', itIsYou);
+}
+
+function leaveBattle(){
+    socket.emit('leave_battle', itIsYou);
 }
 
 commandField.keydown(function(event){

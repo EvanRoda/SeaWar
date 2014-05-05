@@ -5,6 +5,7 @@ var express = require('express');
 var http = require('http');
 var path = require('path');
 var _ = require('lodash');
+var shipsTemplates = require('./shipTemplates');
 
 var app = express();
 var server = http.createServer(app);
@@ -24,7 +25,8 @@ var opt = {
     ammoSpeed: 100,
     missLifeTime: 2500,  // ms милисекунды
     canonRadius: 20,
-    barrelLength: 25
+    barrelLength: 25,
+    endCounter: 10000   // ms милисекунды
 };
 
 opt.windForce = _.random(-opt.maxWind, opt.maxWind, true);
@@ -45,81 +47,6 @@ var grid = [
     {x: 210, y: 135, side: 'fire', is_free: true, number: 3, child_id: ''},
     {x: 220, y: 405, side: 'fire', is_free: true, number: 4, child_id: ''},
     {x: 210, y: 675, side: 'fire', is_free: true, number: 5, child_id: ''}
-];
-
-//Шаблоны кораблей
-var shipsTemplates = [
-    {
-        side: 'leaf',
-        kind: 'destroyer',
-        hull_img: 'leaf_destroyer.png',
-        canon_img: 'uno.png',
-        objects: [
-            {type: 'hull', dx: 0, dy: 0},
-            {type: 'canon', dx: 0, dy: -20, barrels: [0], direction: 0},
-            {type: 'flag', dx: 0, dy: 81}
-        ]
-    },
-    {
-        side: 'leaf',
-        kind: 'light_cruiser',
-        hull_img: 'leaf_light_cruiser.png',
-        canon_img: 'uno.png',
-        objects: [
-            {type: 'hull', dx: 0, dy: 0},
-            {type: 'canon', dx: 0, dy: -55, barrels: [0], direction: 0},
-            {type: 'canon', dx: 0, dy: 75, barrels: [0], direction: 180},
-            {type: 'flag', dx: 0, dy: 125}
-        ]
-    },
-    {
-        side: 'leaf',
-        kind: 'heavy_cruiser',
-        hull_img: 'monstro.png',
-        canon_img: 'triple.png',
-        objects: [
-            {type: 'hull', dx: 0, dy: 0},
-            {type: 'canon', dx: -8, dy: -55, barrels: [6, 0, -6], direction: 0},
-            {type: 'canon', dx: 12, dy: 5, barrels: [6, 0, -6], direction: 0},
-            {type: 'canon', dx: -8, dy: 57, barrels: [6, 0, -6], direction: 180},
-            {type: 'flag', dx: 0, dy: 125}
-        ]
-    },
-    {
-        side: 'fire',
-        kind: 'destroyer',
-        hull_img: 'leaf_destroyer.png',
-        canon_img: 'uno.png',
-        objects: [
-            {type: 'hull', dx: 0, dy: 0},
-            {type: 'canon', dx: 0, dy: -20, barrels: [0], direction: 0},
-            {type: 'flag', dx: 0, dy: 81}
-        ]
-    },
-    {
-        side: 'fire',
-        kind: 'light_cruiser',
-        hull_img: 'leaf_light_cruiser.png',
-        canon_img: 'uno.png',
-        objects: [
-            {type: 'hull', dx: 0, dy: 0},
-            {type: 'canon', dx: 0, dy: -55, barrels: [0], direction: 0},
-            {type: 'canon', dx: 0, dy: 75, barrels: [0], direction: 180},
-            {type: 'flag', dx: 0, dy: 125}
-        ]
-    },
-    {
-        side: 'fire',
-        kind: 'heavy_cruiser',
-        hull_img: 'leaf_light_cruiser.png',
-        canon_img: 'double.png',
-        objects: [
-            {type: 'hull', dx: 0, dy: 0},
-            {type: 'canon', dx: 0, dy: -55, barrels: [4, -4], direction: 0},
-            {type: 'canon', dx: 0, dy: 75, barrels: [4, -4], direction: 180},
-            {type: 'flag', dx: 0, dy: 125}
-        ]
-    }
 ];
 
 function createShip(player, shipType){
@@ -159,6 +86,17 @@ function getRandom(value, percent){
     return _.random(-dv, dv, true);
 }
 
+function kickPlayer(player_id){
+    var player = _.findWhere(players, {_id: player_id});
+    if(player){
+        player.ship.forEach(function(obj){
+            if(obj.type == 'canon' && obj.status){
+                obj.status = false;
+            }
+        });
+    }
+}
+
 app.use(express.static(path.join(__dirname, 'static')));
 
 server.listen(3000, function(){
@@ -170,24 +108,31 @@ io = require('socket.io').listen(server);
 io.sockets.on('connection', function(socket){
     socket.emit('options', {options: opt, templates: shipsTemplates, player_id: socket.id});
     sockets.push(socket);
+
     // Создание нового игрока
     socket.on('new_player', function(data){
         var grid_cell = _.findWhere(grid, {side: data.side, is_free: true});
-        grid_cell.is_free = false;
-        grid_cell.child_id = socket.id;
-        data.x = grid_cell.x;
-        data.y = grid_cell.y;
-        data.ship = [];
-        data.isDefeat = false;
-        data._id = socket.id;
-        players.push(data);
+        if(grid_cell){
+            grid_cell.is_free = false;
+            grid_cell.child_id = socket.id;
+            data.x = grid_cell.x;
+            data.y = grid_cell.y;
+            data.ship = [];
+            data.isDefeat = false;
+            data._id = socket.id;
+            players.push(data);
+        }else{
+            // ... Какое-то сообщение о том что мест в сетке нет
+        }
     });
 
     // Создание объектов для игрока
     socket.on('create_player_object', function(data){
         console.log(data);
         var player = _.findWhere(players, {_id: data.parent_id});
-        createShip(player, data.ship_type);
+        if(player){
+            createShip(player, data.ship_type);
+        }
     });
 
     //Прием команды от игрока
@@ -243,15 +188,27 @@ io.sockets.on('connection', function(socket){
             });
         }
     });
+
+    // Выкидываем игрока на начальный экран
+    // по кнопке
+    socket.on('leave_battle', function(data){
+        kickPlayer(data._id);
+    });
+    // по дисконнекту
+    socket.on('disconnect', function(){
+        kickPlayer(socket.id);
+    });
 });
 
 var intId = setInterval(function(){
     if(players.length){
         players.forEach(function(player){
             var deleteList = [];
+            if(player.ship.length){
+                player.isDefeat = true;
+            }
             player.ship.forEach(function(obj, index){
                 var delta = null;
-                player.isDefeat = true;
                 //расчет пушки
                 if(obj.type == 'canon' && obj.status){
                     player.isDefeat = false;
@@ -334,6 +291,13 @@ var intId = setInterval(function(){
                     }
                 }
             });
+            if(player.isDefeat && player._id){
+                var playerSocket = io.sockets.sockets[player._id];
+                if(playerSocket){
+                    playerSocket.emit('to_start_screen', 'Пнем малыша');
+                    player._id = '';
+                }
+            }
             deleteList.forEach(function(obj_index, index){
                 player.ship.splice(obj_index - index, 1);
             });
