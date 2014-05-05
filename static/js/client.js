@@ -30,8 +30,6 @@ flag.you.src = 'images/flags/flag_you.png';
 flag.friend.src = 'images/flags/flag_friend.png';
 flag.enemy.src = 'images/flags/flag_enemy.png';
 
-var canon = new Image();
-canon.src = 'images/canon.png';
 var damagedCanon = new Image();
 damagedCanon.src = 'images/damagedCanon.png';
 var miss = new Image();
@@ -71,6 +69,7 @@ socket.on('gamedata', function (data) {
     var dist, dir;
     var players = data.players;
     var opt = data.options;
+    var world_opt = data.world;
     if(hulls.length){world.remove(hulls);}
     if(canons.length){world.remove(canons);}
     if(bullets.length){world.remove(bullets);}

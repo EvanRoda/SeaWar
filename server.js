@@ -15,43 +15,192 @@ var sockets = [];
  * Игровые переменные
  */
 var players = [];
+var world = {battleOn: false};
+var grid = [];
+var intId = null;
+
 // Настройки
 var opt = {
     width: 954,
     height: 810,
     delay: 100,
     maxWind: 0.1,
-    windForce: null,
     ammoSpeed: 100,
     missLifeTime: 2500,  // ms милисекунды
     canonRadius: 20,
-    barrelLength: 25,
-    endCounter: 10000,   // ms милисекунды
-    resources: {
-        leaf: 15,
-        fire: 15
-    }
+    barrelLength: 25
 };
 
-opt.windForce = _.random(-opt.maxWind, opt.maxWind, true);
+function startBattle(){
+    world = {
+        battleOn: true,
+        windForce: null,
+        endCounter: 10000,   // ms милисекунды
+        resources: {
+            leaf: 15,
+            fire: 15
+        }
+    };
 
-//Игровая сетка
+    world.windForce = _.random(-opt.maxWind, opt.maxWind, true);
 
-var grid = [
-    {x: 60, y: 135, side: 'leaf', is_free: true, number: 0, child_id: ''},
-    {x: 70, y: 405, side: 'leaf', is_free: false, number: 1, child_id: ''},
-    {x: 60, y: 675, side: 'leaf', is_free: true, number: 2, child_id: ''},
-    {x: 210, y: 135, side: 'leaf', is_free: true, number: 3, child_id: ''},
-    {x: 220, y: 405, side: 'leaf', is_free: true, number: 4, child_id: ''},
-    {x: 210, y: 675, side: 'leaf', is_free: true, number: 5, child_id: ''},
+    grid = [
+        {x: 60, y: 135, side: 'leaf', is_free: true, number: 0, child_id: ''},
+        {x: 70, y: 405, side: 'leaf', is_free: false, number: 1, child_id: ''},
+        {x: 60, y: 675, side: 'leaf', is_free: true, number: 2, child_id: ''},
+        {x: 210, y: 135, side: 'leaf', is_free: true, number: 3, child_id: ''},
+        {x: 220, y: 405, side: 'leaf', is_free: true, number: 4, child_id: ''},
+        {x: 210, y: 675, side: 'leaf', is_free: true, number: 5, child_id: ''},
 
-    {x: 60,  y: 135, side: 'fire', is_free: true, number: 0, child_id: ''},
-    {x: 70,  y: 405, side: 'fire', is_free: false, number: 1, child_id: ''},
-    {x: 60,  y: 675, side: 'fire', is_free: true, number: 2, child_id: ''},
-    {x: 210, y: 135, side: 'fire', is_free: true, number: 3, child_id: ''},
-    {x: 220, y: 405, side: 'fire', is_free: true, number: 4, child_id: ''},
-    {x: 210, y: 675, side: 'fire', is_free: true, number: 5, child_id: ''}
-];
+        {x: 60,  y: 135, side: 'fire', is_free: true, number: 0, child_id: ''},
+        {x: 70,  y: 405, side: 'fire', is_free: false, number: 1, child_id: ''},
+        {x: 60,  y: 675, side: 'fire', is_free: true, number: 2, child_id: ''},
+        {x: 210, y: 135, side: 'fire', is_free: true, number: 3, child_id: ''},
+        {x: 220, y: 405, side: 'fire', is_free: true, number: 4, child_id: ''},
+        {x: 210, y: 675, side: 'fire', is_free: true, number: 5, child_id: ''}
+    ];
+
+    intId = setInterval(function(){
+        if(players.length){
+            var alive = {leaf: 0, fire: 0};
+            players.forEach(function(player){
+                var deleteList = [];
+                if(player.ship.length){
+                    player.isDefeat = true;
+                }
+                player.ship.forEach(function(obj, index){
+                    var delta = null;
+                    //расчет пушки
+                    if(obj.type == 'canon' && obj.status){
+                        player.isDefeat = false;
+                        delta = obj.given_direction - obj.direction;
+                        if(delta){
+                            var trueAngleSpeed = obj.angle_speed*(opt.delay/1000);
+                            if(Math.abs(delta) > trueAngleSpeed){
+                                obj.direction = obj.direction + markOfNumber(delta)*trueAngleSpeed;
+                            }else{
+                                obj.direction = obj.given_direction;
+                            }
+                        }
+                    }
+
+                    //расчет снаряда
+                    else if(obj.type == 'ammo'){
+                        var angle = obj.direction*Math.PI/180;
+                        delta = obj.distance - obj.distance_counter;
+                        var trueAmmoSpeed = obj.ammo_speed*opt.delay/1000;
+
+                        if(delta > trueAmmoSpeed){
+                            obj.x = obj.x + Math.sin(angle)*trueAmmoSpeed;
+                            obj.y = obj.y - Math.cos(angle)*trueAmmoSpeed;
+                            obj.distance_counter = obj.distance_counter + trueAmmoSpeed;
+                            obj.direction = obj.direction + (player.side == 'leaf' ? 1 : -1)*world.windForce;
+                        }else{
+                            obj.x = obj.x + Math.sin(angle)*delta;
+                            obj.y = obj.y - Math.cos(angle)*delta;
+                            obj.distance_counter = obj.distance;
+
+                            // Проверка столкновений
+                            players.forEach(function(t_player){
+                                var vir_x, vir_y, hull_range, isMiss = true;
+                                if(player.side != t_player.side){
+                                    vir_x = opt.width - t_player.x;
+                                    vir_y = opt.height - t_player.y;
+                                }else{
+                                    vir_x = t_player.x;
+                                    vir_y = t_player.y;
+                                }
+                                hull_range = Math.sqrt(Math.pow(vir_x - obj.x, 2) + Math.pow(vir_y - obj.y, 2));
+
+                                if(hull_range < 100){
+                                    t_player.ship.forEach(function(target){
+                                        var target_range = null;
+
+                                        if(player.side != t_player.side){
+                                            vir_x = opt.width - target.x;
+                                            vir_y = opt.height - target.y;
+                                        }else{
+                                            vir_x = target.x;
+                                            vir_y = target.y;
+                                        }
+
+                                        if(target.type == 'canon'){
+                                            target_range = Math.sqrt(Math.pow(vir_x - obj.x, 2) + Math.pow(vir_y - obj.y, 2));
+                                            if(target_range < opt.canonRadius){
+                                                target.status = false;
+                                                isMiss = false;
+                                            }
+                                        }
+                                    });
+                                }
+                                if(isMiss){
+                                    // Заменяем объект ammo на miss ("круги на воде")
+                                    obj.type = 'miss';
+                                    obj.reload = opt.missLifeTime;
+                                    obj.reload_counter = 0;
+                                }
+                            });
+                        }
+                    }else if(obj.type == 'miss'){
+                        delta = obj.reload - obj.reload_counter;
+                        if(delta > opt.delay){
+                            obj.reload_counter = obj.reload_counter + opt.delay;
+                        }else{
+                            deleteList.push(index);
+                        }
+                    }
+                });
+                if(!player.isDefeat){
+                    alive[player.side] += 1;
+                }
+                if(player.isDefeat && player._id){
+                    var playerSocket = io.sockets.sockets[player._id];
+                    if(playerSocket){
+                        playerSocket.emit('to_start_screen', 'Пнем малыша');
+                        player._id = '';
+                    }
+                }
+                deleteList.forEach(function(obj_index, index){
+                    player.ship.splice(obj_index - index, 1);
+                });
+            });
+            if(!alive.leaf || !alive.fire){
+                world.endCounter = world.endCounter - opt.delay;
+            }else{
+                world.endCounter = 10000;
+            }
+            if(world.endCounter <= 0){
+                if(alive.leaf){
+                    endBattle('leaf');
+                }else if(alive.fire){
+                    endBattle('fire');
+                }else{
+                    endBattle(null);
+                }
+            }
+        }
+        io.sockets.emit('gamedata', {options: opt, world: world, players: players});
+    }, opt.delay);
+}
+
+function endBattle(winSide){
+    players.forEach(function(player){
+        if(!player.isDefeat){
+            player.ship.forEach(function(obj){
+                if(obj.type == 'canon' && obj.status){
+                    world.resources[player.side] += obj.barrels.length;
+                }
+            });
+        }
+    });
+    if(winSide){
+        world.resources[winSide] += 3;
+    }
+    players = [];
+    io.sockets.emit('to_start_screen', '');
+    clearInterval(intId);
+    world.battleOn = false;
+}
 
 function createShip(player, shipType){
     player.ship = [];
@@ -129,6 +278,9 @@ io.sockets.on('connection', function(socket){
         }else{
             // ... Какое-то сообщение о том что мест в сетке нет
         }
+        if(!world.battleOn){
+            startBattle();
+        }
     });
 
     // Создание объектов для игрока
@@ -203,110 +355,6 @@ io.sockets.on('connection', function(socket){
         kickPlayer(socket.id);
     });
 });
-
-var intId = setInterval(function(){
-    if(players.length){
-        players.forEach(function(player){
-            var deleteList = [];
-            if(player.ship.length){
-                player.isDefeat = true;
-            }
-            player.ship.forEach(function(obj, index){
-                var delta = null;
-                //расчет пушки
-                if(obj.type == 'canon' && obj.status){
-                    player.isDefeat = false;
-                    delta = obj.given_direction - obj.direction;
-                    if(delta){
-                        var trueAngleSpeed = obj.angle_speed*(opt.delay/1000);
-                        if(Math.abs(delta) > trueAngleSpeed){
-                            obj.direction = obj.direction + markOfNumber(delta)*trueAngleSpeed;
-                        }else{
-                            obj.direction = obj.given_direction;
-                        }
-                    }
-                }
-
-                //расчет снаряда
-                else if(obj.type == 'ammo'){
-                    var angle = obj.direction*Math.PI/180;
-                    delta = obj.distance - obj.distance_counter;
-                    var trueAmmoSpeed = obj.ammo_speed*opt.delay/1000;
-
-                    if(delta > trueAmmoSpeed){
-                        obj.x = obj.x + Math.sin(angle)*trueAmmoSpeed;
-                        obj.y = obj.y - Math.cos(angle)*trueAmmoSpeed;
-                        obj.distance_counter = obj.distance_counter + trueAmmoSpeed;
-                        obj.direction = obj.direction + (player.side == 'leaf' ? 1 : -1)*opt.windForce;
-                    }else{
-                        obj.x = obj.x + Math.sin(angle)*delta;
-                        obj.y = obj.y - Math.cos(angle)*delta;
-                        obj.distance_counter = obj.distance;
-
-                        // Проверка столкновений
-                        players.forEach(function(t_player){
-                            var vir_x, vir_y, hull_range, isMiss = true;
-                            if(player.side != t_player.side){
-                                vir_x = opt.width - t_player.x;
-                                vir_y = opt.height - t_player.y;
-                            }else{
-                                vir_x = t_player.x;
-                                vir_y = t_player.y;
-                            }
-                            hull_range = Math.sqrt(Math.pow(vir_x - obj.x, 2) + Math.pow(vir_y - obj.y, 2));
-
-                            if(hull_range < 100){
-                                t_player.ship.forEach(function(target){
-                                    var target_range = null;
-
-                                    if(player.side != t_player.side){
-                                        vir_x = opt.width - target.x;
-                                        vir_y = opt.height - target.y;
-                                    }else{
-                                        vir_x = target.x;
-                                        vir_y = target.y;
-                                    }
-
-                                    if(target.type == 'canon'){
-                                        target_range = Math.sqrt(Math.pow(vir_x - obj.x, 2) + Math.pow(vir_y - obj.y, 2));
-                                        if(target_range < opt.canonRadius){
-                                            target.status = false;
-                                            isMiss = false;
-                                        }
-                                    }
-                                });
-                            }
-                            if(isMiss){
-                                // Заменяем объект ammo на miss ("круги на воде")
-                                obj.type = 'miss';
-                                obj.reload = opt.missLifeTime;
-                                obj.reload_counter = 0;
-                            }
-                        });
-                    }
-                }else if(obj.type == 'miss'){
-                    delta = obj.reload - obj.reload_counter;
-                    if(delta > opt.delay){
-                        obj.reload_counter = obj.reload_counter + opt.delay;
-                    }else{
-                        deleteList.push(index);
-                    }
-                }
-            });
-            if(player.isDefeat && player._id){
-                var playerSocket = io.sockets.sockets[player._id];
-                if(playerSocket){
-                    playerSocket.emit('to_start_screen', 'Пнем малыша');
-                    player._id = '';
-                }
-            }
-            deleteList.forEach(function(obj_index, index){
-                player.ship.splice(obj_index - index, 1);
-            });
-        });
-    }
-    io.sockets.emit('gamedata', {options: opt, players: players});
-}, opt.delay);
 
 /**
  * Модель player (Игрок)
