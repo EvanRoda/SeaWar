@@ -24,6 +24,8 @@ var flag = {
     enemy: new Image()
 };
 
+var params = $('#params');
+
 flag.you.src = 'images/flags/flag_you.png';
 flag.friend.src = 'images/flags/flag_friend.png';
 flag.enemy.src = 'images/flags/flag_enemy.png';
@@ -66,6 +68,7 @@ socket.on('options', function(data){
 });
 
 socket.on('gamedata', function (data) {
+    var dist, dir;
     var players = data.players;
     var opt = data.options;
     if(hulls.length){world.remove(hulls);}
@@ -98,6 +101,10 @@ socket.on('gamedata', function (data) {
                 });
                 //console.log(newObject);
                 if(obj.type == 'canon'){
+                    if(player._id == itIsYou._id){
+                        dist = player.distance;
+                        dir = obj.given_direction + obj.delta_direction;
+                    }
                     if(obj.status){
                         newObject.view = skins[player.side][obj.kind].canon;
                     }else{
@@ -131,6 +138,7 @@ socket.on('gamedata', function (data) {
                 }
             });
         });
+        params.html('Дал.: ' + dist + ' Нап.: ' + dir);
     }
     if(misses.length){world.add(misses);}
     if(hulls.length){world.add(hulls);}

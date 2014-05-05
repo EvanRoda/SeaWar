@@ -26,7 +26,11 @@ var opt = {
     missLifeTime: 2500,  // ms милисекунды
     canonRadius: 20,
     barrelLength: 25,
-    endCounter: 10000   // ms милисекунды
+    endCounter: 10000,   // ms милисекунды
+    resources: {
+        leaf: 15,
+        fire: 15
+    }
 };
 
 opt.windForce = _.random(-opt.maxWind, opt.maxWind, true);
@@ -117,6 +121,7 @@ io.sockets.on('connection', function(socket){
             grid_cell.child_id = socket.id;
             data.x = grid_cell.x;
             data.y = grid_cell.y;
+            data.distance = 300;
             data.ship = [];
             data.isDefeat = false;
             data._id = socket.id;
@@ -128,7 +133,6 @@ io.sockets.on('connection', function(socket){
 
     // Создание объектов для игрока
     socket.on('create_player_object', function(data){
-        console.log(data);
         var player = _.findWhere(players, {_id: data.parent_id});
         if(player){
             createShip(player, data.ship_type);
@@ -269,8 +273,6 @@ var intId = setInterval(function(){
                                             target.status = false;
                                             isMiss = false;
                                         }
-                                    }else if(target.type == 'hull'){
-                                        // ... Проверяем попадание в корпус
                                     }
                                 });
                             }
