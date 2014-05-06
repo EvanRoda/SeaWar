@@ -46,6 +46,22 @@ var opt = {
     barrelLength: 25
 };
 
+function canonCalc(canon, player){
+    var delta = null;
+    if(canon.status){
+        player.isDefeat = false;
+        delta = canon.given_direction - canon.direction;
+        if(delta){
+            var trueAngleSpeed = canon.angle_speed*(opt.delay/1000);
+            if(Math.abs(delta) > trueAngleSpeed){
+                canon.direction = canon.direction + markOfNumber(delta)*trueAngleSpeed;
+            }else{
+                canon.direction = canon.given_direction;
+            }
+        }
+    }
+}
+
 function startBattle(){
     world = {
         battleOn: true,
@@ -69,18 +85,8 @@ function startBattle(){
                 }
                 player.ship.forEach(function(obj, index){
                     var delta = null;
-                    //расчет пушки
-                    if(obj.type == 'canon' && obj.status){
-                        player.isDefeat = false;
-                        delta = obj.given_direction - obj.direction;
-                        if(delta){
-                            var trueAngleSpeed = obj.angle_speed*(opt.delay/1000);
-                            if(Math.abs(delta) > trueAngleSpeed){
-                                obj.direction = obj.direction + markOfNumber(delta)*trueAngleSpeed;
-                            }else{
-                                obj.direction = obj.given_direction;
-                            }
-                        }
+                    if(obj.type == 'canon'){
+                        canonCalc(obj, player);
                     }
 
                     //расчет снаряда
