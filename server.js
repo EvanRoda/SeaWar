@@ -16,8 +16,23 @@ var sockets = [];
  */
 var players = [];
 var world = {battleOn: false};
-var grid = [];
 var intId = null;
+
+var grid = [
+    {x: 60, y: 135, side: 'leaf', is_free: true, number: 0, child_id: ''},
+    {x: 70, y: 405, side: 'leaf', is_free: false, number: 1, child_id: ''},
+    {x: 60, y: 675, side: 'leaf', is_free: true, number: 2, child_id: ''},
+    {x: 210, y: 135, side: 'leaf', is_free: true, number: 3, child_id: ''},
+    {x: 220, y: 405, side: 'leaf', is_free: true, number: 4, child_id: ''},
+    {x: 210, y: 675, side: 'leaf', is_free: true, number: 5, child_id: ''},
+
+    {x: 60,  y: 135, side: 'fire', is_free: true, number: 0, child_id: ''},
+    {x: 70,  y: 405, side: 'fire', is_free: false, number: 1, child_id: ''},
+    {x: 60,  y: 675, side: 'fire', is_free: true, number: 2, child_id: ''},
+    {x: 210, y: 135, side: 'fire', is_free: true, number: 3, child_id: ''},
+    {x: 220, y: 405, side: 'fire', is_free: true, number: 4, child_id: ''},
+    {x: 210, y: 675, side: 'fire', is_free: true, number: 5, child_id: ''}
+];
 
 // Настройки
 var opt = {
@@ -43,22 +58,6 @@ function startBattle(){
     };
 
     world.windForce = _.random(-opt.maxWind, opt.maxWind, true);
-
-    grid = [
-        {x: 60, y: 135, side: 'leaf', is_free: true, number: 0, child_id: ''},
-        {x: 70, y: 405, side: 'leaf', is_free: false, number: 1, child_id: ''},
-        {x: 60, y: 675, side: 'leaf', is_free: true, number: 2, child_id: ''},
-        {x: 210, y: 135, side: 'leaf', is_free: true, number: 3, child_id: ''},
-        {x: 220, y: 405, side: 'leaf', is_free: true, number: 4, child_id: ''},
-        {x: 210, y: 675, side: 'leaf', is_free: true, number: 5, child_id: ''},
-
-        {x: 60,  y: 135, side: 'fire', is_free: true, number: 0, child_id: ''},
-        {x: 70,  y: 405, side: 'fire', is_free: false, number: 1, child_id: ''},
-        {x: 60,  y: 675, side: 'fire', is_free: true, number: 2, child_id: ''},
-        {x: 210, y: 135, side: 'fire', is_free: true, number: 3, child_id: ''},
-        {x: 220, y: 405, side: 'fire', is_free: true, number: 4, child_id: ''},
-        {x: 210, y: 675, side: 'fire', is_free: true, number: 5, child_id: ''}
-    ];
 
     intId = setInterval(function(){
         if(players.length){
@@ -200,6 +199,22 @@ function endBattle(winSide){
     io.sockets.emit('to_start_screen', '');
     clearInterval(intId);
     world.battleOn = false;
+
+    grid = [
+        {x: 60, y: 135, side: 'leaf', is_free: true, number: 0, child_id: ''},
+        {x: 70, y: 405, side: 'leaf', is_free: false, number: 1, child_id: ''},
+        {x: 60, y: 675, side: 'leaf', is_free: true, number: 2, child_id: ''},
+        {x: 210, y: 135, side: 'leaf', is_free: true, number: 3, child_id: ''},
+        {x: 220, y: 405, side: 'leaf', is_free: true, number: 4, child_id: ''},
+        {x: 210, y: 675, side: 'leaf', is_free: true, number: 5, child_id: ''},
+
+        {x: 60,  y: 135, side: 'fire', is_free: true, number: 0, child_id: ''},
+        {x: 70,  y: 405, side: 'fire', is_free: false, number: 1, child_id: ''},
+        {x: 60,  y: 675, side: 'fire', is_free: true, number: 2, child_id: ''},
+        {x: 210, y: 135, side: 'fire', is_free: true, number: 3, child_id: ''},
+        {x: 220, y: 405, side: 'fire', is_free: true, number: 4, child_id: ''},
+        {x: 210, y: 675, side: 'fire', is_free: true, number: 5, child_id: ''}
+    ];
 }
 
 function createShip(player, shipType){
