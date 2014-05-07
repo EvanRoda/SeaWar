@@ -43,7 +43,8 @@ var opt = {
     missLifeTime: 2500,         // ms милисекунды
     canonRadius: 20,
     barrelLength: 25,
-    defaultEndCounter: 10000    // ms милисекунды
+    defaultEndCounter: 10000,    // ms милисекунды
+    defaultWindCounter: 120000    // ms милисекунды
 };
 
 var world = {
@@ -51,6 +52,7 @@ var world = {
     battleStart: false,
     windForce: null,
     endCounter: opt.defaultEndCounter,   // ms милисекунды
+    windCounter: opt.defaultWindCounter,   // ms милисекунды
     resources: {
         leaf: 15,
         fire: 15
@@ -144,6 +146,7 @@ function startBattle(){
     world.battleOn = true;
     world.battleStart = false;
     world.endCounter = opt.defaultEndCounter;
+    world.windCounter = opt.defaultWindCounter;
     world.windForce = _.random(-opt.maxWind, opt.maxWind, true);
 
     intId = setInterval(function(){
@@ -192,6 +195,15 @@ function startBattle(){
                 }
             }
         }
+
+        // Смена направление и силы ветра по времени
+        world.windCounter -= opt.delay;
+        if(world.windCounter <= 0){
+            world.windCounter = opt.defaultWindCounter;
+            world.windForce = _.random(-opt.maxWind, opt.maxWind, true);
+        }
+
+        // Отправка игровых данных на клиент
         io.sockets.emit('gamedata', {options: opt, world: world, players: players});
     }, opt.delay);
 }
