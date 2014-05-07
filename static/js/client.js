@@ -6,6 +6,7 @@ var itIsYou = {
 };
 
 var commandField = $('#command_line');
+var windMarks = [];
 var hulls = [];
 var canons = [];
 var bullets = [];
@@ -36,12 +37,15 @@ var miss = new Image();
 miss.src = 'images/miss.png';
 var ammo = new Image();
 ammo.src = 'images/ammo.png';
+var wind_center = new Image();
+wind_center.src = 'images/wind_center.png';
+var wind = new Image();
+wind.src = 'images/wind.png';
 
 var world = Physics();
 
 socket.on('options', function(data){
     itIsYou._id = data.player_id;
-    console.log(data);
     data.templates.forEach(function(template){
         skins[template.side][template.kind] = {hull: new Image(), canon: new Image()};
         skins[template.side][template.kind].hull.src = 'images/hulls/' + template.hull_img;
@@ -70,20 +74,47 @@ socket.on('gamedata', function (data) {
     var players = data.players;
     var opt = data.options;
     var world_opt = data.world;
+    if(windMarks.length){world.remove(windMarks);}
     if(hulls.length){world.remove(hulls);}
     if(canons.length){world.remove(canons);}
     if(bullets.length){world.remove(bullets);}
     if(misses.length){world.remove(misses);}
     if(flags.length){world.remove(flags);}
+    windMarks = [];
     hulls = [];
     canons = [];
     bullets = [];
     misses = [];
     flags = [];
+
+    var newObject = Physics.body('circle', {
+        mass: 100,
+        radius: 2,
+        x: 477,
+        y: 730
+    });
+    newObject.view = wind_center;
+    windMarks.push(newObject);
+
+    if(world_opt.windForce){
+        var repeat = Math.floor(4 - Math.abs(opt.maxWind/world_opt.windForce));
+        var direct = markOfNumber(world_opt.windForce);
+        for(var i = 1; i <= repeat; i++){
+            newObject = Physics.body('circle', {
+                mass: 100,
+                radius: 2,
+                x: 477,
+                y: 730 + direct*12*i
+            });
+            newObject.view = wind;
+            newObject.state.angular.pos = direct < 0 ? 0 : Math.PI;
+            windMarks.push(newObject);
+        }
+    }
+
     if(players.length){
         players.forEach(function(player){
             player.ship.forEach(function(obj){
-                var newObject = null;
                 //Переворачиваем координаты для противников
                 if(itIsYou.side != player.side){
                     obj.x = opt.width - obj.x;
@@ -139,6 +170,7 @@ socket.on('gamedata', function (data) {
         });
         params.html('Дал.: ' + dist + ' Нап.: ' + dir);
     }
+    if(windMarks.length){world.add(windMarks);}
     if(misses.length){world.add(misses);}
     if(hulls.length){world.add(hulls);}
     if(flags.length){world.add(flags);}
@@ -170,6 +202,10 @@ function selectSide(side){
 
 function leaveBattle(){
     socket.emit('leave_battle', itIsYou);
+}
+
+function markOfNumber(number){
+    return number<0 ? -1 : 1;
 }
 
 commandField.keydown(function(event){
