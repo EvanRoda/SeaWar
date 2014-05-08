@@ -19,14 +19,14 @@ var intId = null;
 
 var grid = [
     {x: 60, y: 135, side: 'leaf', is_free: true, number: 0, child_id: ''},
-    {x: 70, y: 405, side: 'leaf', is_free: false, number: 1, child_id: ''},
+    {x: 70, y: 405, side: 'leaf', is_free: true, number: 1, child_id: ''},
     {x: 60, y: 675, side: 'leaf', is_free: true, number: 2, child_id: ''},
     {x: 210, y: 135, side: 'leaf', is_free: true, number: 3, child_id: ''},
     {x: 220, y: 405, side: 'leaf', is_free: true, number: 4, child_id: ''},
     {x: 210, y: 675, side: 'leaf', is_free: true, number: 5, child_id: ''},
 
     {x: 60,  y: 135, side: 'fire', is_free: true, number: 0, child_id: ''},
-    {x: 70,  y: 405, side: 'fire', is_free: false, number: 1, child_id: ''},
+    {x: 70,  y: 405, side: 'fire', is_free: true, number: 1, child_id: ''},
     {x: 60,  y: 675, side: 'fire', is_free: true, number: 2, child_id: ''},
     {x: 210, y: 135, side: 'fire', is_free: true, number: 3, child_id: ''},
     {x: 220, y: 405, side: 'fire', is_free: true, number: 4, child_id: ''},
@@ -228,14 +228,14 @@ function endBattle(winSide){
 
     grid = [
         {x: 60, y: 135, side: 'leaf', is_free: true, number: 0, child_id: ''},
-        {x: 70, y: 405, side: 'leaf', is_free: false, number: 1, child_id: ''},
+        {x: 70, y: 405, side: 'leaf', is_free: true, number: 1, child_id: ''},
         {x: 60, y: 675, side: 'leaf', is_free: true, number: 2, child_id: ''},
         {x: 210, y: 135, side: 'leaf', is_free: true, number: 3, child_id: ''},
         {x: 220, y: 405, side: 'leaf', is_free: true, number: 4, child_id: ''},
         {x: 210, y: 675, side: 'leaf', is_free: true, number: 5, child_id: ''},
 
         {x: 60,  y: 135, side: 'fire', is_free: true, number: 0, child_id: ''},
-        {x: 70,  y: 405, side: 'fire', is_free: false, number: 1, child_id: ''},
+        {x: 70,  y: 405, side: 'fire', is_free: true, number: 1, child_id: ''},
         {x: 60,  y: 675, side: 'fire', is_free: true, number: 2, child_id: ''},
         {x: 210, y: 135, side: 'fire', is_free: true, number: 3, child_id: ''},
         {x: 220, y: 405, side: 'fire', is_free: true, number: 4, child_id: ''},
@@ -293,9 +293,9 @@ function kickPlayer(player_id){
                 resources = obj.barrels.length;
             }
         });
-    }
-    if(!world.battleStart){
-        world.resources[player.side] += resources;
+        if(!world.battleStart){
+            world.resources[player.side] += resources;
+        }
     }
 }
 
@@ -308,7 +308,7 @@ server.listen(3000, function(){
 io = require('socket.io').listen(server);
 
 io.sockets.on('connection', function(socket){
-    socket.emit('options', {options: opt, templates: shipsTemplates, player_id: socket.id});
+    socket.emit('options', {options: opt, world: world, templates: shipsTemplates, player_id: socket.id});
     sockets.push(socket);
 
     // Создание нового игрока

@@ -5,7 +5,13 @@ var itIsYou = {
     _id: ''
 };
 
-var commandField = $('#command_line');
+var ui = {
+    leafButton: $('#leaf_button'),
+    fireButton: $('#fire_button'),
+    params: $('#params'),
+    commandField: $('#command_line')
+};
+
 var windMarks = [];
 var hulls = [];
 var canons = [];
@@ -25,8 +31,6 @@ var flag = {
     enemy: new Image()
 };
 
-var params = $('#params');
-
 flag.you.src = 'images/flags/flag_you.png';
 flag.friend.src = 'images/flags/flag_friend.png';
 flag.enemy.src = 'images/flags/flag_enemy.png';
@@ -43,14 +47,18 @@ var wind = new Image();
 wind.src = 'images/wind.png';
 
 var world = Physics();
+var world_opt = {};
 
 socket.on('options', function(data){
+    world_opt = data.world;
     itIsYou._id = data.player_id;
     data.templates.forEach(function(template){
         skins[template.side][template.kind] = {hull: new Image(), canon: new Image()};
         skins[template.side][template.kind].hull.src = 'images/hulls/' + template.hull_img;
         skins[template.side][template.kind].canon.src = 'images/canons/' + template.canon_img;
     });
+    ui.leafButton.html('<i class="icon-eye-open icon-white"></i> Frontend ' + world_opt.resources.leaf);
+    ui.fireButton.html('<i class="icon-eye-close icon-white"></i> Backend ' + world_opt.resources.fire);
     renderer = Physics.renderer('canvas', {
         el: 'game_field',
         width: data.options.width,
@@ -73,7 +81,7 @@ socket.on('gamedata', function (data) {
     var dist, dir;
     var players = data.players;
     var opt = data.options;
-    var world_opt = data.world;
+    world_opt = data.world;
     if(windMarks.length){world.remove(windMarks);}
     if(hulls.length){world.remove(hulls);}
     if(canons.length){world.remove(canons);}
@@ -168,7 +176,7 @@ socket.on('gamedata', function (data) {
                 }
             });
         });
-        params.html('Дал.: ' + dist + ' Нап.: ' + dir);
+        ui.params.html('Дал.: ' + dist + ' Нап.: ' + dir + ' Рес.: ' + world_opt.resources[itIsYou.side]);
     }
     if(windMarks.length){world.add(windMarks);}
     if(misses.length){world.add(misses);}
@@ -180,6 +188,8 @@ socket.on('gamedata', function (data) {
 });
 
 socket.on('to_start_screen', function(){
+    ui.leafButton.html('<i class="icon-eye-open icon-white"></i> Frontend' + world_opt.resources.leaf);
+    ui.fireButton.html('<i class="icon-eye-close icon-white"></i> Backend' + world_opt.resources.fire);
     $('.enter_player_name').removeClass('hiddenRow');
     $('.command_row').addClass('hiddenRow');
 });
@@ -187,7 +197,7 @@ socket.on('to_start_screen', function(){
 function inBattle(shipType){
     $('.choose_player_ship').addClass('hiddenRow');
     $('.command_row').removeClass('hiddenRow');
-    commandField.focus();
+    ui.commandField.focus();
     socket.emit('create_player_object', {parent_id: itIsYou._id, ship_type: shipType});
 }
 
@@ -208,12 +218,12 @@ function markOfNumber(number){
     return number<0 ? -1 : 1;
 }
 
-commandField.keydown(function(event){
+ui.commandField.keydown(function(event){
     if (event.which == 13){
-        var command = commandField.val();
+        var command = ui.commandField.val();
         if(command){
             socket.emit('command', {command: command, player_id: itIsYou._id});
         }
-        commandField.val('').focus();
+        ui.commandField.val('').focus();
     }
 });
