@@ -156,28 +156,29 @@ function startBattle(){
                 var deleteList = [];
                 if(player.ship.length){
                     player.isDefeat = true;
+                    player.ship.forEach(function(obj, index){
+                        if(obj.type == 'canon'){
+                            canonCalc(obj, player);
+                        }else if(obj.type == 'ammo'){
+                            ammoCalc(obj, player);
+                        }else if(obj.type == 'miss'){
+                            missCalc(obj, index, deleteList);
+                        }
+                    });
                 }
 
-                player.ship.forEach(function(obj, index){
-                    if(obj.type == 'canon'){
-                        canonCalc(obj, player);
-                    }else if(obj.type == 'ammo'){
-                        ammoCalc(obj, player);
-                    }else if(obj.type == 'miss'){
-                        missCalc(obj, index, deleteList);
+                if(player.isDefeat){
+                    if(player._id){
+                        var playerSocket = io.sockets.sockets[player._id];
+                        if(playerSocket){
+                            playerSocket.emit('to_start_screen', 'Пнем малыша');
+                            player._id = '';
+                        }
                     }
-                });
-
-                if(!player.isDefeat){
+                }else{
                     alive[player.side] += 1;
                 }
-                if(player.isDefeat && player._id){
-                    var playerSocket = io.sockets.sockets[player._id];
-                    if(playerSocket){
-                        playerSocket.emit('to_start_screen', 'Пнем малыша');
-                        player._id = '';
-                    }
-                }
+
                 deleteList.forEach(function(obj_index, index){
                     player.ship.splice(obj_index - index, 1);
                 });
