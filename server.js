@@ -266,6 +266,8 @@ function createShip(player, shipType){
             newObj.status = true;
             newObj.kind = shipType;
             newObj.barrels = obj.barrels;
+            newObj.min_angle = obj.angles[0];
+            newObj.max_angle = obj.angles[1];
             resources += obj.barrels.length;
         }else if(obj.type == 'hull'){
             newObj.kind = shipType;
@@ -348,8 +350,14 @@ io.sockets.on('connection', function(socket){
         var command =  data.command.split(' ', 2);
         if(command[0].toUpperCase() == 'НАПРАВЛЕНИЕ'){
             player.ship.forEach(function(obj){
+                var value = parseInt(command[1]);
                 if(obj.type == 'canon'){
-                    obj.given_direction = parseInt(command[1]) - obj.delta_direction;
+                    if(value < obj.min_angle){
+                        value = obj.min_angle;
+                    }else if(value > obj.max_angle){
+                        value = obj.max_angle;
+                    }
+                    obj.given_direction = value - obj.delta_direction;
                 }
             });
         }else if(command[0].toUpperCase() == 'СВЕДЕНИЕ'){

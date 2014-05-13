@@ -8,7 +8,7 @@
         "canon_img": "uno.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "dx": 0, "dy": -20, "barrels": [0], "direction": 0},
+            {"type": "canon", "dx": 0, "dy": -20, "barrels": [0], "angles": [0, 180], "direction": 0},
             {"type": "flag", "dx": 0, "dy": 81}
         ]
     },
@@ -21,8 +21,8 @@
         "canon_img": "uno.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "dx": 0, "dy": -55, "barrels": [0], "direction": 0},
-            {"type": "canon", "dx": 0, "dy": 75, "barrels": [0], "direction": 180},
+            {"type": "canon", "dx": 0, "dy": -55, "barrels": [0], "angles": [0, 180], "direction": 0},
+            {"type": "canon", "dx": 0, "dy": 75, "barrels": [0], "angles": [0, 180], "direction": 180},
             {"type": "flag", "dx": 0, "dy": 125}
         ]
     },
@@ -35,8 +35,8 @@
         "canon_img": "double.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "dx": 0, "dy": -55, "barrels": [4, -4], "direction": 0},
-            {"type": "canon", "dx": 0, "dy": 75, "barrels": [4, -4], "direction": 180},
+            {"type": "canon", "dx": 0, "dy": -55, "barrels": [4, -4], "angles": [0, 180], "direction": 0},
+            {"type": "canon", "dx": 0, "dy": 75, "barrels": [4, -4], "angles": [0, 180], "direction": 180},
             {"type": "flag", "dx": 0, "dy": 125}
         ]
     },
@@ -49,9 +49,9 @@
         "canon_img": "triple.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "dx": -8, "dy": -55, "barrels": [6, 0, -6], "direction": 0},
-            {"type": "canon", "dx": 12, "dy": 5, "barrels": [6, 0, -6], "direction": 0},
-            {"type": "canon", "dx": -8, "dy": 57, "barrels": [6, 0, -6], "direction": 180},
+            {"type": "canon", "dx": -8, "dy": -55, "barrels": [6, 0, -6], "angles": [0, 180], "direction": 0},
+            {"type": "canon", "dx": 12, "dy": 5, "barrels": [6, 0, -6], "angles": [0, 180], "direction": 0},
+            {"type": "canon", "dx": -8, "dy": 57, "barrels": [6, 0, -6], "angles": [0, 180], "direction": 180},
             {"type": "flag", "dx": -8, "dy": 125}
         ]
     },
@@ -64,7 +64,7 @@
         "canon_img": "uno.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "dx": 0, "dy": -20, "barrels": [0], "direction": 0},
+            {"type": "canon", "dx": 0, "dy": -20, "barrels": [0], "angles": [0, 180], "direction": 0},
             {"type": "flag", "dx": 0, "dy": 81}
         ]
     },
@@ -77,8 +77,8 @@
         "canon_img": "uno.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "dx": 0, "dy": -55, "barrels": [0], "direction": 0},
-            {"type": "canon", "dx": 0, "dy": 75, "barrels": [0], "direction": 180},
+            {"type": "canon", "dx": 0, "dy": -55, "barrels": [0], "angles": [0, 180], "direction": 0},
+            {"type": "canon", "dx": 0, "dy": 75, "barrels": [0], "angles": [0, 180], "direction": 180},
             {"type": "flag", "dx": 0, "dy": 125}
         ]
     },
@@ -91,9 +91,9 @@
         "canon_img": "triple.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "dx": -8, "dy": -55, "barrels": [6, 0, -6], "direction": 0},
-            {"type": "canon", "dx": 12, "dy": 5, "barrels": [6, 0, -6], "direction": 0},
-            {"type": "canon", "dx": -8, "dy": 57, "barrels": [6, 0, -6], "direction": 180},
+            {"type": "canon", "dx": -8, "dy": -55, "barrels": [6, 0, -6], "angles": [0, 180], "direction": 0},
+            {"type": "canon", "dx": 12, "dy": 5, "barrels": [6, 0, -6], "angles": [0, 180], "direction": 0},
+            {"type": "canon", "dx": -8, "dy": 57, "barrels": [6, 0, -6], "angles": [0, 180], "direction": 180},
             {"type": "flag", "dx": -8, "dy": 125}
         ]
     }
