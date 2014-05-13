@@ -14,8 +14,8 @@
     },
     {
         "side": "leaf",
-        "kind": "duilio",
-        "name": "Дуилио",
+        "kind": "duilioP",
+        "name": "Дуилио Проект",
         "cost": 2,
         "hull_img": "duilio.png",
         "canon_img": "uno_d.png",
@@ -24,6 +24,20 @@
             {"type": "canon", "dx": 11, "dy": -12, "barrels": [0], "angles": [5, 180], "direction": 90},
             {"type": "canon", "dx": -12, "dy": 11, "barrels": [0], "angles": [65, 115], "direction": 90},
             {"type": "flag", "dx": 0, "dy": 125}
+        ]
+    },
+    {
+        "side": "leaf",
+        "kind": "duilio",
+        "name": "Дуилио",
+        "cost": 4,
+        "hull_img": "duilio.png",
+        "canon_img": "double_d.png",
+        "objects": [
+            {"type": "hull", "dx": 0, "dy": 0},
+            {"type": "canon", "dx": 11, "dy": -12, "barrels": [4, -4], "angles": [15, 170], "direction": 90},
+            {"type": "canon", "dx": -12, "dy": 11, "barrels": [4, -4], "angles": [75, 105], "direction": 90},
+            {"type": "flag", "dx": 0, "dy": 102}
         ]
     },
     {
