@@ -2,6 +2,8 @@
     {
         "side": "leaf",
         "kind": "destroyer",
+        "name": "Эсминец",
+        "cost": 1,
         "hull_img": "leaf_destroyer.png",
         "canon_img": "uno.png",
         "objects": [
@@ -13,6 +15,8 @@
     {
         "side": "leaf",
         "kind": "light_cruiser",
+        "name": "Легкий крейсер",
+        "cost": 2,
         "hull_img": "leaf_light_cruiser.png",
         "canon_img": "uno.png",
         "objects": [
@@ -24,7 +28,23 @@
     },
     {
         "side": "leaf",
+        "kind": "light_cruiser2",
+        "name": "Легкий крейсер Mk2",
+        "cost": 4,
+        "hull_img": "leaf_light_cruiser.png",
+        "canon_img": "double.png",
+        "objects": [
+            {"type": "hull", "dx": 0, "dy": 0},
+            {"type": "canon", "dx": 0, "dy": -55, "barrels": [4, -4], "direction": 0},
+            {"type": "canon", "dx": 0, "dy": 75, "barrels": [4, -4], "direction": 180},
+            {"type": "flag", "dx": 0, "dy": 125}
+        ]
+    },
+    {
+        "side": "leaf",
         "kind": "heavy_cruiser",
+        "name": "Тяжелый крейсер",
+        "cost": 9,
         "hull_img": "monstro.png",
         "canon_img": "triple.png",
         "objects": [
@@ -38,6 +58,8 @@
     {
         "side": "fire",
         "kind": "destroyer",
+        "name": "Эсминец",
+        "cost": 1,
         "hull_img": "leaf_destroyer.png",
         "canon_img": "uno.png",
         "objects": [
@@ -49,6 +71,8 @@
     {
         "side": "fire",
         "kind": "light_cruiser",
+        "name": "Легкий крейсер",
+        "cost": 2,
         "hull_img": "leaf_light_cruiser.png",
         "canon_img": "uno.png",
         "objects": [
@@ -61,6 +85,8 @@
     {
         "side": "fire",
         "kind": "heavy_cruiser",
+        "name": "Тяжелый крейсер",
+        "cost": 9,
         "hull_img": "monstro.png",
         "canon_img": "triple.png",
         "objects": [

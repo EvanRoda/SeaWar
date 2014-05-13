@@ -10,7 +10,11 @@ var ui = {
     fireButton: $('#fire_button'),
     params: $('#params'),
     commandField: $('#command_line'),
-    messageBox: $('#message')
+    messageBox: $('#message'),
+    nameField: $('.enter_player_name'),
+    shipChoiсe: $('.choose_player_ship'),
+    commandRow: $('.command_row'),
+    shipContainer: $('#ship_container')
 };
 
 var windMarks = [];
@@ -49,19 +53,24 @@ wind.src = 'images/wind.png';
 
 var world = Physics();
 var world_opt = {};
+var templates = [];
 
 ui.messageBox.hide();
+ui.nameField.show();
+ui.shipChoiсe.hide();
+ui.commandRow.hide();
 
 socket.on('options', function(data){
     world_opt = data.world;
     itIsYou._id = data.player_id;
-    data.templates.forEach(function(template){
+    templates = data.templates;
+    templates.forEach(function(template){
         skins[template.side][template.kind] = {hull: new Image(), canon: new Image()};
         skins[template.side][template.kind].hull.src = 'images/hulls/' + template.hull_img;
         skins[template.side][template.kind].canon.src = 'images/canons/' + template.canon_img;
     });
-    ui.leafButton.html('<i class="icon-eye-open icon-white"></i> Frontend ' + world_opt.resources.leaf);
-    ui.fireButton.html('<i class="icon-eye-close icon-white"></i> Backend ' + world_opt.resources.fire);
+    ui.leafButton.html('<i class="icon-eye-open icon-white"></i> Leaf ' + world_opt.resources.leaf);
+    ui.fireButton.html('<i class="icon-eye-close icon-white"></i> Fire ' + world_opt.resources.fire);
     renderer = Physics.renderer('canvas', {
         el: 'game_field',
         width: data.options.width,
@@ -191,10 +200,10 @@ socket.on('gamedata', function (data) {
 });
 
 socket.on('to_start_screen', function(){
-    ui.leafButton.html('<i class="icon-eye-open icon-white"></i> Frontend' + world_opt.resources.leaf);
-    ui.fireButton.html('<i class="icon-eye-close icon-white"></i> Backend' + world_opt.resources.fire);
-    $('.enter_player_name').removeClass('hiddenRow');
-    $('.command_row').addClass('hiddenRow');
+    ui.leafButton.html('<i class="icon-eye-open icon-white"></i> Leaf ' + world_opt.resources.leaf);
+    ui.fireButton.html('<i class="icon-eye-close icon-white"></i> Fire ' + world_opt.resources.fire);
+    ui.nameField.show();
+    ui.commandRow.hide();
 });
 
 socket.on('messages', function(data){
@@ -208,8 +217,8 @@ socket.on('messages', function(data){
 });
 
 function inBattle(shipType){
-    $('.choose_player_ship').addClass('hiddenRow');
-    $('.command_row').removeClass('hiddenRow');
+    ui.shipChoiсe.hide();
+    ui.commandRow.show();
     ui.commandField.focus();
     socket.emit('create_player_object', {parent_id: itIsYou._id, ship_type: shipType});
 }
@@ -218,8 +227,19 @@ function selectSide(side){
     var name = $('#player_name');
     itIsYou.nickName = name.val();
     itIsYou.side = side;
-    $('.enter_player_name').addClass('hiddenRow');
-    $('.choose_player_ship').removeClass('hiddenRow');
+    ui.shipContainer.html('');
+    templates.forEach(function(template){
+        if(template.side == itIsYou.side){
+            var button = "inBattle('" + template.kind + "')";
+            ui.shipContainer.append('<div class="row">' +
+                '<div class="span6">' +
+                '<button onclick="'+ button +'" class="btn relative-width-100">' + template.name + ' ' + template.cost + '</button>' +
+                '</div>' +
+                '</div>');
+        }
+    });
+    ui.nameField.hide();
+    ui.shipChoiсe.show();
     socket.emit('new_player', itIsYou);
 }
 

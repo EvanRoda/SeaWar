@@ -327,7 +327,7 @@ io.sockets.on('connection', function(socket){
             data._id = socket.id;
             players.push(data);
         }else{
-            // ... Какое-то сообщение о том что мест в сетке нет
+            io.sockets.emit('messages', {show: true, color: 'alert-error', strong: 'Для тебя нет места.', span: ''});
         }
         if(!world.battleOn){
             startBattle();

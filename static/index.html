@@ -13,45 +13,7 @@
 </head>
 <body>
     <div class="container padded">
-        <div class="row enter_player_name" id="enter_player_name">
-            <div class="span12">
-                <input type="text" id="player_name" placeholder="Your nickname">
-            </div>
-        </div>
-        <div class="row enter_player_name">
-            <div class="span12 text-center">
-                <h2>Choose your side!</h2>
-            </div>
-        </div>
-        <div class="row enter_player_name margin-bottom-10">
-            <div class="span6">
-                <button class="btn btn-success btn-large relative-width-100" type="button" onclick="selectSide('leaf')" id="leaf_button">
-                    <i class="icon-eye-open icon-white"></i> Frontend
-                </button>
-            </div>
-            <div class="span6">
-                <button class="btn btn-danger btn-large relative-width-100" type="button" onclick="selectSide('fire')" id="fire_button">
-                    <i class="icon-eye-close icon-white"></i> Backend
-                </button>
-            </div>
-        </div>
-        <div class="row hiddenRow choose_player_ship">
-            <div class="span12 text-center">
-                <h2>Choose your ship!</h2>
-            </div>
-        </div>
-        <div class="row hiddenRow choose_player_ship margin-bottom-10">
-            <div class="span4 text-center">
-                <button class="btn relative-width-100" type="button" onclick="inBattle('destroyer')">Эсминец</button>
-            </div>
-            <div class="span4 text-center">
-                <button class="btn relative-width-100" type="button" onclick="inBattle('light_cruiser')">Легкий крейсер</button>
-            </div>
-            <div class="span4 text-center">
-                <button class="btn relative-width-100" type="button" onclick="inBattle('heavy_cruiser')">Тяжелый крейсер</button>
-            </div>
-        </div>
-        <div class="row command_row hiddenRow">
+        <div class="row command_row">
             <div class="span6">
                 <input type="text" placeholder="Type command" id="command_line" class="relative-width-100">
             </div>
@@ -67,13 +29,51 @@
         </div>
     </div>
     <div class="row">
-        <div class="span5">
+        <div class="span6">
             <div class="alert" id="message">
                 <strong></strong>
                 <span></span>
             </div>
         </div>
     </div>
+
+    <div class="row enter_player_name" id="enter_player_name">
+        <div class="span6">
+            <input type="text" id="player_name" placeholder="Your nickname">
+        </div>
+    </div>
+    <div class="row enter_player_name">
+        <div class="span6 text-center">
+            <h2>Choose your side!</h2>
+        </div>
+    </div>
+    <div class="row enter_player_name margin-bottom-10">
+        <div class="span3">
+            <button class="btn btn-success btn-large relative-width-100" type="button" onclick="selectSide('leaf')" id="leaf_button"></button>
+        </div>
+        <div class="span3">
+            <button class="btn btn-danger btn-large relative-width-100" type="button" onclick="selectSide('fire')" id="fire_button"></button>
+        </div>
+    </div>
+    <div class="row choose_player_ship">
+        <div class="span6 text-center">
+            <h2>Choose your ship!</h2>
+        </div>
+    </div>
+    <div class="row choose_player_ship" id="ship_container">
+
+    </div>
+    <!--<div class="row choose_player_ship">
+        <div class="span2 text-center">
+            <button class="btn relative-width-100" type="button" onclick="inBattle('destroyer')">Эсминец</button>
+        </div>
+        <div class="span2 text-center">
+            <button class="btn relative-width-100" type="button" onclick="inBattle('light_cruiser')">Легкий крейсер</button>
+        </div>
+        <div class="span2 text-center">
+            <button class="btn relative-width-100" type="button" onclick="inBattle('heavy_cruiser')">Тяжелый крейсер</button>
+        </div>
+    </div>-->
     <script type="text/javascript" src="js/client.js"></script>
 </body>
 </html>
