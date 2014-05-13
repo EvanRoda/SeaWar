@@ -14,15 +14,15 @@
     },
     {
         "side": "leaf",
-        "kind": "light_cruiser",
-        "name": "Легкий крейсер",
+        "kind": "duilio",
+        "name": "Дуилио",
         "cost": 2,
-        "hull_img": "leaf_light_cruiser.png",
-        "canon_img": "uno.png",
+        "hull_img": "duilio.png",
+        "canon_img": "uno_d.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "dx": 0, "dy": -55, "barrels": [0], "angles": [0, 180], "direction": 0},
-            {"type": "canon", "dx": 0, "dy": 75, "barrels": [0], "angles": [0, 180], "direction": 180},
+            {"type": "canon", "dx": 11, "dy": -12, "barrels": [0], "angles": [5, 180], "direction": 90},
+            {"type": "canon", "dx": -12, "dy": 11, "barrels": [0], "angles": [65, 115], "direction": 90},
             {"type": "flag", "dx": 0, "dy": 125}
         ]
     },
