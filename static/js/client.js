@@ -9,7 +9,8 @@ var ui = {
     leafButton: $('#leaf_button'),
     fireButton: $('#fire_button'),
     params: $('#params'),
-    commandField: $('#command_line')
+    commandField: $('#command_line'),
+    messageBox: $('#message')
 };
 
 var windMarks = [];
@@ -48,6 +49,8 @@ wind.src = 'images/wind.png';
 
 var world = Physics();
 var world_opt = {};
+
+ui.messageBox.hide();
 
 socket.on('options', function(data){
     world_opt = data.world;
@@ -192,6 +195,16 @@ socket.on('to_start_screen', function(){
     ui.fireButton.html('<i class="icon-eye-close icon-white"></i> Backend' + world_opt.resources.fire);
     $('.enter_player_name').removeClass('hiddenRow');
     $('.command_row').addClass('hiddenRow');
+});
+
+socket.on('messages', function(data){
+    if(data.show){
+        ui.messageBox.show().removeClass().addClass('alert ' + data.color);
+        ui.messageBox.find('strong').html(data.strong);
+        ui.messageBox.find('span').html(data.span);
+    }else{
+        ui.messageBox.hide();
+    }
 });
 
 function inBattle(shipType){

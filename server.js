@@ -149,6 +149,7 @@ function startBattle(){
     world.windCounter = opt.defaultWindCounter;
     world.windForce = _.random(-opt.maxWind, opt.maxWind, true);
 
+    io.sockets.emit('messages', {show: true, color: 'alert-success', strong: 'Битва началась', span: ''});
     intId = setInterval(function(){
         if(players.length){
             var alive = {leaf: 0, fire: 0};
@@ -438,4 +439,12 @@ io.sockets.on('connection', function(socket){
  * ammo_speed           // скорость снаряда ( пушки и снаряды )
  * distance             // for ammo
  * distance_counter     // for ammo
+ */
+
+/**
+ * Вызов сообщения
+ *
+ * Цвета сообщения alert-success  alert-error  alert-info
+ *
+ * io.sockets.emit('messages', {show: true, color: 'alert-success', strong: 'Битва началась', span: ''});
  */
