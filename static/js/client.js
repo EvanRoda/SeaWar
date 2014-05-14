@@ -62,7 +62,6 @@ ui.commandRow.hide();
 
 socket.on('options', function(data){
     world_opt = data.world;
-    itIsYou._id = data.player_id;
     templates = data.templates;
     templates.forEach(function(template){
         skins[template.side][template.kind] = {hull: new Image(), canon: new Image()};
@@ -71,22 +70,25 @@ socket.on('options', function(data){
     });
     ui.leafButton.html('<i class="icon-eye-open icon-white"></i> Leaf ' + world_opt.resources.leaf);
     ui.fireButton.html('<i class="icon-eye-close icon-white"></i> Fire ' + world_opt.resources.fire);
-    renderer = Physics.renderer('canvas', {
-        el: 'game_field',
-        width: data.options.width,
-        height: data.options.height,
-        meta: false, // don't display meta data
-        styles: {
-            'circle' : {
-                strokeStyle: '#351024',
-                lineWidth: 1,
-                fillStyle: '#d33682',
-                angleIndicator: '#351024'
+    if(!data.reoption){
+        itIsYou._id = data.player_id;
+        renderer = Physics.renderer('canvas', {
+            el: 'game_field',
+            width: data.options.width,
+            height: data.options.height,
+            meta: false, // don't display meta data
+            styles: {
+                'circle' : {
+                    strokeStyle: '#351024',
+                    lineWidth: 1,
+                    fillStyle: '#d33682',
+                    angleIndicator: '#351024'
+                }
             }
-        }
-    });
+        });
 
-    world.add( renderer );
+        world.add( renderer );
+    }
 });
 
 socket.on('gamedata', function (data) {
@@ -229,7 +231,7 @@ function selectSide(side){
     itIsYou.side = side;
     ui.shipContainer.html('');
     templates.forEach(function(template){
-        if(template.side == itIsYou.side){
+        if(template.side == itIsYou.side && template.cost <= world_opt.resources[template.side]){
             var button = "inBattle('" + template.kind + "')";
             ui.shipContainer.append('<div class="row">' +
                 '<div class="span6">' +

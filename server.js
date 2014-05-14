@@ -16,6 +16,7 @@ var sockets = [];
  */
 var players = [];
 var intId = null;
+var io;
 
 var grid = [
     {x: 60, y: 135, side: 'leaf', is_free: true, number: 0, child_id: ''},
@@ -60,7 +61,7 @@ var world = {
 };
 
 function canonCalc(canon, player){
-    var delta = null;
+    var delta = null, playerSocket;
     if(canon.status){
         player.isDefeat = false;
         delta = canon.given_direction - canon.direction;
@@ -70,6 +71,15 @@ function canonCalc(canon, player){
                 canon.direction = canon.direction + markOfNumber(delta)*trueAngleSpeed;
             }else{
                 canon.direction = canon.given_direction;
+            }
+        }
+        if(canon.reload_counter > 0){
+            canon.reload_counter -= opt.delay;
+            if(canon.reload_counter <= 0){
+                playerSocket = io.sockets.sockets[player._id];
+                if(playerSocket){
+                    playerSocket.emit('messages', {show: true, color: 'alert-info', strong: 'Орудия перезаряжены', span: ''});
+                }
             }
         }
     }
@@ -261,8 +271,8 @@ function createShip(player, shipType){
             newObj.delta_direction = 0;
             newObj.angle_speed = 20;
             newObj.ammo_speed = opt.ammoSpeed;
-            newObj.reload = 10;
-            newObj.reload_counter = 10;
+            newObj.reload = obj.reload;
+            newObj.reload_counter = 0;
             newObj.status = true;
             newObj.kind = shipType;
             newObj.barrels = obj.barrels;
@@ -276,6 +286,7 @@ function createShip(player, shipType){
         world.resources[player.side] -= resources;
         player.ship.push(newObj);
     });
+    io.sockets.emit('options', {reoption: true, options: opt, world: world, templates: shipsTemplates, player_id: ''});
 }
 
 function markOfNumber(number){
@@ -312,7 +323,7 @@ server.listen(3000, function(){
 io = require('socket.io').listen(server);
 
 io.sockets.on('connection', function(socket){
-    socket.emit('options', {options: opt, world: world, templates: shipsTemplates, player_id: socket.id});
+    socket.emit('options', {reoption: false, options: opt, world: world, templates: shipsTemplates, player_id: socket.id});
     sockets.push(socket);
 
     // Создание нового игрока
@@ -383,22 +394,31 @@ io.sockets.on('connection', function(socket){
         }else if(command[0].toUpperCase() == 'ОГОНЬ'){
             player.ship.forEach(function(obj){
                 if(obj.type == 'canon' && obj.status){
-                    var dy = opt.barrelLength;
-                    obj.barrels.forEach(function(dx){
-                        var c = Math.sqrt(dx*dx + dy*dy);
-                        var alfa = obj.direction * Math.PI / 180;
-                        var beta = Math.asin(dy/c);
-                        var ammo = {
-                            type: 'ammo',
-                            x: obj.x + c * Math.sin((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
-                            y: obj.y - c * Math.cos((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
-                            direction: obj.direction + getRandom(0.5, 100),
-                            ammo_speed: obj.ammo_speed,
-                            distance: player.distance + getRandom(player.distance, 0.5),
-                            distance_counter: 0
-                        };
-                        player.ship.push(ammo);
-                    });
+                    var dy, playerSocket;
+                    if(obj.reload_counter <= 0){
+                        obj.reload_counter = obj.reload;
+                        dy = opt.barrelLength;
+                        obj.barrels.forEach(function(dx){
+                            var c = Math.sqrt(dx*dx + dy*dy);
+                            var alfa = obj.direction * Math.PI / 180;
+                            var beta = Math.asin(dy/c);
+                            var ammo = {
+                                type: 'ammo',
+                                x: obj.x + c * Math.sin((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
+                                y: obj.y - c * Math.cos((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
+                                direction: obj.direction + getRandom(0.5, 100),
+                                ammo_speed: obj.ammo_speed,
+                                distance: player.distance + getRandom(player.distance, 0.5),
+                                distance_counter: 0
+                            };
+                            player.ship.push(ammo);
+                        });
+                    }else{
+                        playerSocket = io.sockets.sockets[player._id];
+                        if(playerSocket){
+                            playerSocket.emit('messages', {show: true, color: '', strong: 'Орудия перезаряжаются', span: ''});
+                        }
+                    }
                 }
             });
         }

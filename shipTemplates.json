@@ -8,7 +8,7 @@
         "canon_img": "uno.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "dx": 0, "dy": -20, "barrels": [0], "angles": [0, 180], "direction": 0},
+            {"type": "canon", "dx": 0, "dy": -20, "barrels": [0], "angles": [0, 180], "reload": 5000, "direction": 0},
             {"type": "flag", "dx": 0, "dy": 81}
         ]
     },
@@ -21,8 +21,8 @@
         "canon_img": "uno_d.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "dx": 11, "dy": -12, "barrels": [0], "angles": [5, 180], "direction": 90},
-            {"type": "canon", "dx": -12, "dy": 11, "barrels": [0], "angles": [65, 115], "direction": 90},
+            {"type": "canon", "dx": 11, "dy": -12, "barrels": [0], "angles": [5, 180], "reload": 4000, "direction": 90},
+            {"type": "canon", "dx": -12, "dy": 11, "barrels": [0], "angles": [65, 115], "reload": 4000, "direction": 90},
             {"type": "flag", "dx": 0, "dy": 125}
         ]
     },
@@ -35,8 +35,8 @@
         "canon_img": "double_d.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "dx": 11, "dy": -12, "barrels": [4, -4], "angles": [15, 170], "direction": 90},
-            {"type": "canon", "dx": -12, "dy": 11, "barrels": [4, -4], "angles": [75, 105], "direction": 90},
+            {"type": "canon", "dx": 11, "dy": -12, "barrels": [4, -4], "angles": [15, 170], "reload": 8000, "direction": 90},
+            {"type": "canon", "dx": -12, "dy": 11, "barrels": [4, -4], "angles": [75, 105], "reload": 8000, "direction": 90},
             {"type": "flag", "dx": 0, "dy": 102}
         ]
     },
@@ -49,8 +49,8 @@
         "canon_img": "double.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "dx": 0, "dy": -55, "barrels": [4, -4], "angles": [0, 180], "direction": 0},
-            {"type": "canon", "dx": 0, "dy": 75, "barrels": [4, -4], "angles": [0, 180], "direction": 180},
+            {"type": "canon", "dx": 0, "dy": -55, "barrels": [4, -4], "angles": [0, 180], "reload": 10000, "direction": 0},
+            {"type": "canon", "dx": 0, "dy": 75, "barrels": [4, -4], "angles": [0, 180], "reload": 10000, "direction": 180},
             {"type": "flag", "dx": 0, "dy": 125}
         ]
     },
@@ -63,9 +63,9 @@
         "canon_img": "triple.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "dx": -8, "dy": -55, "barrels": [6, 0, -6], "angles": [0, 180], "direction": 0},
-            {"type": "canon", "dx": 12, "dy": 5, "barrels": [6, 0, -6], "angles": [0, 180], "direction": 0},
-            {"type": "canon", "dx": -8, "dy": 57, "barrels": [6, 0, -6], "angles": [0, 180], "direction": 180},
+            {"type": "canon", "dx": -8, "dy": -55, "barrels": [6, 0, -6], "angles": [0, 180], "reload": 15000, "direction": 0},
+            {"type": "canon", "dx": 12, "dy": 5, "barrels": [6, 0, -6], "angles": [0, 180], "reload": 15000, "direction": 0},
+            {"type": "canon", "dx": -8, "dy": 57, "barrels": [6, 0, -6], "angles": [0, 180], "reload": 15000, "direction": 180},
             {"type": "flag", "dx": -8, "dy": 125}
         ]
     },
@@ -78,21 +78,49 @@
         "canon_img": "uno.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "dx": 0, "dy": -20, "barrels": [0], "angles": [0, 180], "direction": 0},
+            {"type": "canon", "dx": 0, "dy": -20, "barrels": [0], "angles": [0, 180], "reload": 5000, "direction": 0},
             {"type": "flag", "dx": 0, "dy": 81}
         ]
     },
     {
         "side": "fire",
-        "kind": "light_cruiser",
-        "name": "Легкий крейсер",
+        "kind": "duilioP",
+        "name": "Дуилио Проект",
         "cost": 2,
-        "hull_img": "leaf_light_cruiser.png",
-        "canon_img": "uno.png",
+        "hull_img": "duilio.png",
+        "canon_img": "uno_d.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "dx": 0, "dy": -55, "barrels": [0], "angles": [0, 180], "direction": 0},
-            {"type": "canon", "dx": 0, "dy": 75, "barrels": [0], "angles": [0, 180], "direction": 180},
+            {"type": "canon", "dx": 11, "dy": -12, "barrels": [0], "angles": [5, 180], "reload": 4000, "direction": 90},
+            {"type": "canon", "dx": -12, "dy": 11, "barrels": [0], "angles": [65, 115], "reload": 4000, "direction": 90},
+            {"type": "flag", "dx": 0, "dy": 125}
+        ]
+    },
+    {
+        "side": "fire",
+        "kind": "duilio",
+        "name": "Дуилио",
+        "cost": 4,
+        "hull_img": "duilio.png",
+        "canon_img": "double_d.png",
+        "objects": [
+            {"type": "hull", "dx": 0, "dy": 0},
+            {"type": "canon", "dx": 11, "dy": -12, "barrels": [4, -4], "angles": [15, 170], "reload": 8000, "direction": 90},
+            {"type": "canon", "dx": -12, "dy": 11, "barrels": [4, -4], "angles": [75, 105], "reload": 8000, "direction": 90},
+            {"type": "flag", "dx": 0, "dy": 102}
+        ]
+    },
+    {
+        "side": "fire",
+        "kind": "light_cruiser2",
+        "name": "Легкий крейсер Mk2",
+        "cost": 4,
+        "hull_img": "leaf_light_cruiser.png",
+        "canon_img": "double.png",
+        "objects": [
+            {"type": "hull", "dx": 0, "dy": 0},
+            {"type": "canon", "dx": 0, "dy": -55, "barrels": [4, -4], "angles": [0, 180], "reload": 10000, "direction": 0},
+            {"type": "canon", "dx": 0, "dy": 75, "barrels": [4, -4], "angles": [0, 180], "reload": 10000, "direction": 180},
             {"type": "flag", "dx": 0, "dy": 125}
         ]
     },
@@ -105,9 +133,9 @@
         "canon_img": "triple.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "dx": -8, "dy": -55, "barrels": [6, 0, -6], "angles": [0, 180], "direction": 0},
-            {"type": "canon", "dx": 12, "dy": 5, "barrels": [6, 0, -6], "angles": [0, 180], "direction": 0},
-            {"type": "canon", "dx": -8, "dy": 57, "barrels": [6, 0, -6], "angles": [0, 180], "direction": 180},
+            {"type": "canon", "dx": -8, "dy": -55, "barrels": [6, 0, -6], "angles": [0, 180], "reload": 15000, "direction": 0},
+            {"type": "canon", "dx": 12, "dy": 5, "barrels": [6, 0, -6], "angles": [0, 180], "reload": 15000, "direction": 0},
+            {"type": "canon", "dx": -8, "dy": 57, "barrels": [6, 0, -6], "angles": [0, 180], "reload": 15000, "direction": 180},
             {"type": "flag", "dx": -8, "dy": 125}
         ]
     }
