@@ -61,6 +61,7 @@ ui.shipChoiсe.hide();
 ui.commandRow.hide();
 
 socket.on('options', function(data){
+    itIsYou._id = data.player_id;
     world_opt = data.world;
     templates = data.templates;
     templates.forEach(function(template){
@@ -68,27 +69,29 @@ socket.on('options', function(data){
         skins[template.side][template.kind].hull.src = 'images/hulls/' + template.hull_img;
         skins[template.side][template.kind].canon.src = 'images/canons/' + template.canon_img;
     });
-    ui.leafButton.html('<i class="icon-eye-open icon-white"></i> Leaf ' + world_opt.resources.leaf);
-    ui.fireButton.html('<i class="icon-eye-close icon-white"></i> Fire ' + world_opt.resources.fire);
-    if(!data.reoption){
-        itIsYou._id = data.player_id;
-        renderer = Physics.renderer('canvas', {
-            el: 'game_field',
-            width: data.options.width,
-            height: data.options.height,
-            meta: false, // don't display meta data
-            styles: {
-                'circle' : {
-                    strokeStyle: '#351024',
-                    lineWidth: 1,
-                    fillStyle: '#d33682',
-                    angleIndicator: '#351024'
-                }
-            }
-        });
+    renderButtons(world_opt);
 
-        world.add( renderer );
-    }
+    renderer = Physics.renderer('canvas', {
+        el: 'game_field',
+        width: data.options.width,
+        height: data.options.height,
+        meta: false, // don't display meta data
+        styles: {
+            'circle' : {
+                strokeStyle: '#351024',
+                lineWidth: 1,
+                fillStyle: '#d33682',
+                angleIndicator: '#351024'
+            }
+        }
+    });
+
+    world.add( renderer );
+});
+
+socket.on('buttons', function(data){
+    world_opt = data;
+    renderButtons(world_opt);
 });
 
 socket.on('gamedata', function (data) {
@@ -201,9 +204,9 @@ socket.on('gamedata', function (data) {
     world.render();
 });
 
-socket.on('to_start_screen', function(){
-    ui.leafButton.html('<i class="icon-eye-open icon-white"></i> Leaf ' + world_opt.resources.leaf);
-    ui.fireButton.html('<i class="icon-eye-close icon-white"></i> Fire ' + world_opt.resources.fire);
+socket.on('to_start_screen', function(data){
+    world_opt = data;
+    renderButtons(world_opt);
     ui.nameField.show();
     ui.commandRow.hide();
 });
@@ -218,6 +221,21 @@ socket.on('messages', function(data){
     }
 });
 
+function renderButtons(world_opt){
+    ui.leafButton.html('<i class="icon-eye-open icon-white"></i> Leaf ' + world_opt.resources.leaf);
+    ui.fireButton.html('<i class="icon-eye-close icon-white"></i> Fire ' + world_opt.resources.fire);
+    templates.forEach(function(template){
+        if(template.side == itIsYou.side && template.cost <= world_opt.resources[template.side]){
+            var button = "inBattle('" + template.kind + "')";
+            ui.shipContainer.append('<div class="row">' +
+                '<div class="span6">' +
+                '<button onclick="'+ button +'" class="btn relative-width-100">' + template.name + ' ' + template.cost + '</button>' +
+                '</div>' +
+                '</div>');
+        }
+    });
+}
+
 function inBattle(shipType){
     ui.shipChoiсe.hide();
     ui.commandRow.show();
@@ -230,16 +248,6 @@ function selectSide(side){
     itIsYou.nickName = name.val();
     itIsYou.side = side;
     ui.shipContainer.html('');
-    templates.forEach(function(template){
-        if(template.side == itIsYou.side && template.cost <= world_opt.resources[template.side]){
-            var button = "inBattle('" + template.kind + "')";
-            ui.shipContainer.append('<div class="row">' +
-                '<div class="span6">' +
-                '<button onclick="'+ button +'" class="btn relative-width-100">' + template.name + ' ' + template.cost + '</button>' +
-                '</div>' +
-                '</div>');
-        }
-    });
     ui.nameField.hide();
     ui.shipChoiсe.show();
     socket.emit('new_player', itIsYou);

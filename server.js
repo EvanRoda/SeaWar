@@ -234,7 +234,7 @@ function endBattle(winSide){
         world.resources[winSide] += 3;
     }
     players = [];
-    io.sockets.emit('to_start_screen', '');
+    io.sockets.emit('to_start_screen', world);
     clearInterval(intId);
     world.battleOn = false;
 
@@ -286,7 +286,7 @@ function createShip(player, shipType){
         world.resources[player.side] -= resources;
         player.ship.push(newObj);
     });
-    io.sockets.emit('options', {reoption: true, options: opt, world: world, templates: shipsTemplates, player_id: ''});
+    io.sockets.emit('buttons', world);
 }
 
 function markOfNumber(number){
@@ -310,6 +310,7 @@ function kickPlayer(player_id){
         });
         if(!world.battleStart){
             world.resources[player.side] += resources;
+            io.sockets.emit('buttons', world);
         }
     }
 }
@@ -323,7 +324,7 @@ server.listen(3000, function(){
 io = require('socket.io').listen(server);
 
 io.sockets.on('connection', function(socket){
-    socket.emit('options', {reoption: false, options: opt, world: world, templates: shipsTemplates, player_id: socket.id});
+    socket.emit('options', {options: opt, world: world, templates: shipsTemplates, player_id: socket.id});
     sockets.push(socket);
 
     // Создание нового игрока
