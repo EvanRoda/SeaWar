@@ -221,11 +221,12 @@ socket.on('messages', function(data){
     }
 });
 
-function renderButtons(world_opt){
-    ui.leafButton.html('<i class="icon-eye-open icon-white"></i> Leaf ' + world_opt.resources.leaf);
-    ui.fireButton.html('<i class="icon-eye-close icon-white"></i> Fire ' + world_opt.resources.fire);
+function renderButtons(option){
+    ui.leafButton.html('<i class="icon-eye-open icon-white"></i> Leaf ' + option.resources.leaf);
+    ui.fireButton.html('<i class="icon-eye-close icon-white"></i> Fire ' + option.resources.fire);
+    ui.shipContainer.html('');
     templates.forEach(function(template){
-        if(template.side == itIsYou.side && template.cost <= world_opt.resources[template.side]){
+        if(template.side == itIsYou.side && template.cost <= option.resources[template.side]){
             var button = "inBattle('" + template.kind + "')";
             ui.shipContainer.append('<div class="row">' +
                 '<div class="span6">' +
@@ -247,7 +248,6 @@ function selectSide(side){
     var name = $('#player_name');
     itIsYou.nickName = name.val();
     itIsYou.side = side;
-    ui.shipContainer.html('');
     ui.nameField.hide();
     ui.shipChoiсe.show();
     socket.emit('new_player', itIsYou);
