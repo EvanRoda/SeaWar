@@ -78,7 +78,7 @@ function canonCalc(canon, player){
             if(canon.reload_counter <= 0){
                 playerSocket = io.sockets.sockets[player._id];
                 if(playerSocket){
-                    playerSocket.emit('messages', {show: true, color: 'alert-info', strong: 'Орудия перезаряжены', span: ''});
+                    playerSocket.emit('messages', {show: true, color: 'alert-info', strong: 'Орудия заряжены', span: ''});
                 }
             }
         }
@@ -182,7 +182,7 @@ function startBattle(){
                     if(player._id){
                         var playerSocket = io.sockets.sockets[player._id];
                         if(playerSocket){
-                            playerSocket.emit('to_start_screen', 'Пнем малыша');
+                            playerSocket.emit('to_start_screen', world);
                             player._id = '';
                         }
                     }
@@ -393,9 +393,10 @@ io.sockets.on('connection', function(socket){
         }else if(command[0].toUpperCase() == 'ДАЛЬНОСТЬ'){
             player.distance = parseInt(command[1]);
         }else if(command[0].toUpperCase() == 'ОГОНЬ'){
+            socket.emit('messages', {show: true, color: '', strong: 'Перезарядка', span: ''});
             player.ship.forEach(function(obj){
                 if(obj.type == 'canon' && obj.status){
-                    var dy, playerSocket;
+                    var dy;
                     if(obj.reload_counter <= 0){
                         obj.reload_counter = obj.reload;
                         dy = opt.barrelLength;
@@ -415,10 +416,7 @@ io.sockets.on('connection', function(socket){
                             player.ship.push(ammo);
                         });
                     }else{
-                        playerSocket = io.sockets.sockets[player._id];
-                        if(playerSocket){
-                            playerSocket.emit('messages', {show: true, color: '', strong: 'Орудия перезаряжаются', span: ''});
-                        }
+                        socket.emit('messages', {show: true, color: '', strong: 'Орудия перезаряжаются', span: ''});
                     }
                 }
             });

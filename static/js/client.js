@@ -222,8 +222,8 @@ socket.on('messages', function(data){
 });
 
 function renderButtons(option){
-    ui.leafButton.html('<i class="icon-eye-open icon-white"></i> Leaf ' + option.resources.leaf);
-    ui.fireButton.html('<i class="icon-eye-close icon-white"></i> Fire ' + option.resources.fire);
+    ui.leafButton.html('<i class="icon-eye-open icon-white"></i> Leaf ' + world_opt.resources.leaf);
+    ui.fireButton.html('<i class="icon-eye-close icon-white"></i> Fire ' + world_opt.resources.fire);
     ui.shipContainer.html('');
     templates.forEach(function(template){
         if(template.side == itIsYou.side && template.cost <= option.resources[template.side]){
@@ -266,6 +266,7 @@ ui.commandField.keydown(function(event){
         var command = ui.commandField.val();
         if(command){
             socket.emit('command', {command: command, player_id: itIsYou._id});
+            ui.messageBox.hide();
         }
         ui.commandField.val('').focus();
     }
