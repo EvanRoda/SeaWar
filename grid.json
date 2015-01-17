@@ -1,0 +1,15 @@
+[
+  {"x": 60,  "y": 135, "side": "leaf", "is_free": true, "number": 0, "child_id": ""},
+  {"x": 70,  "y": 405, "side": "leaf", "is_free": true, "number": 1, "child_id": ""},
+  {"x": 60,  "y": 675, "side": "leaf", "is_free": true, "number": 2, "child_id": ""},
+  {"x": 210, "y": 135, "side": "leaf", "is_free": true, "number": 3, "child_id": ""},
+  {"x": 220, "y": 405, "side": "leaf", "is_free": true, "number": 4, "child_id": ""},
+  {"x": 210, "y": 675, "side": "leaf", "is_free": true, "number": 5, "child_id": ""},
+
+  {"x": 60,  "y": 135, "side": "fire", "is_free": true, "number": 0, "child_id": ""},
+  {"x": 70,  "y": 405, "side": "fire", "is_free": true, "number": 1, "child_id": ""},
+  {"x": 60,  "y": 675, "side": "fire", "is_free": true, "number": 2, "child_id": ""},
+  {"x": 210, "y": 135, "side": "fire", "is_free": true, "number": 3, "child_id": ""},
+  {"x": 220, "y": 405, "side": "fire", "is_free": true, "number": 4, "child_id": ""},
+  {"x": 210, "y": 675, "side": "fire", "is_free": true, "number": 5, "child_id": ""}
+]

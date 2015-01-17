@@ -6,6 +6,9 @@ var http = require('http');
 var path = require('path');
 var _ = require('lodash');
 var shipsTemplates = require('./shipTemplates');
+var utils = require('./utils');
+var opt = require('./options');
+var defaultGrid = require('./grid');
 
 var app = express();
 var server = http.createServer(app);
@@ -18,35 +21,7 @@ var players = [];
 var intId = null;
 var io;
 
-var grid = [
-    {x: 60, y: 135, side: 'leaf', is_free: true, number: 0, child_id: ''},
-    {x: 70, y: 405, side: 'leaf', is_free: true, number: 1, child_id: ''},
-    {x: 60, y: 675, side: 'leaf', is_free: true, number: 2, child_id: ''},
-    {x: 210, y: 135, side: 'leaf', is_free: true, number: 3, child_id: ''},
-    {x: 220, y: 405, side: 'leaf', is_free: true, number: 4, child_id: ''},
-    {x: 210, y: 675, side: 'leaf', is_free: true, number: 5, child_id: ''},
-
-    {x: 60,  y: 135, side: 'fire', is_free: true, number: 0, child_id: ''},
-    {x: 70,  y: 405, side: 'fire', is_free: true, number: 1, child_id: ''},
-    {x: 60,  y: 675, side: 'fire', is_free: true, number: 2, child_id: ''},
-    {x: 210, y: 135, side: 'fire', is_free: true, number: 3, child_id: ''},
-    {x: 220, y: 405, side: 'fire', is_free: true, number: 4, child_id: ''},
-    {x: 210, y: 675, side: 'fire', is_free: true, number: 5, child_id: ''}
-];
-
-// Настройки
-var opt = {
-    width: 954,
-    height: 810,
-    delay: 100,
-    maxWind: 0.1,
-    ammoSpeed: 100,
-    missLifeTime: 2500,         // ms милисекунды
-    canonRadius: 20,
-    barrelLength: 25,
-    defaultEndCounter: 10000,    // ms милисекунды
-    defaultWindCounter: 120000    // ms милисекунды
-};
+var grid = utils.extend({}, defaultGrid);
 
 var world = {
     battleOn: false,
@@ -68,7 +43,7 @@ function canonCalc(canon, player){
         if(delta){
             var trueAngleSpeed = canon.angle_speed*(opt.delay/1000);
             if(Math.abs(delta) > trueAngleSpeed){
-                canon.direction = canon.direction + markOfNumber(delta)*trueAngleSpeed;
+                canon.direction = canon.direction + utils.markOfNumber(delta)*trueAngleSpeed;
             }else{
                 canon.direction = canon.given_direction;
             }
@@ -160,64 +135,66 @@ function startBattle(){
     world.windForce = _.random(-opt.maxWind, opt.maxWind, true);
 
     io.sockets.emit('messages', {show: true, color: 'alert-success', strong: 'Битва началась', span: ''});
-    intId = setInterval(function(){
-        if(players.length){
-            var alive = {leaf: 0, fire: 0};
-            players.forEach(function(player){
-                var deleteList = [];
-                if(player.ship.length){
-                    player.isDefeat = true;
-                    player.ship.forEach(function(obj, index){
-                        if(obj.type == 'canon'){
-                            canonCalc(obj, player);
-                        }else if(obj.type == 'ammo'){
-                            ammoCalc(obj, player);
-                        }else if(obj.type == 'miss'){
-                            missCalc(obj, index, deleteList);
-                        }
-                    });
-                }
+    intId = setInterval(gameCycle, opt.delay);
+}
 
-                if(player.isDefeat){
-                    if(player._id){
-                        var playerSocket = io.sockets.sockets[player._id];
-                        if(playerSocket){
-                            playerSocket.emit('to_start_screen', world);
-                            player._id = '';
-                        }
+function gameCycle(){
+    if(players.length){
+        var alive = {leaf: 0, fire: 0};
+        players.forEach(function(player){
+            var deleteList = [];
+            if(player.ship.length){
+                player.isDefeat = true;
+                player.ship.forEach(function(obj, index){
+                    if(obj.type == 'canon'){
+                        canonCalc(obj, player);
+                    }else if(obj.type == 'ammo'){
+                        ammoCalc(obj, player);
+                    }else if(obj.type == 'miss'){
+                        missCalc(obj, index, deleteList);
                     }
-                }else{
-                    alive[player.side] += 1;
-                }
-
-                deleteList.forEach(function(obj_index, index){
-                    player.ship.splice(obj_index - index, 1);
                 });
-            });
+            }
 
-            world.battleStart = !world.battleStart ? (alive.leaf && alive.fire) : true;
-            world.endCounter = (!alive.leaf || !alive.fire) ? world.endCounter - opt.delay : opt.defaultEndCounter;
-            if(world.endCounter <= 0 && world.battleStart){
-                if(alive.leaf){
-                    endBattle('leaf');
-                }else if(alive.fire){
-                    endBattle('fire');
-                }else{
-                    endBattle(null);
+            if(player.isDefeat){
+                if(player._id){
+                    var playerSocket = io.sockets.sockets[player._id];
+                    if(playerSocket){
+                        playerSocket.emit('to_start_screen', world);
+                        player._id = '';
+                    }
                 }
+            }else{
+                alive[player.side] += 1;
+            }
+
+            deleteList.forEach(function(obj_index, index){
+                player.ship.splice(obj_index - index, 1);
+            });
+        });
+
+        world.battleStart = !world.battleStart ? (alive.leaf && alive.fire) : true;
+        world.endCounter = (!alive.leaf || !alive.fire) ? world.endCounter - opt.delay : opt.defaultEndCounter;
+        if(world.endCounter <= 0 && world.battleStart){
+            if(alive.leaf){
+                endBattle('leaf');
+            }else if(alive.fire){
+                endBattle('fire');
+            }else{
+                endBattle(null);
             }
         }
+    }
 
-        // Смена направление и силы ветра по времени
-        world.windCounter -= opt.delay;
-        if(world.windCounter <= 0){
-            world.windCounter = opt.defaultWindCounter;
-            world.windForce = _.random(-opt.maxWind, opt.maxWind, true);
-        }
+    // Смена направление и силы ветра по времени
+    world.windCounter -= opt.delay;
+    if(world.windCounter <= 0){
+        world.windCounter = opt.defaultWindCounter;
+        world.windForce = _.random(-opt.maxWind, opt.maxWind, true);
+    }
 
-        // Отправка игровых данных на клиент
-        io.sockets.emit('gamedata', {options: opt, world: world, players: players});
-    }, opt.delay);
+    // Отправка игровых данных на клиент
+    io.sockets.emit('gamedata', {options: opt, world: world, players: players});
 }
 
 function endBattle(winSide){
@@ -238,21 +215,7 @@ function endBattle(winSide){
     clearInterval(intId);
     world.battleOn = false;
 
-    grid = [
-        {x: 60, y: 135, side: 'leaf', is_free: true, number: 0, child_id: ''},
-        {x: 70, y: 405, side: 'leaf', is_free: true, number: 1, child_id: ''},
-        {x: 60, y: 675, side: 'leaf', is_free: true, number: 2, child_id: ''},
-        {x: 210, y: 135, side: 'leaf', is_free: true, number: 3, child_id: ''},
-        {x: 220, y: 405, side: 'leaf', is_free: true, number: 4, child_id: ''},
-        {x: 210, y: 675, side: 'leaf', is_free: true, number: 5, child_id: ''},
-
-        {x: 60,  y: 135, side: 'fire', is_free: true, number: 0, child_id: ''},
-        {x: 70,  y: 405, side: 'fire', is_free: true, number: 1, child_id: ''},
-        {x: 60,  y: 675, side: 'fire', is_free: true, number: 2, child_id: ''},
-        {x: 210, y: 135, side: 'fire', is_free: true, number: 3, child_id: ''},
-        {x: 220, y: 405, side: 'fire', is_free: true, number: 4, child_id: ''},
-        {x: 210, y: 675, side: 'fire', is_free: true, number: 5, child_id: ''}
-    ];
+    grid = utils.extend({}, defaultGrid);
 }
 
 function createShip(player, shipType){
@@ -289,15 +252,6 @@ function createShip(player, shipType){
     io.sockets.emit('buttons', world);
 }
 
-function markOfNumber(number){
-    return number<0 ? -1 : 1;
-}
-
-function getRandom(value, percent){
-    var dv = value * percent / 100;
-    return _.random(-dv, dv, true);
-}
-
 function kickPlayer(player_id){
     var player = _.findWhere(players, {_id: player_id});
     var resources = 0;
@@ -324,8 +278,8 @@ server.listen(3000, function(){
 io = require('socket.io').listen(server);
 
 io.sockets.on('connection', function(socket){
-    socket.emit('options', {options: opt, world: world, templates: shipsTemplates, player_id: socket.id});
-    sockets.push(socket);
+        socket.emit('options', {options: opt, world: world, templates: shipsTemplates, player_id: socket.id});
+        sockets.push(socket);
 
     // Создание нового игрока
     socket.on('new_player', function(data){
@@ -408,9 +362,9 @@ io.sockets.on('connection', function(socket){
                                 type: 'ammo',
                                 x: obj.x + c * Math.sin((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
                                 y: obj.y - c * Math.cos((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
-                                direction: obj.direction + getRandom(0.5, 100),
+                                direction: obj.direction + utils.getRandom(0.5, 100),
                                 ammo_speed: obj.ammo_speed,
-                                distance: player.distance + getRandom(player.distance, 0.5),
+                                distance: player.distance + utils.getRandom(player.distance, 0.5),
                                 distance_counter: 0
                             };
                             player.ship.push(ammo);

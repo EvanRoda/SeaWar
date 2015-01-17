@@ -1,0 +1,12 @@
+{
+  "width": 954,
+  "height": 810,
+  "delay": 100,
+  "maxWind": 0.1,
+  "ammoSpeed": 100,
+  "missLifeTime": 2500,
+  "canonRadius": 20,
+  "barrelLength": 25,
+  "defaultEndCounter": 10000,
+  "defaultWindCounter": 120000
+}
