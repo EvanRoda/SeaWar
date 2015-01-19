@@ -278,8 +278,8 @@ server.listen(3000, function(){
 io = require('socket.io').listen(server);
 
 io.sockets.on('connection', function(socket){
-        socket.emit('options', {options: opt, world: world, templates: shipsTemplates, player_id: socket.id});
-        sockets.push(socket);
+    socket.emit('options', {options: opt, world: world, templates: shipsTemplates, player_id: socket.id});
+    sockets.push(socket);
 
     // Создание нового игрока
     socket.on('new_player', function(data){
