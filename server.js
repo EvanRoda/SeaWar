@@ -379,8 +379,8 @@ io.sockets.on('connection', function(socket){
 
     // Выкидываем игрока на начальный экран
     // по кнопке
-    socket.on('leave_battle', function(data){
-        kickPlayer(data._id);
+    socket.on('leave_battle', function(){
+        kickPlayer(socket._id);
     });
     // по дисконнекту
     socket.on('disconnect', function(){
@@ -423,9 +423,65 @@ io.sockets.on('connection', function(socket){
  */
 
 /**
- * Вызов сообщения
+ * События
  *
- * Цвета сообщения alert-success  alert-error  alert-info
+ * Сообщение
+ * messages  server -> client
+ * .emit('messages', {show: true, color: 'alert-info', strong: 'Орудия заряжены', span: ''})
  *
- * io.sockets.emit('messages', {show: true, color: 'alert-success', strong: 'Битва началась', span: ''});
+ * show         |   boolean     |   true/false                              |   Видимость сообщения
+ * color        |   string      |   alert-success  alert-error  alert-info  |   Цвет сообщения
+ * strong       |   string      |                                           |   Текст который нужно написать жирным
+ * span         |   string      |                                           |   Текст который нужно написать обычным шрифтом
+ *
+ *
+ * Перенаправление игрока на стартовый экран
+ * to_start_screen  server -> client
+ * .emit('to_start_screen', world)
+ *
+ * world        |   Object      |    world                                  |   Объект с настройками игрового поля
+ *
+ *
+ * Отправка игровых данных на клиент в каждый тик сервера
+ * gamedata     server -> client
+ * .emit('gamedata', {options: opt, world: world, players: players})
+ *
+ * options      |   Object      |   opt                                     |   Объект с настройками сервера
+ * world        |   Object      |   world                                   |   Объект с настройками игрового поля
+ * players      |   Array       |   players                                 |   Список объектов игроков
+ *
+ *
+ * Отправка стартовых данных при инициализации нового игрока
+ * options      server -> client
+ * .emit('options', {options: opt, world: world, templates: shipsTemplates, player_id: socket.id})
+ *
+ * options      |   Object      |   opt                                     |   Объект с настройками сервера
+ * world        |   Object      |   world                                   |   Объект с настройками игрового поля
+ * templates    |   Array       |   shipsTemplates                          |   Список объектов шаблонов кораблей
+ * player_id    |   String      |   socket.id                               |   id текущего игрока
+ *
+ *
+ * Запрос на создание нового игрока
+ * new_player   client -> server
+ * .emit('new_player', { nickName: 'Evan', side: 'leaf', _id: '' })
+ *
+ * nickName     |   String      |   'Evan'                                  |   Имя пользователя
+ * side         |   String      |   'leaf'/'fire'                           |   Выбранная сторона
+ * _id          |   String      |   ''                                      |   Место под id пользователя
+ *
+ *
+ * Запрос на создание игровых объектов для конкретного игрока
+ * create_player_object client -> server
+ * .emit('create_player_object', {parent_id: itIsYou._id, ship_type: shipType})
+ *
+ * parent_id    |   String      |   itIsYou._id                             |   id Игрока
+ * ship_type    |   String      |   shipTemplates.kind                      |   Тип выбранного корабля
+ *
+ *
+ * Отправка комманд управления
+ * command  client -> server
+ * .emit('command', {command: command, player_id: itIsYou._id})
+ *
+ * command      |   String      |   ''                                      |   Команда от игрока
+ * player_id    |   String      |   itIsYou._id                             |   id текущего игрока
  */

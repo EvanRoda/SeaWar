@@ -123,7 +123,7 @@ socket.on('gamedata', function (data) {
 
     if(world_opt.windForce){
         var repeat = Math.floor(4 - Math.abs(opt.maxWind/world_opt.windForce));
-        var direct = markOfNumber(world_opt.windForce);
+        var direct = itIsYou.side == 'leaf' ? markOfNumber(world_opt.windForce) : -1 * markOfNumber(world_opt.windForce);
         for(var i = 1; i <= repeat; i++){
             newObject = Physics.body('circle', {
                 mass: 100,
@@ -254,7 +254,7 @@ function selectSide(side){
 }
 
 function leaveBattle(){
-    socket.emit('leave_battle', itIsYou);
+    socket.emit('leave_battle');
 }
 
 function markOfNumber(number){

@@ -21,7 +21,7 @@
         "canon_img": "uno_d.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "dx": 11, "dy": -12, "barrels": [0], "angles": [5, 180], "reload": 4000, "direction": 90},
+            {"type": "canon", "dx": 11, "dy": -12, "barrels": [0], "angles": [5, 170], "reload": 4000, "direction": 90},
             {"type": "canon", "dx": -12, "dy": 11, "barrels": [0], "angles": [65, 115], "reload": 4000, "direction": 90},
             {"type": "flag", "dx": 0, "dy": 102}
         ]
