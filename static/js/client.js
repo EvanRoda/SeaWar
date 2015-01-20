@@ -14,7 +14,8 @@ var ui = {
     nameField: $('.enter_player_name'),
     shipChoiсe: $('.choose_player_ship'),
     commandRow: $('.command_row'),
-    shipContainer: $('#ship_container')
+    shipContainer: $('#ship_container'),
+    toLobby: $('#to_battle')
 };
 
 var windMarks = [];
@@ -59,6 +60,7 @@ ui.messageBox.hide();
 ui.nameField.show();
 ui.shipChoiсe.hide();
 ui.commandRow.hide();
+ui.toLobby.hide();
 
 socket.on('options', function(data){
     itIsYou._id = data.player_id;
@@ -96,7 +98,7 @@ socket.on('buttons', function(data){
 
 socket.on('gamedata', function (data) {
     var dist, dir;
-    var players = data.players;
+    var players = data.world.inBattle;
     var opt = data.options;
     world_opt = data.world;
     if(windMarks.length){world.remove(windMarks);}
@@ -138,7 +140,8 @@ socket.on('gamedata', function (data) {
     }
 
     if(players.length){
-        players.forEach(function(player){
+        players.forEach(function(id){
+            var player = world_opt.players[id];
             player.ship.forEach(function(obj){
                 //Переворачиваем координаты для противников
                 if(itIsYou.side != player.side){
@@ -249,8 +252,14 @@ function selectSide(side){
     itIsYou.nickName = name.val();
     itIsYou.side = side;
     ui.nameField.hide();
-    ui.shipChoiсe.show();
+    ui.toLobby.show();
     socket.emit('new_player', itIsYou);
+}
+
+function toLobby(){
+    //todo: Функция для перхода игрока в ожидание боя
+    socket.emit('to_lobby');
+    ui.shipChoiсe.show();
 }
 
 function leaveBattle(){
