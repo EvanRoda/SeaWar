@@ -299,6 +299,10 @@ io.sockets.on('connection', function(socket){
 
     // Создание нового игрока
     socket.on('new_player', function(data){
+        if(!data.nickName){
+            data.nickName = 'Captain' + socket.id;
+            socket.emit('set_name', data.nickName);
+        }
         data.x = 0;
         data.y = 0;
         data.distance = 300;
@@ -308,8 +312,9 @@ io.sockets.on('connection', function(socket){
 
         world.players[data._id] = data;
         io.sockets.emit('messages', {show: true, color: 'alert-info', strong: 'Игрок ' + data.nickName + ' входит в игру', span: ''});
+        io.sockets.emit('update_player_list', world);
 
-        //todo: Код ниже нужно выполнить при создании боя
+        //todo: Код ниже нужно выполнить при создании боя для каждого игрока
         /*var grid_cell = _.findWhere(grid, {side: data.side, is_free: true});
         if(grid_cell){
             grid_cell.is_free = false;
@@ -333,14 +338,14 @@ io.sockets.on('connection', function(socket){
 
     socket.on('to_lobby', function(){
         world.lobby.push(socket.id);
+        io.sockets.emit('update_player_list', world);
     });
 
     // Создание объектов для игрока
     socket.on('create_player_object', function(data){
-        //var player = _.findWhere(players, {_id: data.parent_id});
-        var player = world.players[data.parent_id];
+        var player = world.players[data._id];
         if(player){
-            createShip(player, data.ship_type);
+            createShip(player, data.shipType);
         }
     });
 

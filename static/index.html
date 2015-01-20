@@ -12,69 +12,81 @@
 
 </head>
 <body>
-    <div id="battle_screen" class="container padded">
-        <div class="row command_row">
+    <div class="container padded">
+        <div class="row">
             <div class="span6">
-                <input type="text" placeholder="Type command" id="command_line" class="relative-width-100">
+                <div class="alert" id="message">
+                    <strong></strong>
+                    <span></span>
+                </div>
             </div>
             <div class="span6">
-                <button class="btn btn-warning relative-width-100" type="button" onclick="leaveBattle()">Врагу не сдается...</button>
-                <span id="params"></span>
+                <div class="well well-small">
+                    Ник (корабель)
+                </div>
             </div>
         </div>
         <div class="row">
-            <div class="span12">
-                <canvas id="game_field" width="954" height="810" style="border: 1px solid; background-image: url(images/water.jpg);"></canvas>
+            <div class="offset4 span4">
+                <button id="to_lobby" class="btn btn-large relative-width-100" type="button" onclick="toLobby()">В очередь</button>
+                <button id="to_battle" class="btn btn-danger btn-large relative-width-100" type="button" onclick="toBattle()">В Бой</button>
+            </div>
+        </div>
+
+        <div id="battle_screen">
+            <div class="row command_row">
+                <div class="span6">
+                    <input type="text" placeholder="Type command" id="command_line" class="relative-width-100">
+                </div>
+                <div class="span6">
+                    <button class="btn btn-warning relative-width-100" type="button" onclick="leaveBattle()">Врагу не сдается...</button>
+                    <span id="params"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span12">
+                    <canvas id="game_field" width="954" height="810" style="border: 1px solid; background-image: url(images/water.jpg);"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="lobby">
+            <div class="row">
+                <div class="span4"><h3>Все игроки</h3></div>
+                <div class="span4"><h3>В очереди</h3></div>
+                <div class="span4"><h3>В бою</h3></div>
+            </div>
+            <div class="row">
+                <div id="all_players" class="span4"></div>
+                <div id="lobby_players" class="span4"></div>
+                <div id="battle_players" class="span4"></div>
             </div>
         </div>
     </div>
-    <div id="lobby" class="container padded">
-        <div class="row">
-            <div class="span12">
 
+    <div id="login_modal" class="modal hide fade">
+        <div class="modal-body">
+            <div>
+                <input type="text" id="player_name" placeholder="Your nickname">
+            </div>
+            <div class="text-center">
+                <h2>Choose your side!</h2>
+            </div>
+            <div class="text-center">
+                <button class="btn btn-success btn-large" type="button" onclick="selectSide('leaf')" id="leaf_button"></button>
+                <button class="btn btn-danger btn-large" type="button" onclick="selectSide('fire')" id="fire_button"></button>
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="span6">
-            <div class="alert" id="message">
-                <strong></strong>
-                <span></span>
+
+    <div id="ship_modal" class="modal hide fade">
+        <div class="modal-body">
+            <div class="text-center">
+                <h2>Choose your ship!</h2>
             </div>
+            <div id="ship_container" class="text-center"></div>
         </div>
     </div>
-
-    <div class="row enter_player_name" id="enter_player_name">
-        <div class="span6">
-            <input type="text" id="player_name" placeholder="Your nickname">
-        </div>
-    </div>
-    <div class="row enter_player_name">
-        <div class="span6 text-center">
-            <h2>Choose your side!</h2>
-        </div>
-    </div>
-    <div class="row enter_player_name margin-bottom-10">
-        <div class="span3">
-            <button class="btn btn-success btn-large relative-width-100" type="button" onclick="selectSide('leaf')" id="leaf_button"></button>
-        </div>
-        <div class="span3">
-            <button class="btn btn-danger btn-large relative-width-100" type="button" onclick="selectSide('fire')" id="fire_button"></button>
-        </div>
-    </div>
-
-    <div id="to_battle" class="row">
-        <div class="span6 text-center">
-            <button class="btn btn-danger btn-large relative-width-100" type="button" onclick="toLobby()">В Бой</button>
-        </div>
-    </div>
-
-    <div class="row choose_player_ship">
-        <div class="span6 text-center">
-            <h2>Choose your ship!</h2>
-        </div>
-    </div>
-    <div class="row choose_player_ship" id="ship_container"></div>
 
     <script type="text/javascript" src="js/client.js"></script>
 </body>

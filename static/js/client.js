@@ -2,6 +2,7 @@ var socket = io.connect();
 var itIsYou = {
     nickName: '',
     side: 'leaf',
+    shipType: '',
     _id: ''
 };
 
@@ -11,13 +12,18 @@ var ui = {
     params: $('#params'),
     commandField: $('#command_line'),
     messageBox: $('#message'),
-    nameField: $('.enter_player_name'),
-    shipChoiсe: $('.choose_player_ship'),
+    loginModal: $('#login_modal'),
+    shipModal: $('#ship_modal'),
     commandRow: $('.command_row'),
     shipContainer: $('#ship_container'),
-    toLobby: $('#to_battle'),
+    toLobby: $('#to_lobby'),
+    toBattle: $('#to_battle'),
     battleScreen: $('#battle_screen'),
-    lobby: $('#lobby')
+    lobby: $('#lobby'),
+    allPlayers: $('#all_players'),
+    lobbyPlayers: $('#lobby_players'),
+    battlePlayers: $('#battle_players')
+
 };
 
 var windMarks = [];
@@ -59,10 +65,11 @@ var world_opt = {};
 var templates = [];
 
 ui.messageBox.hide();
-ui.nameField.show();
-ui.shipChoiсe.hide();
+ui.loginModal.modal('show');
+ui.shipModal.modal('hide');
 ui.commandRow.hide();
 ui.toLobby.hide();
+ui.toBattle.hide();
 ui.battleScreen.hide();
 
 socket.on('options', function(data){
@@ -75,6 +82,7 @@ socket.on('options', function(data){
         skins[template.side][template.kind].canon.src = 'images/canons/' + template.canon_img;
     });
     renderButtons(world_opt);
+    renderLobby(world_opt);
 
     renderer = Physics.renderer('canvas', {
         el: 'game_field',
@@ -97,6 +105,10 @@ socket.on('options', function(data){
 socket.on('buttons', function(data){
     world_opt = data;
     renderButtons(world_opt);
+});
+
+socket.on('update_player_list', function(lists){
+    renderLobby(lists);
 });
 
 socket.on('gamedata', function (data) {
@@ -213,7 +225,6 @@ socket.on('gamedata', function (data) {
 socket.on('to_start_screen', function(data){
     world_opt = data;
     renderButtons(world_opt);
-    ui.nameField.show();
     ui.commandRow.hide();
 });
 
@@ -227,34 +238,71 @@ socket.on('messages', function(data){
     }
 });
 
+socket.on('set_name', function(name){
+    itIsYou.nickName = name;
+});
+
 function renderButtons(option){
     ui.leafButton.html('<i class="icon-eye-open icon-white"></i> Leaf ' + world_opt.resources.leaf);
     ui.fireButton.html('<i class="icon-eye-close icon-white"></i> Fire ' + world_opt.resources.fire);
     ui.shipContainer.html('');
     templates.forEach(function(template){
         if(template.side == itIsYou.side && template.cost <= option.resources[template.side]){
-            var button = "inBattle('" + template.kind + "')";
-            ui.shipContainer.append('<div class="row">' +
-                '<div class="span6">' +
-                '<button onclick="'+ button +'" class="btn relative-width-100">' + template.name + ' ' + template.cost + '</button>' +
-                '</div>' +
-                '</div>');
+            var fn = "setShipType('" + template.kind + "')";
+            ui.shipContainer.append('<button onclick="'+ fn +'" class="btn relative-width-100">' + template.name + ' ' + template.cost + '</button>');
         }
     });
 }
 
+function renderLobby(lists){
+    ui.allPlayers.html('');
+    ui.lobbyPlayers.html('');
+    ui.battlePlayers.html('');
+    var render = function(player, where){
+        if(player._id === itIsYou._id){
+            where.append('<div style="color: #c67605"><h4>'+ player.nickName +'</h4></div>')
+        }else if(player.side === 'leaf'){
+            where.append('<div style="color: #39b25a"><h4>'+ player.nickName +'</h4></div>')
+        }else{
+            where.append('<div style="color: #b21c1f"><h4>'+ player.nickName +'</h4></div>')
+        }
+    };
+
+    for(var key in lists.players){
+        if(lists.players.hasOwnProperty(key)){
+            render(lists.players[key], ui.allPlayers);
+        }
+    }
+
+    lists.lobby.forEach(function(id){
+        render(lists.players[id], ui.lobbyPlayers);
+    });
+
+    lists.inBattle.forEach(function(id){
+        render(lists.players[id], ui.battlePlayers);
+    });
+}
+
+function setShipType(shipType){
+    itIsYou.shipType = shipType;
+
+    //todo: нарисовать тип корабля в верхней строке
+
+    ui.shipModal.modal('hide');
+}
+
 function inBattle(shipType){
-    ui.shipChoiсe.hide();
+
     ui.commandRow.show();
     ui.commandField.focus();
-    socket.emit('create_player_object', {parent_id: itIsYou._id, ship_type: shipType});
+    socket.emit('create_player_object', itIsYou);
 }
 
 function selectSide(side){
     var name = $('#player_name');
     itIsYou.nickName = name.val();
     itIsYou.side = side;
-    ui.nameField.hide();
+    ui.loginModal.modal('hide');
     ui.toLobby.show();
     socket.emit('new_player', itIsYou);
 }
@@ -262,7 +310,13 @@ function selectSide(side){
 function toLobby(){
     //todo: Функция для перхода игрока в ожидание боя
     socket.emit('to_lobby');
-    ui.shipChoiсe.show();
+    ui.toLobby.hide();
+    ui.toBattle.show();
+    ui.shipModal.modal('show');
+}
+
+function toBattle(){
+    socket.emit('to_battle');
 }
 
 function leaveBattle(){
