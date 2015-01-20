@@ -15,7 +15,9 @@ var ui = {
     shipChoiсe: $('.choose_player_ship'),
     commandRow: $('.command_row'),
     shipContainer: $('#ship_container'),
-    toLobby: $('#to_battle')
+    toLobby: $('#to_battle'),
+    battleScreen: $('#battle_screen'),
+    lobby: $('#lobby')
 };
 
 var windMarks = [];
@@ -61,6 +63,7 @@ ui.nameField.show();
 ui.shipChoiсe.hide();
 ui.commandRow.hide();
 ui.toLobby.hide();
+ui.battleScreen.hide();
 
 socket.on('options', function(data){
     itIsYou._id = data.player_id;
