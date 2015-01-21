@@ -9,3 +9,11 @@
 .margin-bottom-10 {
     margin-bottom: 10px;
 }
+
+.sim_link{
+    cursor: pointer;
+}
+
+.sim_link:hover{
+    color: #656565;
+}

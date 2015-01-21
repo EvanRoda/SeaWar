@@ -22,7 +22,9 @@ var ui = {
     lobby: $('#lobby'),
     allPlayers: $('#all_players'),
     lobbyPlayers: $('#lobby_players'),
-    battlePlayers: $('#battle_players')
+    battlePlayers: $('#battle_players'),
+    showNick: $('#show_nick'),
+    showShip: $('#show_ship')
 
 };
 
@@ -240,6 +242,7 @@ socket.on('messages', function(data){
 
 socket.on('set_name', function(name){
     itIsYou.nickName = name;
+    renderNick();
 });
 
 function renderButtons(option){
@@ -283,12 +286,38 @@ function renderLobby(lists){
     });
 }
 
+function renderNick(){
+    ui.showNick.html(itIsYou.nickName);
+}
+
+function renderShip(){
+    var ship = findWhere(templates, {side: itIsYou.side, kind: itIsYou.shipType});
+
+    ui.showShip.html(ship ? '('+ ship.name + ')' : '(корабель)');
+}
+
 function setShipType(shipType){
     itIsYou.shipType = shipType;
-
-    //todo: нарисовать тип корабля в верхней строке
-
+    renderShip();
     ui.shipModal.modal('hide');
+}
+
+function findWhere(arr, params){
+    var element = null;
+    arr.forEach(function(el){
+        var check = true;
+        for(var key in params){
+            if(check && params.hasOwnProperty(key) && el.hasOwnProperty(key)){
+                check = params[key] === el[key];
+            }else{
+                check = false;
+            }
+        }
+        if(check){
+            element = el;
+        }
+    });
+    return element;
 }
 
 function inBattle(shipType){
@@ -302,17 +331,19 @@ function selectSide(side){
     var name = $('#player_name');
     itIsYou.nickName = name.val();
     itIsYou.side = side;
+    renderNick();
     ui.loginModal.modal('hide');
     ui.toLobby.show();
     socket.emit('new_player', itIsYou);
 }
 
 function toLobby(){
-    //todo: Функция для перхода игрока в ожидание боя
     socket.emit('to_lobby');
     ui.toLobby.hide();
     ui.toBattle.show();
-    ui.shipModal.modal('show');
+    if(!itIsYou.shipType){
+        ui.shipModal.modal('show');
+    }
 }
 
 function toBattle(){
