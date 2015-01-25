@@ -14,9 +14,7 @@ var ui = {
     messageBox: $('#message'),
     loginModal: $('#login_modal'),
     shipModal: $('#ship_modal'),
-    commandRow: $('.command_row'),
     shipContainer: $('#ship_container'),
-    toLobby: $('#to_lobby'),
     toBattle: $('#to_battle'),
     battleScreen: $('#battle_screen'),
     lobby: $('#lobby'),
@@ -69,8 +67,6 @@ var templates = [];
 ui.messageBox.hide();
 ui.loginModal.modal('show');
 ui.shipModal.modal('hide');
-ui.commandRow.hide();
-ui.toLobby.hide();
 ui.toBattle.hide();
 ui.battleScreen.hide();
 
@@ -110,6 +106,7 @@ socket.on('buttons', function(data){
 });
 
 socket.on('update_player_list', function(lists){
+    world_opt = lists;
     renderLobby(lists);
 });
 
@@ -227,7 +224,12 @@ socket.on('gamedata', function (data) {
 socket.on('to_start_screen', function(data){
     world_opt = data;
     renderButtons(world_opt);
-    ui.commandRow.hide();
+});
+
+socket.on('show_battle_screen', function(){
+    ui.toBattle.hide();
+    ui.battleScreen.show();
+    ui.commandField.focus();
 });
 
 socket.on('messages', function(data){
@@ -290,16 +292,61 @@ function renderNick(){
     ui.showNick.html(itIsYou.nickName);
 }
 
-function renderShip(){
+function renderShipLabel(){
     var ship = findWhere(templates, {side: itIsYou.side, kind: itIsYou.shipType});
 
-    ui.showShip.html(ship ? '('+ ship.name + ')' : '(корабель)');
+    ui.showShip.html(ship ? ship.name : '[корабель]');
+}
+
+function openSelectShipWindow(){
+    if(!world_opt.players[itIsYou._id].ship || !world_opt.players[itIsYou._id].ship.length){
+        ui.shipModal.modal('show');
+    }
 }
 
 function setShipType(shipType){
     itIsYou.shipType = shipType;
-    renderShip();
+    socket.emit('set_ship_type', shipType);
+    renderShipLabel();
+    toLobby();
     ui.shipModal.modal('hide');
+}
+
+function selectSide(side){
+    var name = $('#player_name');
+    itIsYou.nickName = name.val();
+    itIsYou.side = side;
+    renderNick();
+    ui.loginModal.modal('hide');
+    socket.emit('new_player', itIsYou);
+}
+
+function toLobby(){
+    var sending = true;
+    world_opt.lobby.forEach(function(id){
+        if(itIsYou._id == id){
+            sending = false;
+        }
+    });
+    if(sending){
+        socket.emit('to_lobby');
+        ui.toBattle.show();
+        if(!itIsYou.shipType){
+            ui.shipModal.modal('show');
+        }
+    }
+}
+
+function toBattle(){
+    socket.emit('to_battle');
+}
+
+function leaveBattle(){
+    socket.emit('leave_battle');
+}
+
+function markOfNumber(number){
+    return number<0 ? -1 : 1;
 }
 
 function findWhere(arr, params){
@@ -318,44 +365,6 @@ function findWhere(arr, params){
         }
     });
     return element;
-}
-
-function inBattle(shipType){
-
-    ui.commandRow.show();
-    ui.commandField.focus();
-    socket.emit('create_player_object', itIsYou);
-}
-
-function selectSide(side){
-    var name = $('#player_name');
-    itIsYou.nickName = name.val();
-    itIsYou.side = side;
-    renderNick();
-    ui.loginModal.modal('hide');
-    ui.toLobby.show();
-    socket.emit('new_player', itIsYou);
-}
-
-function toLobby(){
-    socket.emit('to_lobby');
-    ui.toLobby.hide();
-    ui.toBattle.show();
-    if(!itIsYou.shipType){
-        ui.shipModal.modal('show');
-    }
-}
-
-function toBattle(){
-    socket.emit('to_battle');
-}
-
-function leaveBattle(){
-    socket.emit('leave_battle');
-}
-
-function markOfNumber(number){
-    return number<0 ? -1 : 1;
 }
 
 ui.commandField.keydown(function(event){

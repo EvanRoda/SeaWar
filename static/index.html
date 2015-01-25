@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title></title>
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <link href="css/base.css" rel="stylesheet" media="screen">
     <script src="bootstrap/js/jquery-2.1.0.min.js"></script>
     <script src="bootstrap/js/bootstrap.min.js"></script>
@@ -23,19 +24,19 @@
             <div class="span6">
                 <div class="well well-small">
                     <strong id="show_nick">Ник</strong>
-                    <strong id="show_ship" class="sim_link" onclick="ui.shipModal.modal('show')">(корабель)</strong>
+                    <strong><i class="fa fa-ship"></i></strong>
+                    <strong id="show_ship" class="sim_link" onclick="openSelectShipWindow()">(корабель)</strong>
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div id="to_battle" class="row">
             <div class="offset4 span4">
-                <button id="to_lobby" class="btn btn-large relative-width-100" type="button" onclick="toLobby()">В очередь</button>
-                <button id="to_battle" class="btn btn-danger btn-large relative-width-100" type="button" onclick="toBattle()">В Бой</button>
+                <button class="btn btn-danger btn-large relative-width-100" type="button" onclick="toBattle()">В Бой</button>
             </div>
         </div>
 
         <div id="battle_screen">
-            <div class="row command_row">
+            <div class="row">
                 <div class="span6">
                     <input type="text" placeholder="Type command" id="command_line" class="relative-width-100">
                 </div>

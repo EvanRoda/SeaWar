@@ -135,13 +135,32 @@ function missCalc(miss, index, deleteList){
     }
 }
 
-// todo: Создать событие для вызова фции startBattle
 function startBattle(){
     // todo: В будущем в бой нужно отправлять не всех, а по шесть человек из каждой команды
     world.inBattle = world.lobby;
     world.lobby = [];
+    io.sockets.emit('update_player_list', world);
 
     //todo: Написать функцию распределения игроков по точкам сетки (или даже отказаться от сетки)
+
+    world.inBattle.forEach(function(id){
+        var player = world.players[id];
+        var grid_cell = _.findWhere(grid, {side: player.side, is_free: true});
+
+        if(grid_cell){
+            grid_cell.is_free = false;
+            grid_cell.child_id = player._id;
+            player.x = grid_cell.x;
+            player.y = grid_cell.y;
+            player.distance = 300;
+            player.ship = [];
+            player.isDefeat = false;
+        }else{
+            socket.emit('messages', {show: true, color: 'alert-error', strong: 'Для тебя нет места.', span: ''});
+            delete world.players[id];
+        }
+        createShip(player);
+    });
 
     world.battle.status = 'start';
     world.endCounter = opt.defaultEndCounter;
@@ -149,6 +168,8 @@ function startBattle(){
     world.windForce = _.random(-opt.maxWind, opt.maxWind, true);
 
     io.sockets.emit('messages', {show: true, color: 'alert-success', strong: 'Битва началась', span: ''});
+    io.emit('show_battle_screen');
+
     intId = setInterval(gameCycle, opt.delay);
 }
 
@@ -157,7 +178,7 @@ function gameCycle(){
         var alive = {leaf: 0, fire: 0};
         world.inBattle.forEach(function(id){
             var deleteList = [], player = world.players[id];
-            if(player.ship.length){
+            if(player && player.ship.length){
                 player.isDefeat = true;
                 player.ship.forEach(function(obj, index){
                     if(obj.type == 'canon'){
@@ -234,9 +255,10 @@ function endBattle(winSide){
     grid = utils.extend({}, defaultGrid);
 }
 
-function createShip(player, shipType){
+function createShip(player){
+    console.log(player);
     player.ship = [];
-    var template = _.findWhere(shipsTemplates, {side: player.side, kind: shipType});
+    var template = _.findWhere(shipsTemplates, {side: player.side, kind: player.shipType});
     template.objects.forEach(function(obj){
         var resources = 0;
         var newObj = {
@@ -253,13 +275,13 @@ function createShip(player, shipType){
             newObj.reload = obj.reload;
             newObj.reload_counter = 0;
             newObj.status = true;
-            newObj.kind = shipType;
+            newObj.kind = player.shipType;
             newObj.barrels = obj.barrels;
             newObj.min_angle = obj.angles[0];
             newObj.max_angle = obj.angles[1];
             resources += obj.barrels.length;
         }else if(obj.type == 'hull'){
-            newObj.kind = shipType;
+            newObj.kind = player.shipType;
             newObj.direction = 0;
         }
         world.resources[player.side] -= resources;
@@ -303,37 +325,15 @@ io.sockets.on('connection', function(socket){
             data.nickName = 'Captain' + socket.id;
             socket.emit('set_name', data.nickName);
         }
-        data.x = 0;
-        data.y = 0;
-        data.distance = 300;
-        data.ship = [];
-        data.isDefeat = false;
         data._id = socket.id;
 
         world.players[data._id] = data;
         io.sockets.emit('messages', {show: true, color: 'alert-info', strong: 'Игрок ' + data.nickName + ' входит в игру', span: ''});
         io.sockets.emit('update_player_list', world);
+    });
 
-        //todo: Код ниже нужно выполнить при создании боя для каждого игрока
-        /*var grid_cell = _.findWhere(grid, {side: data.side, is_free: true});
-        if(grid_cell){
-            grid_cell.is_free = false;
-            grid_cell.child_id = socket.id;
-            data.x = grid_cell.x;
-            data.y = grid_cell.y;
-            data.distance = 300;
-            data.ship = [];
-            data.isDefeat = false;
-            data._id = socket.id;
-
-            world.players[data._id] = data;
-            //players.push(data);
-        }else{
-            socket.emit('messages', {show: true, color: 'alert-error', strong: 'Для тебя нет места.', span: ''});
-        }
-        if(!world.battleOn){
-            startBattle();
-        }*/
+    socket.on('set_ship_type', function(type){
+        world.players[socket.id].shipType = type;
     });
 
     socket.on('to_lobby', function(){
@@ -341,12 +341,8 @@ io.sockets.on('connection', function(socket){
         io.sockets.emit('update_player_list', world);
     });
 
-    // Создание объектов для игрока
-    socket.on('create_player_object', function(data){
-        var player = world.players[data._id];
-        if(player){
-            createShip(player, data.shipType);
-        }
+    socket.on('to_battle', function(){
+        startBattle();
     });
 
     //Прием команды от игрока
@@ -425,6 +421,9 @@ io.sockets.on('connection', function(socket){
     // по дисконнекту
     socket.on('disconnect', function(){
         kickPlayer(socket.id);
+        if(world.players[socket.id]){
+            delete world.players[socket.id];
+        }
     });
 });
 
