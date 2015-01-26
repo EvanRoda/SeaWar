@@ -12,7 +12,6 @@ var defaultGrid = require('./grid');
 
 var app = express();
 var server = http.createServer(app);
-var sockets = [];
 
 /**
  * Игровые переменные
@@ -256,7 +255,6 @@ function endBattle(winSide){
 }
 
 function createShip(player){
-    console.log(player);
     player.ship = [];
     var template = _.findWhere(shipsTemplates, {side: player.side, kind: player.shipType});
     template.objects.forEach(function(obj){
@@ -317,7 +315,6 @@ io = require('socket.io').listen(server);
 
 io.sockets.on('connection', function(socket){
     socket.emit('options', {options: opt, world: world, templates: shipsTemplates, player_id: socket.id});
-    sockets.push(socket);
 
     // Создание нового игрока
     socket.on('new_player', function(data){
