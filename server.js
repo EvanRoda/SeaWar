@@ -135,12 +135,22 @@ function missCalc(miss, index, deleteList){
 }
 
 function startBattle(){
-    // todo: В будущем в бой нужно отправлять не всех, а по шесть человек из каждой команды
-    world.inBattle = world.lobby;
-    world.lobby = [];
+    var side = {leaf: 0, fire: 0}, temp = [];
+    world.inBattle = [];
+    world.lobby.forEach(function(id){
+        if(side[world.players[id].side]<6){
+            side[world.players[id].side]++;
+            world.inBattle.push(id);
+        }else{
+            temp.push(id);
+        }
+    });
+    world.lobby = temp;
+
     io.sockets.emit('update_player_list', world);
 
     //todo: Написать функцию распределения игроков по точкам сетки (или даже отказаться от сетки)
+    //в зависимости от типа корабля (торпедоносцы вперед). Или дать игрокам самим выбирать.
 
     world.inBattle.forEach(function(id){
         var player = world.players[id];
@@ -191,12 +201,10 @@ function gameCycle(){
             }
 
             if(player.isDefeat){
-                if(player._id){
-                    var playerSocket = io.sockets.sockets[player._id];
-                    if(playerSocket){
-                        playerSocket.emit('to_start_screen', world);
-                        player._id = '';
-                    }
+                var playerSocket = io.sockets.sockets[player._id];
+                if(playerSocket){
+                    playerSocket.emit('to_start_screen', world);
+                    player._id = '';
                 }
             }else{
                 alive[player.side] += 1;
@@ -211,11 +219,11 @@ function gameCycle(){
         world.endCounter = (!alive.leaf || !alive.fire) ? world.endCounter - opt.delay : opt.defaultEndCounter;
         if(world.endCounter <= 0 && world.battleStart){
             if(alive.leaf){
-                endBattle('leaf');
-            }else if(alive.fire){
-                endBattle('fire');
-            }else{
-                endBattle(null);
+                    endBattle('leaf');
+                }else if(alive.fire){
+                    endBattle('fire');
+                }else{
+                    endBattle(null);
             }
         }
     }
@@ -245,7 +253,8 @@ function endBattle(winSide){
     if(winSide){
         world.resources[winSide] += 3;
     }
-    //players = [];
+
+    //todo: Непросто очистить а переместить в лобби
     world.inBattle = [];
     io.sockets.emit('to_start_screen', world);
     clearInterval(intId);

@@ -141,12 +141,6 @@ var world = Physics();
 var world_opt = {};
 var templates = [];
 
-ui.messageBox.hide();
-ui.modal.login.modal('show');
-ui.modal.ship.modal('hide');
-ui.buttons.toBattle.hide();
-ui.screen.battle.hide();
-
 socket.on('options', createWorld);
 
 socket.on('buttons', ui.renderButtons);
@@ -155,13 +149,23 @@ socket.on('update_player_list', ui.renderLobby);
 
 socket.on('gamedata', gameTick);
 
-socket.on('to_start_screen', ui.renderButtons);
+socket.on('to_start_screen', onStart);
 
 socket.on('show_battle_screen', ui.toBattleScreen);
 
 socket.on('messages', ui.renderMessage);
 
 socket.on('set_name', ui.renderNick);
+
+function onStart(data){
+    ui.renderButtons(data);
+    ui.renderLobby(data);
+    ui.messageBox.hide();
+    ui.modal.login.modal('show');
+    ui.modal.ship.modal('hide');
+    ui.buttons.toBattle.hide();
+    ui.screen.battle.hide();
+}
 
 function createWorld(data){
     itIsYou._id = data.player_id;
@@ -171,8 +175,6 @@ function createWorld(data){
         skins[template.side][template.kind].hull.src = 'images/hulls/' + template.hull_img;
         skins[template.side][template.kind].canon.src = 'images/canons/' + template.canon_img;
     });
-    ui.renderButtons(data.world);
-    ui.renderLobby(data.world);
 
     renderer = Physics.renderer('canvas', {
         el: 'game_field',
@@ -190,6 +192,7 @@ function createWorld(data){
     });
 
     world.add( renderer );
+    onStart(data.world);
 }
 
 function gameTick(data){
