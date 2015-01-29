@@ -42,6 +42,10 @@ var world = {
     }
 };
 
+function log(a, b){
+    io.sockets.emit('logging', {a:a, b:b});
+}
+
 function canonCalc(canon, player){
     var delta = null, playerSocket;
     if(canon.status){

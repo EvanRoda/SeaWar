@@ -157,6 +157,10 @@ socket.on('messages', ui.renderMessage);
 
 socket.on('set_name', ui.renderNick);
 
+socket.on('logging', function(data){
+    console.log(data.a, data.b);
+});
+
 function onStart(data){
     ui.renderButtons(data);
     ui.renderLobby(data);
