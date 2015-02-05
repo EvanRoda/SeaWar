@@ -187,8 +187,8 @@ function startBattle(){
 }
 
 function gameCycle(){
+    var alive = {leaf: 0, fire: 0};
     if(world.inBattle.length){
-        var alive = {leaf: 0, fire: 0};
         world.inBattle.forEach(function(id){
             var deleteList = [], player = world.players[id];
             if(player && player.ship.length){
