@@ -359,7 +359,21 @@ io.sockets.on('connection', function(socket){
     });
 
     socket.on('to_battle', function(){
-        startBattle();
+        var alive = {leaf: 0, fire: 0};
+        if(world.battle.status === 'start'){
+            socket.emit('messages', {show: true, color: '', strong: 'Бой уже начался', span: ''});
+        }else if(world.lobby.length <= 1){
+            socket.emit('messages', {show: true, color: '', strong: 'Мало игроков', span: ''});
+        }else{
+            world.lobby.forEach(function(id){
+                alive[world.players[id].side] += 1;
+            });
+            if(!alive.leaf || !alive.fire){
+                socket.emit('messages', {show: true, color: '', strong: 'Ждем противников', span: ''});
+            }else{
+                startBattle();
+            }
+        }
     });
 
     //Прием команды от игрока
