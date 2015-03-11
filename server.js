@@ -24,10 +24,8 @@ var grid = utils.extend({}, defaultGrid);
 
 var world = {
     battle: {
-        status: 'none' // Возможные варианты: wait  start
+        status: 'wait' // Возможные варианты: wait  start  end
     },
-    battleOn: false,        // todo: Заменить на battle.status
-    battleStart: false,     //
 
     players: {},    // словарь ключи = id-шники
     lobby: [],      // список id игроков в лобби
@@ -202,32 +200,39 @@ function gameCycle(){
                         missCalc(obj, index, deleteList);
                     }
                 });
-            }
 
-            if(player.isDefeat){
-                var playerSocket = io.sockets.sockets[player._id];
-                if(playerSocket){
-                    playerSocket.emit('to_start_screen', world);
-                    player._id = '';
+                if(player.isDefeat){
+                    var playerSocket = io.sockets.sockets[player._id];
+                    if(playerSocket){
+                        playerSocket.emit('to_start_screen', world);
+                        player._id = '';
+                    }
+                }else{
+                    alive[player.side] += 1;
                 }
-            }else{
-                alive[player.side] += 1;
-            }
 
-            deleteList.forEach(function(obj_index, index){
-                player.ship.splice(obj_index - index, 1);
-            });
+                deleteList.forEach(function(obj_index, index){
+                    player.ship.splice(obj_index - index, 1);
+                });
+            }
         });
 
-        world.battleStart = !world.battleStart ? (alive.leaf && alive.fire) : true;
-        world.endCounter = (!alive.leaf || !alive.fire) ? world.endCounter - opt.delay : opt.defaultEndCounter;
-        if(world.endCounter <= 0 && world.battleStart){
-            if(alive.leaf){
+        //todo: Допилить проверку статуса боя
+        //Определяем статус боя
+        if(world.battle.status === 'start'){
+            world.battle.status = (alive.leaf && alive.fire) ? 'start' : 'end';
+        }
+
+        if(world.battle.status === 'end'){
+            world.endCounter = world.endCounter - opt.delay;
+            if(world.endCounter <= 0){
+                if(alive.leaf){
                     endBattle('leaf');
                 }else if(alive.fire){
                     endBattle('fire');
                 }else{
                     endBattle(null);
+                }
             }
         }
     }
@@ -252,6 +257,8 @@ function endBattle(winSide){
                     world.resources[player.side] += obj.barrels.length;
                 }
             });
+        }else{
+            delete player.shipType;
         }
     });
     if(winSide){
@@ -262,7 +269,7 @@ function endBattle(winSide){
     world.inBattle = [];
     io.sockets.emit('to_start_screen', world);
     clearInterval(intId);
-    world.battle.status = 'none';
+    world.battle.status = 'wait';
 
     grid = utils.extend({}, defaultGrid);
 }
@@ -311,9 +318,9 @@ function kickPlayer(player_id){
                 resources = obj.barrels.length;
             }
         });
-        if(!world.battleStart){
+        if(world.battle.status !== 'start'){
             world.resources[player.side] += resources;
-            io.sockets.emit('buttons', world);
+            io.sockets.emit('to_start_screen', world);
         }
     }
 }
@@ -426,7 +433,7 @@ io.sockets.on('connection', function(socket){
     // Выкидываем игрока на начальный экран
     // по кнопке
     socket.on('leave_battle', function(){
-        kickPlayer(socket._id);
+        kickPlayer(socket.id);
     });
     // по дисконнекту
     socket.on('disconnect', function(){

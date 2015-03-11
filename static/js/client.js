@@ -82,7 +82,7 @@ var ui = {
     renderShipLabel: function(){
         var ship = findWhere(templates, {side: itIsYou.side, kind: itIsYou.shipType});
 
-        ui.showShip.html(ship ? ship.name : '[корабель]');
+        ui.showShip.html(ship ? ship.name : '(корабель)');
     },
 
     renderMessage: function(data){
@@ -162,6 +162,7 @@ socket.on('logging', function(data){
 });
 
 function onStart(data){
+    ui.showShip.html('(корабель)');
     ui.renderButtons(data);
     ui.renderLobby(data);
     ui.messageBox.hide();
@@ -169,6 +170,7 @@ function onStart(data){
     ui.modal.ship.modal('hide');
     ui.buttons.toBattle.hide();
     ui.screen.battle.hide();
+    ui.screen.lobby.show();
 }
 
 function createWorld(data){
