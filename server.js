@@ -30,6 +30,7 @@ var world = {
     players: {},    // словарь ключи = id-шники
     lobby: [],      // список id игроков в лобби
     inBattle: [],   // список id игроков в битве
+    disconected: [],// список id игроков выкинутых по дисконнекту
 
     windForce: null,
     endCounter: opt.defaultEndCounter,   // ms милисекунды
@@ -265,13 +266,27 @@ function endBattle(winSide){
         world.resources[winSide] += 3;
     }
 
+    world.inBattle.forEach(function(id){
+        io.sockets.sockets[id].emit('to_start_screen', world);
+    });
+
+    deleteDisconnected();
     //todo: Непросто очистить а переместить в лобби
     world.inBattle = [];
-    io.sockets.emit('to_start_screen', world);
+
     clearInterval(intId);
     world.battle.status = 'wait';
 
     grid = utils.extend({}, defaultGrid);
+}
+
+function deleteDisconnected(){
+    world.disconected.forEach(function(id){
+        if(world.players[id]){
+            delete world.players[id];
+        }
+    });
+    world.disconected = [];
 }
 
 function createShip(player){
@@ -311,7 +326,7 @@ function createShip(player){
 function kickPlayer(player_id){
     var player = world.players[player_id];
     var resources = 0;
-    if(player){
+    if(player && player.ship && player.ship.length){
         player.ship.forEach(function(obj){
             if(obj.type == 'canon' && obj.status){
                 obj.status = false;
@@ -320,7 +335,7 @@ function kickPlayer(player_id){
         });
         if(world.battle.status !== 'start'){
             world.resources[player.side] += resources;
-            io.sockets.emit('to_start_screen', world);
+            io.sockets.sockets[player._id].emit('to_start_screen', world);
         }
     }
 }
@@ -452,9 +467,7 @@ io.sockets.on('connection', function(socket){
     // по дисконнекту
     socket.on('disconnect', function(){
         kickPlayer(socket.id);
-        if(world.players[socket.id]){
-            delete world.players[socket.id];
-        }
+        world.disconected.push(socket.id);
     });
 });
 
