@@ -20,7 +20,7 @@ var server = http.createServer(app);
 var intId = null;
 var io;
 
-var grid = utils.extend({}, defaultGrid);
+var grid = utils.extend({}, defaultGrid, true);
 
 var world = {
     battle: {
@@ -42,7 +42,7 @@ var world = {
 };
 
 function log(a, b){
-    io.sockets.emit('logging', {a:a, b:b});
+    io.emit('logging', {a:a, b:b});
 }
 
 function canonCalc(canon, player){
@@ -61,7 +61,7 @@ function canonCalc(canon, player){
         if(canon.reload_counter > 0){
             canon.reload_counter -= opt.delay;
             if(canon.reload_counter <= 0){
-                playerSocket = io.sockets.sockets[player._id];
+                playerSocket = io.to(player._id);
                 if(playerSocket){
                     playerSocket.emit('messages', {show: true, color: 'alert-info', strong: 'Орудия заряжены', span: ''});
                 }
@@ -141,25 +141,15 @@ function startBattle(){
     var side = {leaf: 0, fire: 0}, temp = [];
     world.inBattle = [];
     world.lobby.forEach(function(id){
-        if(side[world.players[id].side]<6){
-            side[world.players[id].side]++;
-            world.inBattle.push(id);
-        }else{
-            temp.push(id);
-        }
-    });
-    world.lobby = temp;
-
-    io.sockets.emit('update_player_list', world);
-
-    //todo: Написать функцию распределения игроков по точкам сетки (или даже отказаться от сетки)
-    //в зависимости от типа корабля (торпедоносцы вперед). Или дать игрокам самим выбирать.
-
-    world.inBattle.forEach(function(id){
         var player = world.players[id];
+        //todo: Написать функцию распределения игроков по точкам сетки (или даже отказаться от сетки)
+        //в зависимости от типа корабля (торпедоносцы вперед). Или дать игрокам самим выбирать.
         var grid_cell = _.findWhere(grid, {side: player.side, is_free: true});
 
-        if(grid_cell){
+        if(side[player.side]<6 && grid_cell){
+            side[player.side]++;
+            world.inBattle.push(id);
+
             grid_cell.is_free = false;
             grid_cell.child_id = player._id;
             player.x = grid_cell.x;
@@ -167,19 +157,21 @@ function startBattle(){
             player.distance = 300;
             player.ship = [];
             player.isDefeat = false;
+            createShip(player);
         }else{
-            socket.emit('messages', {show: true, color: 'alert-error', strong: 'Для тебя нет места.', span: ''});
-            delete world.players[id];
+            temp.push(id);
+            io.to(id).emit('messages', {show: true, color: 'alert-error', strong: 'Для тебя нет места.', span: ''});
         }
-        createShip(player);
     });
+    world.lobby = temp;
 
     world.battle.status = 'start';
     world.endCounter = opt.defaultEndCounter;
     world.windCounter = opt.defaultWindCounter;
     world.windForce = _.random(-opt.maxWind, opt.maxWind, true);
 
-    io.sockets.emit('messages', {show: true, color: 'alert-success', strong: 'Битва началась', span: ''});
+    io.emit('update_player_list', world);
+    io.emit('messages', {show: true, color: 'alert-success', strong: 'Битва началась', span: ''});
     io.emit('show_battle_screen');
 
     intId = setInterval(gameCycle, opt.delay);
@@ -203,7 +195,7 @@ function gameCycle(){
                 });
 
                 if(player.isDefeat){
-                    var playerSocket = io.sockets.sockets[player._id];
+                    var playerSocket = io.to(player._id);
                     if(playerSocket){
                         playerSocket.emit('to_start_screen', world);
                         player._id = '';
@@ -218,8 +210,6 @@ function gameCycle(){
             }
         });
 
-        //todo: Допилить проверку статуса боя
-        //Определяем статус боя
         if(world.battle.status === 'start'){
             world.battle.status = (alive.leaf && alive.fire) ? 'start' : 'end';
         }
@@ -246,7 +236,7 @@ function gameCycle(){
     }
 
     // Отправка игровых данных на клиент
-    io.sockets.emit('gamedata', {options: opt, world: world});
+    io.emit('gamedata', {options: opt, world: world});
 }
 
 function endBattle(winSide){
@@ -267,17 +257,14 @@ function endBattle(winSide){
     }
 
     world.inBattle.forEach(function(id){
-        io.sockets.sockets[id].emit('to_start_screen', world);
+        io.to(id).emit('to_start_screen', world);
     });
-
     deleteDisconnected();
-    //todo: Непросто очистить а переместить в лобби
-    world.inBattle = [];
-
     clearInterval(intId);
+    world.inBattle = [];
     world.battle.status = 'wait';
 
-    grid = utils.extend({}, defaultGrid);
+    grid = utils.extend({}, defaultGrid, true);
 }
 
 function deleteDisconnected(){
@@ -320,7 +307,7 @@ function createShip(player){
         world.resources[player.side] -= resources;
         player.ship.push(newObj);
     });
-    io.sockets.emit('buttons', world);
+    io.emit('buttons', world);
 }
 
 function kickPlayer(player_id){
@@ -333,10 +320,6 @@ function kickPlayer(player_id){
                 resources = obj.barrels.length;
             }
         });
-        if(world.battle.status !== 'start'){
-            world.resources[player.side] += resources;
-            io.sockets.sockets[player._id].emit('to_start_screen', world);
-        }
     }
 }
 
@@ -360,8 +343,8 @@ io.sockets.on('connection', function(socket){
         data._id = socket.id;
 
         world.players[data._id] = data;
-        io.sockets.emit('messages', {show: true, color: 'alert-info', strong: 'Игрок ' + data.nickName + ' входит в игру', span: ''});
-        io.sockets.emit('update_player_list', world);
+        io.emit('messages', {show: true, color: 'alert-info', strong: 'Игрок ' + data.nickName + ' входит в игру', span: ''});
+        io.emit('update_player_list', world);
     });
 
     socket.on('set_ship_type', function(type){
@@ -370,7 +353,7 @@ io.sockets.on('connection', function(socket){
 
     socket.on('to_lobby', function(){
         world.lobby.push(socket.id);
-        io.sockets.emit('update_player_list', world);
+        io.emit('update_player_list', world);
     });
 
     socket.on('to_battle', function(){
