@@ -7,6 +7,6 @@
   "missLifeTime": 2500,
   "canonRadius": 20,
   "barrelLength": 25,
-  "defaultEndCounter": 10000,
+  "defaultEndCounter": 5000,
   "defaultWindCounter": 120000
 }

@@ -66,6 +66,8 @@ var ui = {
         }
 
         lists.lobby.forEach(function(id){
+            console.log('lists', lists);
+            console.log('lists', lists.players[id]);
             ui.render(lists.players[id], ui.lobbyPlayers);
         });
 

@@ -1,0 +1,16 @@
+[
+  {
+    "_id": "arny",
+    "nickName": "Arny*",
+    "is_bot": true,
+    "shipType": "destroyer",
+    "side": "fire"
+  },
+  {
+    "_id": "jan",
+    "nickName": "Jan*",
+    "is_bot": true,
+    "shipType": "heavy_cruiser",
+    "side": "fire"
+  }
+]

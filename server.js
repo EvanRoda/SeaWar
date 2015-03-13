@@ -9,6 +9,7 @@ var shipsTemplates = require('./shipTemplates');
 var utils = require('./utils');
 var opt = require('./options');
 var defaultGrid = require('./grid');
+var bots = require('./bots');
 
 var app = express();
 var server = http.createServer(app);
@@ -40,6 +41,13 @@ var world = {
         fire: 15
     }
 };
+
+function addBotToLobby(){
+    bots.forEach(function(bot){
+        world.lobby.push(bot._id);
+    });
+    io.emit('update_player_list', world);
+}
 
 function log(a, b){
     io.emit('logging', {a:a, b:b});
@@ -194,15 +202,7 @@ function gameCycle(){
                     }
                 });
 
-                if(player.isDefeat){
-                    var playerSocket = io.to(player._id);
-                    if(playerSocket){
-                        playerSocket.emit('to_start_screen', world);
-                        player._id = '';
-                    }
-                }else{
-                    alive[player.side] += 1;
-                }
+                alive[player.side] += (!player.isDefeat ? 1 : 0);
 
                 deleteList.forEach(function(obj_index, index){
                     player.ship.splice(obj_index - index, 1);
@@ -248,9 +248,9 @@ function endBattle(winSide){
                     world.resources[player.side] += obj.barrels.length;
                 }
             });
-        }else{
+        }/*else{
             delete player.shipType;
-        }
+        }*/
     });
     if(winSide){
         world.resources[winSide] += 3;
@@ -261,6 +261,7 @@ function endBattle(winSide){
     });
     deleteDisconnected();
     clearInterval(intId);
+    addBotToLobby(); //todo: Убрать когда боты будут добавляться руками
     world.inBattle = [];
     world.battle.status = 'wait';
 
@@ -312,12 +313,10 @@ function createShip(player){
 
 function kickPlayer(player_id){
     var player = world.players[player_id];
-    var resources = 0;
     if(player && player.ship && player.ship.length){
         player.ship.forEach(function(obj){
             if(obj.type == 'canon' && obj.status){
                 obj.status = false;
-                resources = obj.barrels.length;
             }
         });
     }
@@ -341,7 +340,6 @@ io.sockets.on('connection', function(socket){
             socket.emit('set_name', data.nickName);
         }
         data._id = socket.id;
-
         world.players[data._id] = data;
         io.emit('messages', {show: true, color: 'alert-info', strong: 'Игрок ' + data.nickName + ' входит в игру', span: ''});
         io.emit('update_player_list', world);
@@ -454,19 +452,31 @@ io.sockets.on('connection', function(socket){
     });
 });
 
+//todo: Добавление ботов в очередь по желанию игрока.
+bots.forEach(function(bot){
+    world.players[bot._id] = bot;
+});
+addBotToLobby();
+
 /**
  * Модель player (Игрок)
  *
  * _id
- * name
+ * nickName
  * side
+ * shipType
+ * -------------- На этапе добавления игрока в world.players
+ * -------------- При попадании в очередь только добавляется значение shipType
  * x
  * y
  * distance
  * isDefeat
+ * ship []
+ * -------------- Добавляются на этапе startBattle
  * ship [
  *      ... //Список объектов игрока (корпус пушки снаряды)
  * ]
+ * -------------- Заполняется в фции createShip
  */
 
 /**
