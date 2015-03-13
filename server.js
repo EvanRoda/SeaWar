@@ -95,20 +95,12 @@ function ammoCalc(ammo, player){
 
         // Проверка столкновений
         world.inBattle.forEach(function(id){
-            var vir_x, vir_y, hull_range, isMiss = true, t_player = world.players[id];
-            if(player.side != t_player.side){
-                vir_x = opt.width - t_player.x;
-                vir_y = opt.height - t_player.y;
-            }else{
-                vir_x = t_player.x;
-                vir_y = t_player.y;
-            }
-            hull_range = Math.sqrt(Math.pow(vir_x - ammo.x, 2) + Math.pow(vir_y - ammo.y, 2));
+            var vir_x, vir_y, isMiss = true, t_player = world.players[id];
 
-            if(hull_range < 100){
-                t_player.ship.forEach(function(target){
-                    var target_range = null;
+            t_player.ship.forEach(function(target){
+                var target_range = null;
 
+                if(target.type == 'canon'){
                     if(player.side != t_player.side){
                         vir_x = opt.width - target.x;
                         vir_y = opt.height - target.y;
@@ -117,15 +109,14 @@ function ammoCalc(ammo, player){
                         vir_y = target.y;
                     }
 
-                    if(target.type == 'canon'){
-                        target_range = Math.sqrt(Math.pow(vir_x - ammo.x, 2) + Math.pow(vir_y - ammo.y, 2));
-                        if(target_range < opt.canonRadius){
-                            target.status = false;
-                            isMiss = false;
-                        }
+                    target_range = Math.sqrt(Math.pow(vir_x - ammo.x, 2) + Math.pow(vir_y - ammo.y, 2));
+                    if(target_range < opt.canonRadius){ //todo: canonRadius перенести из глобальных опций в снаряды
+                        target.status = false;
+                        isMiss = false;
                     }
-                });
-            }
+                }
+            });
+
             if(isMiss){
                 // Заменяем объект ammo на miss ("круги на воде")
                 ammo.type = 'miss';
@@ -482,7 +473,7 @@ addBotToLobby();
 /**
  * Игровой объект
  *
- * type                 //hull canon ammo miss
+ * type                 // hull canon ammo miss
  * x
  * y
  * kind                 // только для hull тип карабля
