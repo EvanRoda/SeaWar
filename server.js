@@ -270,7 +270,7 @@ function deleteDisconnected(){
 
 function createShip(player){
     player.ship = [];
-    var template = _.findWhere(shipsTemplates, {side: player.side, kind: player.shipType});
+    var template = _.findWhere(shipsTemplates, {kind: player.shipType});
     template.objects.forEach(function(obj){
         var resources = 0;
         var newObj = {
@@ -287,13 +287,14 @@ function createShip(player){
             newObj.reload = obj.reload;
             newObj.reload_counter = 0;
             newObj.status = true;
-            newObj.kind = player.shipType;
+            newObj.kind = obj.kind;
+            newObj.range = obj.range || 1300;
             newObj.barrels = obj.barrels;
             newObj.min_angle = obj.angles[0];
             newObj.max_angle = obj.angles[1];
             resources += obj.barrels.length;
         }else if(obj.type == 'hull'){
-            newObj.kind = player.shipType;
+            //newObj.kind = player.shipType;
             newObj.direction = 0;
         }
         world.resources[player.side] -= resources;
@@ -365,7 +366,6 @@ io.sockets.on('connection', function(socket){
 
     //Прием команды от игрока
     socket.on('command', function(data){
-        //var player = _.findWhere(players, {_id: data.player_id});
         var player = world.players[data.player_id];
         var command =  data.command.split(' ', 2);
         if(command[0].toUpperCase() == 'НАПРАВЛЕНИЕ'){
@@ -401,9 +401,9 @@ io.sockets.on('connection', function(socket){
         }else if(command[0].toUpperCase() == 'ДАЛЬНОСТЬ'){
             player.distance = parseInt(command[1]);
         }else if(command[0].toUpperCase() == 'ОГОНЬ'){
-            socket.emit('messages', {show: true, color: '', strong: 'Перезарядка', span: ''});
+            var shot = false;
             player.ship.forEach(function(obj){
-                if(obj.type == 'canon' && obj.status){
+                if(obj.type == 'canon' && obj.status && player.distance <= obj.range ){
                     var dy;
                     if(obj.reload_counter <= 0){
                         obj.reload_counter = obj.reload;
@@ -422,12 +422,16 @@ io.sockets.on('connection', function(socket){
                                 distance_counter: 0
                             };
                             player.ship.push(ammo);
+                            shot = true;
                         });
                     }else{
                         socket.emit('messages', {show: true, color: '', strong: 'Орудия перезаряжаются', span: ''});
                     }
                 }
             });
+            if(shot){
+                socket.emit('messages', {show: true, color: '', strong: 'Перезарядка', span: ''});
+            }
         }
     });
 

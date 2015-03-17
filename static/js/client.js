@@ -46,7 +46,7 @@ var ui = {
         ui.buttons.fire.html('<i class="icon-eye-close icon-white"></i> Fire ' + world_opt.resources.fire);
         ui.shipContainer.html('');
         templates.forEach(function(template){
-            if(template.side == itIsYou.side && template.cost <= option.resources[template.side]){
+            if(template.cost <= option.resources[itIsYou.side]){
                 var fn = "setShipType('" + template.kind + "')";
                 ui.shipContainer.append('<button onclick="'+ fn +'" class="btn relative-width-100">' + template.name + ' ' + template.cost + '</button>');
             }
@@ -82,7 +82,7 @@ var ui = {
     },
 
     renderShipLabel: function(){
-        var ship = findWhere(templates, {side: itIsYou.side, kind: itIsYou.shipType});
+        var ship = findWhere(templates, {kind: itIsYou.shipType});
 
         ui.showShip.html(ship ? ship.name : '(корабель)');
     },
@@ -113,10 +113,7 @@ var misses = [];
 var flags = [];
 var renderer = null;
 
-var skins = {
-    leaf: {},
-    fire: {}
-};
+var skins = {};
 
 var flag = {
     you: new Image(),
@@ -179,9 +176,14 @@ function createWorld(data){
     itIsYou._id = data.player_id;
     templates = data.templates;
     templates.forEach(function(template){
-        skins[template.side][template.kind] = {hull: new Image(), canon: new Image()};
-        skins[template.side][template.kind].hull.src = 'images/hulls/' + template.hull_img;
-        skins[template.side][template.kind].canon.src = 'images/canons/' + template.canon_img;
+        skins[template.kind] = {hull: new Image(), canons: {}};
+        skins[template.kind].hull.src = 'images/hulls/' + template.hull_img;
+        template.objects.forEach(function(obj){
+           if(obj.type == 'canon'){
+               skins[template.kind].canons[obj.kind] = new Image();
+               skins[template.kind].canons[obj.kind].src = 'images/canons/' + obj.img;
+           }
+        });
     });
 
     renderer = Physics.renderer('canvas', {
@@ -271,14 +273,14 @@ function gameTick(data){
                         dir = obj.given_direction + obj.delta_direction;
                     }
                     if(obj.status){
-                        newObject.view = skins[player.side][obj.kind].canon;
+                        newObject.view = skins[player.shipType].canons[obj.kind];
                     }else{
                         newObject.view = damagedCanon;
                     }
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     canons.push(newObject);
                 }else if(obj.type == 'hull'){
-                    newObject.view = skins[player.side][obj.kind].hull;
+                    newObject.view = skins[player.shipType].hull;
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     hulls.push(newObject);
                 }else if(obj.type == 'ammo'){
