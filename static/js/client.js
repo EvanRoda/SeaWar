@@ -129,8 +129,13 @@ var damagedCanon = new Image();
 damagedCanon.src = 'images/damagedCanon.png';
 var miss = new Image();
 miss.src = 'images/miss.png';
-var ammo = new Image();
-ammo.src = 'images/ammo.png';
+var ammo = {
+    main: new Image(),
+    second: new Image()
+};
+ammo.main.src = 'images/ammo/main.png';
+ammo.second.src = 'images/ammo/second.png';
+
 var wind_center = new Image();
 wind_center.src = 'images/wind_center.png';
 var wind = new Image();
@@ -284,7 +289,7 @@ function gameTick(data){
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     hulls.push(newObject);
                 }else if(obj.type == 'ammo'){
-                    newObject.view = ammo;
+                    newObject.view = ammo[obj.kind];
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     bullets.push(newObject);
                 }else if(obj.type == 'miss'){

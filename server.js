@@ -414,6 +414,7 @@ io.sockets.on('connection', function(socket){
                             var beta = Math.asin(dy/c);
                             var ammo = {
                                 type: 'ammo',
+                                kind: obj.kind,
                                 x: obj.x + c * Math.sin((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
                                 y: obj.y - c * Math.cos((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
                                 direction: obj.direction + utils.getRandom(0.5, 100),
