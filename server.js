@@ -305,7 +305,7 @@ function createShip(player){
             newObj.given_direction = obj.direction;
             newObj.delta_direction = 0;
             newObj.angle_speed = 20;
-            newObj.ammo_speed = opt.ammoSpeed;
+            newObj.ammo_speed = obj.ammo_speed || opt.ammoSpeed;
             newObj.reload = obj.reload;
             newObj.reload_counter = 0;
             newObj.status = true;
