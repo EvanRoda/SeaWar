@@ -82,6 +82,24 @@ function canonLauncherCalc(obj, player){
     }
 }
 
+function torpedoCalc(torpedo, player){
+    var angle = torpedo.direction*Math.PI/180;
+    var delta = torpedo.distance - torpedo.distance_counter;
+    var trueAmmoSpeed = torpedo.ammo_speed*opt.delay/1000;
+
+    if(delta > trueAmmoSpeed){
+        torpedo.x = torpedo.x + Math.sin(angle)*trueAmmoSpeed;
+        torpedo.y = torpedo.y - Math.cos(angle)*trueAmmoSpeed;
+        torpedo.distance_counter = torpedo.distance_counter + trueAmmoSpeed;
+
+        //todo: Провека столкновений торпед
+    }else{
+        torpedo.type = 'miss';
+        torpedo.reload = opt.missLifeTime;
+        torpedo.reload_counter = 0;
+    }
+}
+
 function ammoCalc(ammo, player){
     var angle = ammo.direction*Math.PI/180;
     var delta = ammo.distance - ammo.distance_counter;
@@ -192,6 +210,8 @@ function gameCycle(){
                         canonLauncherCalc(obj, player);
                     }else if(obj.type == 'ammo'){
                         ammoCalc(obj, player);
+                    }else if(obj.type == 'torpedo'){
+                        torpedoCalc(obj, player);
                     }else if(obj.type == 'miss'){
                         missCalc(obj, index, deleteList);
                     }
@@ -291,6 +311,8 @@ function createShip(player){
             newObj.status = true;
             if(obj.type == 'canon'){
                 newObj.kind = obj.kind;
+            }else{
+                newObj.cone = 10;
             }
             newObj.range = obj.range || 1300;
             newObj.barrels = obj.barrels;
@@ -436,6 +458,41 @@ io.sockets.on('connection', function(socket){
             });
             if(shot){
                 socket.emit('messages', {show: true, color: '', strong: 'Перезарядка', span: ''});
+            }
+        }else if(command[0].toUpperCase() == 'ПУСК'){
+            var shot = false;
+            player.ship.forEach(function(obj){
+                if(obj.type == 'launcher' && obj.status){
+                    var dy, ha, da;
+                    if(obj.reload_counter <= 0){
+                        obj.reload_counter = obj.reload;
+                        dy = opt.barrelLength;
+
+                        ha = obj.barrels.length > 1 ? (obj.cone / 2) : 0;
+                        da = obj.barrels.length > 1 ? (obj.cone / (obj.barrels.length - 1)) : 0;
+                        obj.barrels.forEach(function(dx, index){
+                            var c = Math.sqrt(dx*dx + dy*dy);
+                            var alfa = obj.direction * Math.PI / 180;
+                            var beta = Math.asin(dy/c);
+                            var torpedo = {
+                                type: 'torpedo',
+                                x: obj.x + c * Math.sin((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
+                                y: obj.y - c * Math.cos((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
+                                direction: obj.direction + ha - index*da,
+                                ammo_speed: obj.ammo_speed,
+                                distance: obj.range,// + utils.getRandom(player.distance, 0.5),
+                                distance_counter: 0
+                            };
+                            player.ship.push(torpedo);
+                            shot = true;
+                        });
+                    }else{
+                        socket.emit('messages', {show: true, color: '', strong: 'ТА перезаряжаютя', span: ''});
+                    }
+                }
+            });
+            if(shot){
+                socket.emit('messages', {show: true, color: '', strong: 'Идет перезарядка ТА', span: ''});
             }
         }
     });

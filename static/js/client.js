@@ -110,6 +110,7 @@ var hulls = [];
 var canons = [];
 var launchers = [];
 var bullets = [];
+var torpedos = [];
 var misses = [];
 var flags = [];
 var renderer = null;
@@ -136,7 +137,8 @@ var ammo = {
 };
 ammo.main.src = 'images/ammo/main.png';
 ammo.second.src = 'images/ammo/second.png';
-
+var torpedo = new Image();
+torpedo.src = 'images/ammo/torpedo.png';
 var wind_center = new Image();
 wind_center.src = 'images/wind_center.png';
 var wind = new Image();
@@ -224,6 +226,7 @@ function gameTick(data){
     if(canons.length){world.remove(canons);}
     if(launchers.length){world.remove(launchers);}
     if(bullets.length){world.remove(bullets);}
+    if(torpedos.length){world.remove(torpedos);}
     if(misses.length){world.remove(misses);}
     if(flags.length){world.remove(flags);}
     windMarks = [];
@@ -231,6 +234,7 @@ function gameTick(data){
     canons = [];
     launchers = [];
     bullets = [];
+    torpedos = [];
     misses = [];
     flags = [];
 
@@ -309,6 +313,10 @@ function gameTick(data){
                     newObject.view = ammo[obj.kind];
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     bullets.push(newObject);
+                }else if(obj.type == 'torpedo'){
+                    newObject.view = torpedo;
+                    newObject.state.angular.pos = Math.PI*obj.direction/180;
+                    torpedos.push(newObject);
                 }else if(obj.type == 'miss'){
                     newObject.view = miss;
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
@@ -331,6 +339,7 @@ function gameTick(data){
     }
     if(windMarks.length){world.add(windMarks);}
     if(misses.length){world.add(misses);}
+    if(torpedos.length){world.add(torpedos);}
     if(hulls.length){world.add(hulls);}
     if(flags.length){world.add(flags);}
     if(canons.length){world.add(canons);}
