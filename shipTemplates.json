@@ -6,7 +6,7 @@
         "hull_img": "leaf_destroyer.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0},
-            {"type": "canon", "img": "uno.png", "kind": "main", "dx": 0, "dy": -20, "barrels": [0], "angles": [0, 180], "reload": 5000, "direction": 0},
+            {"type": "launcher", "img": "launcher2.png", "dx": 0, "dy": -20, "barrels": [3, -3], "angles": [45, 135], "reload": 5000, "direction": 90},
             {"type": "canon", "img": "second.png", "kind": "second", "dx": 0, "dy": 20, "barrels": [0], "angles": [0, 180], "reload": 3000, "direction": 0, "range": 500},
             {"type": "flag", "dx": 0, "dy": 81}
         ]

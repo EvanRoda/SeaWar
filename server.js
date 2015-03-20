@@ -53,25 +53,29 @@ function log(a, b){
     io.emit('logging', {a:a, b:b});
 }
 
-function canonCalc(canon, player){
+function canonLauncherCalc(obj, player){
     var delta = null, playerSocket;
-    if(canon.status){
+    if(obj.status){
         player.isDefeat = false;
-        delta = canon.given_direction - canon.direction;
+        delta = obj.given_direction - obj.direction;
         if(delta){
-            var trueAngleSpeed = canon.angle_speed*(opt.delay/1000);
+            var trueAngleSpeed = obj.angle_speed*(opt.delay/1000);
             if(Math.abs(delta) > trueAngleSpeed){
-                canon.direction = canon.direction + utils.markOfNumber(delta)*trueAngleSpeed;
+                obj.direction = obj.direction + utils.markOfNumber(delta)*trueAngleSpeed;
             }else{
-                canon.direction = canon.given_direction;
+                obj.direction = obj.given_direction;
             }
         }
-        if(canon.reload_counter > 0){
-            canon.reload_counter -= opt.delay;
-            if(canon.reload_counter <= 0){
+        if(obj.reload_counter > 0){
+            obj.reload_counter -= opt.delay;
+            if(obj.reload_counter <= 0){
                 playerSocket = io.to(player._id);
                 if(playerSocket){
-                    playerSocket.emit('messages', {show: true, color: 'alert-info', strong: 'Орудия заряжены', span: ''});
+                    if(obj.type == 'canon'){
+                        playerSocket.emit('messages', {show: true, color: 'alert-info', strong: 'Орудия заряжены', span: ''});
+                    }else if(obj.type == 'launcher'){
+                        playerSocket.emit('messages', {show: true, color: 'alert-info', strong: 'Торпеды загружены', span: ''});
+                    }
                 }
             }
         }
@@ -184,8 +188,8 @@ function gameCycle(){
             if(player && player.ship.length){
                 player.isDefeat = true;
                 player.ship.forEach(function(obj, index){
-                    if(obj.type == 'canon'){
-                        canonCalc(obj, player);
+                    if(obj.type == 'canon' || obj.type == 'launcher'){
+                        canonLauncherCalc(obj, player);
                     }else if(obj.type == 'ammo'){
                         ammoCalc(obj, player);
                     }else if(obj.type == 'miss'){
@@ -239,9 +243,7 @@ function endBattle(winSide){
                     world.resources[player.side] += obj.barrels.length;
                 }
             });
-        }/*else{
-            delete player.shipType;
-        }*/
+        }
     });
     if(winSide){
         world.resources[winSide] += 3;
@@ -278,7 +280,7 @@ function createShip(player){
             x: player.x + obj.dx,
             y: player.y + obj.dy
         };
-        if(obj.type == 'canon'){
+        if(obj.type == 'canon' || obj.type == 'launcher'){
             newObj.direction = obj.direction;
             newObj.given_direction = obj.direction;
             newObj.delta_direction = 0;
@@ -287,7 +289,9 @@ function createShip(player){
             newObj.reload = obj.reload;
             newObj.reload_counter = 0;
             newObj.status = true;
-            newObj.kind = obj.kind;
+            if(obj.type == 'canon'){
+                newObj.kind = obj.kind;
+            }
             newObj.range = obj.range || 1300;
             newObj.barrels = obj.barrels;
             newObj.min_angle = obj.angles[0];
@@ -307,7 +311,7 @@ function kickPlayer(player_id){
     var player = world.players[player_id];
     if(player && player.ship && player.ship.length){
         player.ship.forEach(function(obj){
-            if(obj.type == 'canon' && obj.status){
+            if((obj.type == 'canon' || obj.type == 'launcher') && obj.status){
                 obj.status = false;
             }
         });
@@ -371,7 +375,7 @@ io.sockets.on('connection', function(socket){
         if(command[0].toUpperCase() == 'НАПРАВЛЕНИЕ'){
             player.ship.forEach(function(obj){
                 var value = parseInt(command[1]);
-                if(obj.type == 'canon'){
+                if(obj.type == 'canon' || obj.type == 'launcher'){
                     if(value < obj.min_angle){
                         value = obj.min_angle;
                     }else if(value > obj.max_angle){

@@ -108,6 +108,7 @@ var ui = {
 var windMarks = [];
 var hulls = [];
 var canons = [];
+var launchers = [];
 var bullets = [];
 var misses = [];
 var flags = [];
@@ -187,6 +188,9 @@ function createWorld(data){
            if(obj.type == 'canon'){
                skins[template.kind].canons[obj.kind] = new Image();
                skins[template.kind].canons[obj.kind].src = 'images/canons/' + obj.img;
+           }else if(obj.type == 'launcher'){
+               skins[template.kind].launcher = new Image();
+               skins[template.kind].launcher.src = 'images/launchers/' + obj.img;
            }
         });
     });
@@ -218,12 +222,14 @@ function gameTick(data){
     if(windMarks.length){world.remove(windMarks);}
     if(hulls.length){world.remove(hulls);}
     if(canons.length){world.remove(canons);}
+    if(launchers.length){world.remove(launchers);}
     if(bullets.length){world.remove(bullets);}
     if(misses.length){world.remove(misses);}
     if(flags.length){world.remove(flags);}
     windMarks = [];
     hulls = [];
     canons = [];
+    launchers = [];
     bullets = [];
     misses = [];
     flags = [];
@@ -284,6 +290,17 @@ function gameTick(data){
                     }
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     canons.push(newObject);
+                }else if(obj.type == 'launcher'){
+                    if(player._id == itIsYou._id){
+                        dir = obj.given_direction + obj.delta_direction;
+                    }
+                    if(obj.status){
+                        newObject.view = skins[player.shipType].launcher;
+                    }else{
+                        newObject.view = damagedCanon;
+                    }
+                    newObject.state.angular.pos = Math.PI*obj.direction/180;
+                    launchers.push(newObject);
                 }else if(obj.type == 'hull'){
                     newObject.view = skins[player.shipType].hull;
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
@@ -317,6 +334,7 @@ function gameTick(data){
     if(hulls.length){world.add(hulls);}
     if(flags.length){world.add(flags);}
     if(canons.length){world.add(canons);}
+    if(launchers.length){world.add(launchers);}
     if(bullets.length){world.add(bullets);}
     world.render();
 }
