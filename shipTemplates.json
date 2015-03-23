@@ -5,7 +5,7 @@
         "cost": 1,
         "hull_img": "leaf_destroyer.png",
         "objects": [
-            {"type": "hull", "dx": 0, "dy": 0},
+            {"type": "hull", "dx": 0, "dy": 0, "long": 170},
             {"type": "launcher", "img": "launcher2.png", "dx": 0, "dy": -20, "barrels": [3, -3], "angles": [45, 135], "cone_limit": [0, 15], "ammo_speed": 30, "reload": 5000, "direction": 90},
             {"type": "canon", "img": "second.png", "kind": "second", "dx": 0, "dy": 20, "barrels": [0], "angles": [0, 180], "reload": 3000, "direction": 0, "range": 500},
             {"type": "flag", "dx": 0, "dy": 81}
@@ -17,7 +17,7 @@
         "cost": 2,
         "hull_img": "duilio.png",
         "objects": [
-            {"type": "hull", "dx": 0, "dy": 0},
+            {"type": "hull", "dx": 0, "dy": 0, "long": 210},
             {"type": "canon", "img": "uno_d.png", "kind": "main", "dx": 11, "dy": -12, "barrels": [0], "angles": [5, 170], "reload": 4000, "direction": 90},
             {"type": "canon", "img": "uno_d.png", "kind": "main", "dx": -12, "dy": 11, "barrels": [0], "angles": [65, 115], "reload": 4000, "direction": 90},
             {"type": "flag", "dx": 0, "dy": 102}
@@ -29,7 +29,7 @@
         "cost": 4,
         "hull_img": "duilio.png",
         "objects": [
-            {"type": "hull", "dx": 0, "dy": 0},
+            {"type": "hull", "dx": 0, "dy": 0, "long": 210},
             {"type": "canon", "img": "double_d.png", "kind": "main", "dx": 11, "dy": -12, "barrels": [4, -4], "angles": [15, 170], "reload": 8000, "direction": 90},
             {"type": "canon", "img": "double_d.png", "kind": "main", "dx": -12, "dy": 11, "barrels": [4, -4], "angles": [75, 105], "reload": 8000, "direction": 90},
             {"type": "flag", "dx": 0, "dy": 102}
@@ -41,7 +41,7 @@
         "cost": 4,
         "hull_img": "leaf_light_cruiser.png",
         "objects": [
-            {"type": "hull", "dx": 0, "dy": 0},
+            {"type": "hull", "dx": 0, "dy": 0, "long": 260},
             {"type": "canon", "img": "double.png", "kind": "main", "dx": 0, "dy": -55, "barrels": [4, -4], "angles": [0, 180], "reload": 10000, "direction": 0},
             {"type": "canon", "img": "double.png", "kind": "main", "dx": 0, "dy": 75, "barrels": [4, -4], "angles": [0, 180], "reload": 10000, "direction": 180},
             {"type": "flag", "dx": 0, "dy": 125}
@@ -54,7 +54,7 @@
         "hull_img": "monstro.png",
         "canon_img": "triple.png",
         "objects": [
-            {"type": "hull", "dx": 0, "dy": 0},
+            {"type": "hull", "dx": 0, "dy": 0, "long": 270},
             {"type": "canon", "img": "triple.png", "kind": "main", "dx": -8, "dy": -55, "barrels": [6, 0, -6], "angles": [0, 180], "reload": 15000, "direction": 0},
             {"type": "canon", "img": "triple.png", "kind": "main", "dx": 12, "dy": 5, "barrels": [6, 0, -6], "angles": [0, 180], "reload": 15000, "direction": 0},
             {"type": "canon", "img": "triple.png", "kind": "main", "dx": -8, "dy": 57, "barrels": [6, 0, -6], "angles": [0, 180], "reload": 15000, "direction": 180},

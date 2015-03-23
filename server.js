@@ -92,7 +92,42 @@ function torpedoCalc(torpedo, player){
         torpedo.y = torpedo.y - Math.cos(angle)*trueAmmoSpeed;
         torpedo.distance_counter = torpedo.distance_counter + trueAmmoSpeed;
 
-        //todo: Провека столкновений торпед
+        //Провека столкновений торпед
+        world.inBattle.forEach(function(id){
+            var vir_x, vir_y, t_player = world.players[id];
+            if(player.side != t_player.side){
+                vir_x = opt.width - t_player.x;
+                vir_y = opt.height - t_player.y;
+            }else{
+                vir_x = t_player.x;
+                vir_y = t_player.y;
+            }
+
+            if(torpedo.x > vir_x - 10 && torpedo.x < vir_x + 10 && torpedo.y >= (vir_y - t_player.long/2) && torpedo.y <= (vir_y + t_player.long/2)){
+                t_player.ship.forEach(function(target){
+                    var target_range = null;
+
+                    if(target.type == 'canon' || target.type == 'torpedo' || target.type == 'launcher'){
+                        if(player.side != t_player.side){
+                            vir_x = opt.width - target.x;
+                            vir_y = opt.height - target.y;
+                        }else{
+                            vir_x = target.x;
+                            vir_y = target.y;
+                        }
+
+                        target_range = Math.sqrt(Math.pow(vir_x - torpedo.x, 2) + Math.pow(vir_y - torpedo.y, 2));
+                        if(target_range < opt.torpedoRadius){ //todo: torpedoRadius перенести из глобальных опций в снаряды
+                            target.status = false;
+                        }
+                    }
+                });
+                //todo: Сократить басню!!!
+                torpedo.type = 'miss';
+                torpedo.reload = opt.missLifeTime;
+                torpedo.reload_counter = 0;
+            }
+        });
     }else{
         torpedo.type = 'miss';
         torpedo.reload = opt.missLifeTime;
@@ -122,7 +157,7 @@ function ammoCalc(ammo, player){
             t_player.ship.forEach(function(target){
                 var target_range = null;
 
-                if(target.type == 'canon' || target.type == 'torpedo'){
+                if(target.type == 'canon' || target.type == 'torpedo' || target.type == 'launcher'){
                     if(player.side != t_player.side){
                         vir_x = opt.width - target.x;
                         vir_y = opt.height - target.y;
@@ -323,6 +358,7 @@ function createShip(player){
         }else if(obj.type == 'hull'){
             //newObj.kind = player.shipType;
             newObj.direction = 0;
+            player.long = obj.long; // так проще см. попадание торпед
         }
         world.resources[player.side] -= resources;
         player.ship.push(newObj);
@@ -395,6 +431,7 @@ io.sockets.on('connection', function(socket){
     socket.on('command', function(data){
         var player = world.players[data.player_id];
         var command =  data.command.split(' ', 2);
+        var shot = false;
         if(command[0].toUpperCase() == 'НАПРАВЛЕНИЕ'){
             player.ship.forEach(function(obj){
                 var value = parseInt(command[1]);
@@ -428,7 +465,7 @@ io.sockets.on('connection', function(socket){
         }else if(command[0].toUpperCase() == 'ДАЛЬНОСТЬ'){
             player.distance = parseInt(command[1]);
         }else if(command[0].toUpperCase() == 'ОГОНЬ'){
-            var shot = false;
+            shot = false;
             player.ship.forEach(function(obj){
                 if(obj.type == 'canon' && obj.status && player.distance <= obj.range ){
                     var dy;
@@ -463,11 +500,20 @@ io.sockets.on('connection', function(socket){
         }else if(command[0].toUpperCase() == 'УГОЛ'){
             var cone = parseInt(command[1]);
             player.ship.forEach(function(obj){
-                //todo: Распихать значение cone по лаунчерам
+                if(obj.type == 'launcher' && obj.status){
+                    if(cone < obj.cone_limit[0]){
+                        obj.cone = obj.cone_limit[0];
+                        socket.emit('messages', {show: true, color: '', strong: 'Минимальный угол', span: ''});
+                    }else if(cone > obj.cone_limit[1]){
+                        obj.cone = obj.cone_limit[1];
+                        socket.emit('messages', {show: true, color: '', strong: 'Максимальный угол', span: ''});
+                    }else{
+                        obj.cone = cone;
+                    }
+                }
             });
-
         }else if(command[0].toUpperCase() == 'ПУСК'){
-            var shot = false;
+            shot = false;
             player.ship.forEach(function(obj){
                 if(obj.type == 'launcher' && obj.status){
                     var dy, ha, da;

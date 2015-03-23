@@ -6,6 +6,7 @@
   "ammoSpeed": 100,
   "missLifeTime": 2500,
   "canonRadius": 20,
+  "torpedoRadius": 50,
   "barrelLength": 25,
   "defaultEndCounter": 5000,
   "defaultWindCounter": 120000
