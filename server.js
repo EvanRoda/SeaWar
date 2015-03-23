@@ -122,7 +122,7 @@ function ammoCalc(ammo, player){
             t_player.ship.forEach(function(target){
                 var target_range = null;
 
-                if(target.type == 'canon'){
+                if(target.type == 'canon' || target.type == 'torpedo'){
                     if(player.side != t_player.side){
                         vir_x = opt.width - target.x;
                         vir_y = opt.height - target.y;
