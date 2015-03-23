@@ -1,7 +1,7 @@
 {
   "width": 954,
   "height": 810,
-  "delay": 100,
+  "delay": 60,
   "maxWind": 0.1,
   "ammoSpeed": 100,
   "missLifeTime": 2500,

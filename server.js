@@ -312,7 +312,8 @@ function createShip(player){
             if(obj.type == 'canon'){
                 newObj.kind = obj.kind;
             }else{
-                newObj.cone = 10;
+                newObj.cone_limit = obj.cone_limit;
+                newObj.cone = 0;
             }
             newObj.range = obj.range || 1300;
             newObj.barrels = obj.barrels;
@@ -459,6 +460,12 @@ io.sockets.on('connection', function(socket){
             if(shot){
                 socket.emit('messages', {show: true, color: '', strong: 'Перезарядка', span: ''});
             }
+        }else if(command[0].toUpperCase() == 'УГОЛ'){
+            var cone = parseInt(command[1]);
+            player.ship.forEach(function(obj){
+                //todo: Распихать значение cone по лаунчерам
+            });
+
         }else if(command[0].toUpperCase() == 'ПУСК'){
             var shot = false;
             player.ship.forEach(function(obj){
