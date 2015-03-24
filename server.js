@@ -56,7 +56,10 @@ function log(a, b){
 function canonLauncherCalc(obj, player){
     var delta = null, playerSocket;
     if(obj.status){
-        player.isDefeat = false;
+        if((obj.type == 'canon' && obj.kind == 'main') || obj.type == 'launcher'){
+            player.isDefeat = false;
+        }
+
         delta = obj.given_direction - obj.direction;
         if(delta){
             var trueAngleSpeed = obj.angle_speed*(opt.delay/1000);
