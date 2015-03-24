@@ -201,9 +201,23 @@ function startBattle(){
     world.inBattle = [];
     world.lobby.forEach(function(id){
         var player = world.players[id];
+
+        // Набираем игроков в бой, создаем корабли.
+        if(side[player.side]<6){
+            side[player.side]++;
+            world.inBattle.push(id);
+            player.distance = 300;
+            player.isDefeat = false;
+            createShip(player);
+        }else{
+            temp.push(id);
+            io.to(id).emit('messages', {show: true, color: 'alert-error', strong: 'Для тебя нет места.', span: ''});
+        }
+
         //todo: Написать функцию распределения игроков по точкам сетки (или даже отказаться от сетки)
         //в зависимости от типа корабля (торпедоносцы вперед). Или дать игрокам самим выбирать.
-        var grid_cell = _.findWhere(grid, {side: player.side, is_free: true});
+
+        /*var grid_cell = _.findWhere(grid, {side: player.side, is_free: true});
 
         if(side[player.side]<6 && grid_cell){
             side[player.side]++;
@@ -214,13 +228,12 @@ function startBattle(){
             player.x = grid_cell.x;
             player.y = grid_cell.y;
             player.distance = 300;
-            player.ship = [];
             player.isDefeat = false;
             createShip(player);
         }else{
             temp.push(id);
             io.to(id).emit('messages', {show: true, color: 'alert-error', strong: 'Для тебя нет места.', span: ''});
-        }
+        }*/
     });
     world.lobby = temp;
 
@@ -331,12 +344,13 @@ function deleteDisconnected(){
 function createShip(player){
     player.ship = [];
     var template = _.findWhere(shipsTemplates, {kind: player.shipType});
+    player.shipClass = template.class;
     template.objects.forEach(function(obj){
         var resources = 0;
         var newObj = {
             type: obj.type,
-            x: player.x + obj.dx,
-            y: player.y + obj.dy
+            x: obj.dx,   //player.x + obj.dx,
+            y: obj.dy    //player.y + obj.dy
         };
         if(obj.type == 'canon' || obj.type == 'launcher'){
             newObj.direction = obj.direction;

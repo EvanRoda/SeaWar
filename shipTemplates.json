@@ -2,6 +2,7 @@
     {
         "kind": "destroyer",
         "name": "Эсминец",
+        "class": "torpedo",
         "cost": 1,
         "hull_img": "leaf_destroyer.png",
         "objects": [
@@ -14,6 +15,7 @@
     {
         "kind": "duilioP",
         "name": "Дуилио Проект",
+        "class": "canon",
         "cost": 2,
         "hull_img": "duilio.png",
         "objects": [
@@ -26,6 +28,7 @@
     {
         "kind": "duilio",
         "name": "Дуилио",
+        "class": "canon",
         "cost": 4,
         "hull_img": "duilio.png",
         "objects": [
@@ -38,6 +41,7 @@
     {
         "kind": "light_cruiser2",
         "name": "Легкий крейсер Mk2",
+        "class": "canon",
         "cost": 4,
         "hull_img": "leaf_light_cruiser.png",
         "objects": [
@@ -50,6 +54,7 @@
     {
         "kind": "heavy_cruiser",
         "name": "Тяжелый крейсер",
+        "class": "canon",
         "cost": 9,
         "hull_img": "monstro.png",
         "canon_img": "triple.png",
