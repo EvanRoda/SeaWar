@@ -129,8 +129,16 @@ flag.enemy.src = 'images/flags/flag_enemy.png';
 
 var damagedCanon = new Image();
 damagedCanon.src = 'images/damagedCanon.png';
-var miss = new Image();
-miss.src = 'images/miss.png';
+
+var miss = {
+    main: new Image(),
+    second: new Image(),
+    torpedo: new Image()
+};
+miss.main.src = 'images/miss.png';
+miss.second.src = 'images/miss.png';
+miss.torpedo.src = 'images/t_boom.png';
+
 var ammo = {
     main: new Image(),
     second: new Image()
@@ -318,8 +326,8 @@ function gameTick(data){
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     torpedos.push(newObject);
                 }else if(obj.type == 'miss'){
-                    newObject.view = miss;
-                    newObject.state.angular.pos = Math.PI*obj.direction/180;
+                    newObject.view = miss[obj.kind];
+                    newObject.state.angular.pos = Math.PI*(0)/180;
                     misses.push(newObject);
                 }else if(obj.type == 'flag'){
                     if(player._id == itIsYou._id){

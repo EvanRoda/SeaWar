@@ -124,12 +124,14 @@ function torpedoCalc(torpedo, player){
                 });
                 //todo: Сократить басню!!!
                 torpedo.type = 'miss';
+                torpedo.kind = 'torpedo';
                 torpedo.reload = opt.missLifeTime;
                 torpedo.reload_counter = 0;
             }
         });
     }else{
         torpedo.type = 'miss';
+        torpedo.kind = 'main';
         torpedo.reload = opt.missLifeTime;
         torpedo.reload_counter = 0;
     }
@@ -174,12 +176,10 @@ function ammoCalc(ammo, player){
                 }
             });
 
-            if(isMiss){
-                // Заменяем объект ammo на miss ("круги на воде")
-                ammo.type = 'miss';
-                ammo.reload = opt.missLifeTime;
-                ammo.reload_counter = 0;
-            }
+            // Заменяем объект ammo на miss ("круги на воде")
+            ammo.type = 'miss';
+            ammo.reload = opt.missLifeTime;
+            ammo.reload_counter = 0;
         });
     }
 }
