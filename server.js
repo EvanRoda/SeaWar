@@ -197,25 +197,26 @@ function missCalc(miss, index, deleteList){
 }
 
 function startBattle(){
-    var side = {leaf: 0, fire: 0}, temp = [];
+    var counter = {
+        leaf: {count:0, torpedo: [], canon: []},
+        fire: {count:0, torpedo: [], canon: []}
+    }, temp = [];
     world.inBattle = [];
     world.lobby.forEach(function(id){
         var player = world.players[id];
 
         // Набираем игроков в бой, создаем корабли.
-        if(side[player.side]<6){
-            side[player.side]++;
+        if(counter[player.side].count < 6){
+            counter[player.side].count++;
+            createShip(player);
             world.inBattle.push(id);
+            counter[player.side][player.shipClass].push(id);
             player.distance = 300;
             player.isDefeat = false;
-            createShip(player);
         }else{
             temp.push(id);
             io.to(id).emit('messages', {show: true, color: 'alert-error', strong: 'Для тебя нет места.', span: ''});
         }
-
-        //todo: Написать функцию распределения игроков по точкам сетки (или даже отказаться от сетки)
-        //в зависимости от типа корабля (торпедоносцы вперед). Или дать игрокам самим выбирать.
 
         /*var grid_cell = _.findWhere(grid, {side: player.side, is_free: true});
 
@@ -236,6 +237,34 @@ function startBattle(){
         }*/
     });
     world.lobby = temp;
+
+    //todo: Написать функцию распределения игроков по точкам сетки (или даже отказаться от сетки)
+    //в зависимости от типа корабля (торпедоносцы вперед). Или дать игрокам самим выбирать.
+    //
+    ['leaf', 'fire'].forEach(function(side){
+        var cellWidth, cellHeight, xLimit=0, yLimit=0, allPlayers;
+        if(counter[side].count <= 3){
+            cellWidth = 240;
+            cellHeight = opt.height / counter[side].count;
+            allPlayers = counter[side].canon.concat(counter[side].torpedo);
+            allPlayers.forEach(function(id, index){
+                var player = world.players[id];
+                player.x = utils.getRandomForCell((cellWidth - player.wide)/2);
+                player.y = yLimit + utils.getRandomForCell((cellHeight * (index+1) - yLimit - player.long)/2);
+                player.ship.forEach(function(obj){
+                    obj.x += player.x;
+                    obj.y += player.y;
+                });
+
+                yLimit = player.y + player.long/2 + 10;
+            });
+        }else{
+            //Тут надо что то придумывать
+        }
+
+
+    });
+
 
     world.battle.status = 'start';
     world.endCounter = opt.defaultEndCounter;
@@ -373,9 +402,9 @@ function createShip(player){
             newObj.max_angle = obj.angles[1];
             resources += obj.barrels.length;
         }else if(obj.type == 'hull'){
-            //newObj.kind = player.shipType;
             newObj.direction = 0;
             player.long = obj.long; // так проще см. попадание торпед
+            player.wide = obj.wide;
         }
         world.resources[player.side] -= resources;
         player.ship.push(newObj);

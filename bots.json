@@ -12,5 +12,12 @@
     "is_bot": true,
     "shipType": "heavy_cruiser",
     "side": "fire"
+  },
+  {
+    "_id": "arny2",
+    "nickName": "Arny*",
+    "is_bot": true,
+    "shipType": "destroyer",
+    "side": "fire"
   }
 ]

@@ -33,3 +33,7 @@ exports.getRandom = function (value, percent){
     var dv = value * percent / 100;
     return _.random(-dv, dv, true);
 };
+
+exports.getRandomForCell = function (value){
+    return _.random(0, value, true);
+};
