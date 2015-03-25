@@ -217,24 +217,6 @@ function startBattle(){
             temp.push(id);
             io.to(id).emit('messages', {show: true, color: 'alert-error', strong: 'Для тебя нет места.', span: ''});
         }
-
-        /*var grid_cell = _.findWhere(grid, {side: player.side, is_free: true});
-
-        if(side[player.side]<6 && grid_cell){
-            side[player.side]++;
-            world.inBattle.push(id);
-
-            grid_cell.is_free = false;
-            grid_cell.child_id = player._id;
-            player.x = grid_cell.x;
-            player.y = grid_cell.y;
-            player.distance = 300;
-            player.isDefeat = false;
-            createShip(player);
-        }else{
-            temp.push(id);
-            io.to(id).emit('messages', {show: true, color: 'alert-error', strong: 'Для тебя нет места.', span: ''});
-        }*/
     });
     world.lobby = temp;
 
@@ -242,15 +224,17 @@ function startBattle(){
     //в зависимости от типа корабля (торпедоносцы вперед). Или дать игрокам самим выбирать.
     //
     ['leaf', 'fire'].forEach(function(side){
-        var cellWidth, cellHeight, xLimit=0, yLimit=0, allPlayers;
+        var cellWidth, cellHeight, yLimit=0, allPlayers, firstRow, secondRow;
         if(counter[side].count <= 3){
             cellWidth = 240;
             cellHeight = opt.height / counter[side].count;
+
             allPlayers = counter[side].canon.concat(counter[side].torpedo);
+
             allPlayers.forEach(function(id, index){
                 var player = world.players[id];
-                player.x = utils.getRandomForCell((cellWidth - player.wide)/2);
-                player.y = yLimit + utils.getRandomForCell((cellHeight * (index+1) - yLimit - player.long)/2);
+                player.x = (player.wide / 2) + utils.getRandomForCell(cellWidth - player.wide);
+                player.y = player.long/2 + yLimit + utils.getRandomForCell(cellHeight * (index+1) - yLimit - player.long);
                 player.ship.forEach(function(obj){
                     obj.x += player.x;
                     obj.y += player.y;
@@ -259,12 +243,17 @@ function startBattle(){
                 yLimit = player.y + player.long/2 + 10;
             });
         }else{
-            //Тут надо что то придумывать
+            if(counter[side].torpedo.length >= counter[side].canon.length){
+                secondRow = counter[side].torpedo.slice(0, 3);
+                firstRow = (counter[side].torpedo.slice(3)).concat(counter[side].canon);
+                lineUp(firstRow, secondRow);
+            }else{
+                firstRow = counter[side].canon.slice(0, 3);
+                secondRow = (counter[side].canon.slice(3)).concat(counter[side].torpedo);
+                lineUp(firstRow, secondRow);
+            }
         }
-
-
     });
-
 
     world.battle.status = 'start';
     world.endCounter = opt.defaultEndCounter;
@@ -276,6 +265,43 @@ function startBattle(){
     io.emit('show_battle_screen');
 
     intId = setInterval(gameCycle, opt.delay);
+}
+
+function lineUp(firstRow, secondRow){
+    var cellWidth = 120, cellHeight, xLimit=0, yLimit=0;
+    log('firstRow', firstRow);
+    log('secondRow', secondRow);
+    cellHeight = opt.height / firstRow.length;
+    firstRow.forEach(function(id, index){
+        var player = world.players[id], newXLimit = 0;
+
+        player.x = (player.wide / 2) + utils.getRandomForCell(cellWidth - player.wide);
+        player.y = player.long/2 + yLimit + utils.getRandomForCell(cellHeight * (index+1) - yLimit - player.long);
+        player.ship.forEach(function(obj){
+            obj.x += player.x;
+            obj.y += player.y;
+        });
+        newXLimit = player.x + player.wide/2 + 10;
+        xLimit = newXLimit > xLimit ? newXLimit : xLimit;
+        yLimit = player.y + player.long/2 + 10;
+    });
+
+    log('xLimit', xLimit);
+
+    cellHeight = opt.height / secondRow.length;
+    yLimit = 0;
+    secondRow.forEach(function(id, index){
+        var player = world.players[id];
+        player.x = (player.wide / 2) + xLimit + utils.getRandomForCell(cellWidth * 2 - xLimit - player.wide);
+        player.y = player.long/2 + yLimit + utils.getRandomForCell(cellHeight * (index+1) - yLimit - player.long);
+        log('x', player.x);
+        log('y', player.y);
+        player.ship.forEach(function(obj){
+            obj.x += player.x;
+            obj.y += player.y;
+        });
+        yLimit = player.y + player.long/2 + 10;
+    });
 }
 
 function gameCycle(){

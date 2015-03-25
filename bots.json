@@ -10,7 +10,7 @@
     "_id": "jan",
     "nickName": "Jan*",
     "is_bot": true,
-    "shipType": "heavy_cruiser",
+    "shipType": "duilioP",
     "side": "fire"
   },
   {
@@ -18,6 +18,13 @@
     "nickName": "Arny*",
     "is_bot": true,
     "shipType": "destroyer",
+    "side": "fire"
+  },
+  {
+    "_id": "jan2",
+    "nickName": "Jan*",
+    "is_bot": true,
+    "shipType": "duilioP",
     "side": "fire"
   }
 ]
