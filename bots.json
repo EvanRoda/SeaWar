@@ -14,10 +14,10 @@
     "side": "fire"
   },
   {
-    "_id": "arny2",
+    "_id": "rutger",
     "nickName": "Arny*",
     "is_bot": true,
-    "shipType": "destroyer",
+    "shipType": "murakumo",
     "side": "fire"
   },
   {
