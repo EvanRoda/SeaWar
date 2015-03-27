@@ -109,6 +109,7 @@ var windMarks = [];
 var hulls = [];
 var canons = [];
 var launchers = [];
+var floors = [];
 var bullets = [];
 var torpedos = [];
 var misses = [];
@@ -201,6 +202,9 @@ function createWorld(data){
            }else if(obj.type == 'launcher'){
                skins[template.kind].launcher = new Image();
                skins[template.kind].launcher.src = 'images/launchers/' + obj.img;
+           }else if(obj.type == 'floor'){
+               skins[template.kind].floor = new Image();
+               skins[template.kind].floor.src = 'images/floors/' + obj.img;
            }
         });
     });
@@ -233,6 +237,7 @@ function gameTick(data){
     if(hulls.length){world.remove(hulls);}
     if(canons.length){world.remove(canons);}
     if(launchers.length){world.remove(launchers);}
+    if(floors.length){world.remove(floors);}
     if(bullets.length){world.remove(bullets);}
     if(torpedos.length){world.remove(torpedos);}
     if(misses.length){world.remove(misses);}
@@ -241,6 +246,7 @@ function gameTick(data){
     hulls = [];
     canons = [];
     launchers = [];
+    floors = [];
     bullets = [];
     torpedos = [];
     misses = [];
@@ -317,6 +323,10 @@ function gameTick(data){
                     newObject.view = skins[player.shipType].hull;
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
                     hulls.push(newObject);
+                }else if(obj.type == 'floor'){
+                    newObject.view = skins[player.shipType].floor;
+                    newObject.state.angular.pos = Math.PI*obj.direction/180;
+                    floors.push(newObject);
                 }else if(obj.type == 'ammo'){
                     newObject.view = ammo[obj.kind];
                     newObject.state.angular.pos = Math.PI*obj.direction/180;
@@ -352,6 +362,7 @@ function gameTick(data){
     if(flags.length){world.add(flags);}
     if(canons.length){world.add(canons);}
     if(launchers.length){world.add(launchers);}
+    if(floors.length){world.add(floors);}
     if(bullets.length){world.add(bullets);}
     world.render();
 }

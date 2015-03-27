@@ -12,9 +12,28 @@
           {"type": "canon", "img": "cs_murakumo.png", "kind": "second", "dx": 0, "dy": -51, "barrels": [0], "angles": [0, 180], "reload": 3000, "direction": 0, "range": 500},
           {"type": "canon", "img": "cs_murakumo.png", "kind": "second", "dx": 5, "dy": -45, "barrels": [0], "angles": [0, 180], "reload": 3000, "direction": 0, "range": 500},
           {"type": "canon", "img": "cs_murakumo.png", "kind": "second", "dx": 0, "dy": 69, "barrels": [0], "angles": [0, 180], "reload": 3000, "direction": 180, "range": 500},
-          {"type": "flag", "dx": 0, "dy": 81}
+          {"type": "flag", "dx": 0, "dy": 80}
         ]
     },
+    {
+        "kind": "georg",
+        "name": "Бр. Георгий",
+        "class": "canon",
+        "cost": 1,
+        "hull_img": "georg.png",
+        "objects": [
+          {"type": "hull", "dx": 0, "dy": 0, "long": 241, "wide": 51},
+          {"type": "floor", "img": "f_georg.png", "dx": 0, "dy": 0},
+          {"type": "canon", "img": "cm_georg.png", "kind": "main", "dx": 11, "dy": -33, "barrels": [4, -4], "angles": [0, 150], "reload": 8000, "direction": 0},
+          {"type": "canon", "img": "cm_georg.png", "kind": "main", "dx": 0, "dy": 28, "barrels": [4, -4], "angles": [35, 180], "reload": 8000, "direction": 180},
+          {"type": "canon", "img": "cs_georg.png", "kind": "second", "dx": 17, "dy": -94, "barrels": [0], "angles": [10, 170], "reload": 3000, "direction": 15, "range": 500},
+          {"type": "canon", "img": "cs_georg.png", "kind": "second", "dx": 23, "dy": -54, "barrels": [0], "angles": [10, 170], "reload": 3000, "direction": 15, "range": 500},
+          {"type": "canon", "img": "cs_georg.png", "kind": "second", "dx": 24, "dy": 2, "barrels": [0], "angles": [10, 170], "reload": 3000, "direction": 165, "range": 500},
+          {"type": "canon", "img": "cs_georg.png", "kind": "second", "dx": 23, "dy": 60, "barrels": [0], "angles": [10, 170], "reload": 3000, "direction": 165, "range": 500},
+          {"type": "flag", "dx": 0, "dy": 120}
+        ]
+    },
+
     {
         "kind": "destroyer",
         "name": "Эсминец",

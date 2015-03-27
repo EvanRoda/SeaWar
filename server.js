@@ -1,22 +1,3 @@
-//todo: Запилить Георгия
-/*
-* center
-* 25.120
-*
-* main
-* 36.87
-* 25.148
-*
-* second
-*
-* 42.26
-* 49.66
-* 49.122
-* 48.180
-*
-*/
-
-
 /**
  * Служебные переменные
  */
@@ -450,6 +431,8 @@ function createShip(player){
             newObj.direction = 0;
             player.long = obj.long; // так проще см. попадание торпед
             player.wide = obj.wide;
+        }else if(obj.type == 'floor'){
+            newObj.direction = 0;
         }
         world.resources[player.side] -= resources;
         player.ship.push(newObj);
