@@ -7,8 +7,8 @@
         "hull_img": "murakumo.png",
         "objects": [
           {"type": "hull", "dx": 0, "dy": 0, "long": 169, "wide": 17},
-          {"type": "launcher", "img": "l_murakumo.png", "dx": 0, "dy": 36, "barrels": [0], "angles": [45, 135], "cone_limit": [0, 0], "ammo_speed": 30, "reload": 5000, "direction": 0},
-          {"type": "launcher", "img": "l_murakumo.png", "dx": 0, "dy": 55, "barrels": [0], "angles": [45, 135], "cone_limit": [0, 0], "ammo_speed": 30, "reload": 5000, "direction": 0},
+          {"type": "launcher", "img": "l_murakumo.png", "dx": 0, "dy": 36, "barrels": [0], "angles": [45, 135], "cone_limit": [0, 0], "ammo_speed": 30, "reload": 30000, "direction": 0},
+          {"type": "launcher", "img": "l_murakumo.png", "dx": 0, "dy": 55, "barrels": [0], "angles": [45, 135], "cone_limit": [0, 0], "ammo_speed": 30, "reload": 30000, "direction": 0},
           {"type": "canon", "img": "cs_murakumo.png", "kind": "second", "dx": 0, "dy": -51, "barrels": [0], "angles": [0, 180], "reload": 3000, "direction": 0, "range": 500},
           {"type": "canon", "img": "cs_murakumo.png", "kind": "second", "dx": 5, "dy": -45, "barrels": [0], "angles": [0, 180], "reload": 3000, "direction": 0, "range": 500},
           {"type": "canon", "img": "cs_murakumo.png", "kind": "second", "dx": 0, "dy": 69, "barrels": [0], "angles": [0, 180], "reload": 3000, "direction": 180, "range": 500},

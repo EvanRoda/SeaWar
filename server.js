@@ -269,8 +269,6 @@ function startBattle(){
 
 function lineUp(firstRow, secondRow){
     var cellWidth = 120, cellHeight, xLimit=0, yLimit=0;
-    log('firstRow', firstRow);
-    log('secondRow', secondRow);
     cellHeight = opt.height / firstRow.length;
     firstRow.forEach(function(id, index){
         var player = world.players[id], newXLimit = 0;
@@ -286,16 +284,12 @@ function lineUp(firstRow, secondRow){
         yLimit = player.y + player.long/2 + 10;
     });
 
-    log('xLimit', xLimit);
-
     cellHeight = opt.height / secondRow.length;
     yLimit = 0;
     secondRow.forEach(function(id, index){
         var player = world.players[id];
         player.x = (player.wide / 2) + xLimit + utils.getRandomForCell(cellWidth * 2 - xLimit - player.wide);
         player.y = player.long/2 + yLimit + utils.getRandomForCell(cellHeight * (index+1) - yLimit - player.long);
-        log('x', player.x);
-        log('y', player.y);
         player.ship.forEach(function(obj){
             obj.x += player.x;
             obj.y += player.y;
