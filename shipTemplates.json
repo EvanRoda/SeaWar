@@ -16,6 +16,18 @@
         ]
     },
     {
+        "kind": "novgorod",
+        "name": "Бр. Новгород",
+        "class": "canon",
+        "cost": 1,
+        "hull_img": "novgorod.png",
+        "objects": [
+            {"type": "hull", "dx": 0, "dy": 0, "long": 75, "wide": 75},
+            {"type": "canon", "img": "cm_novgorod.png", "kind": "main", "dx": 0, "dy": 0, "barrels": [4, -4], "angles": [0, 180], "reload": 8000, "direction": 0},
+            {"type": "flag", "dx": -36, "dy": 36}
+        ]
+    },
+    {
         "kind": "georg",
         "name": "Бр. Георгий",
         "class": "canon",
