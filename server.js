@@ -110,7 +110,7 @@ function torpedoCalc(torpedo, player){
                 t_player.ship.forEach(function(target){
                     var target_range = null;
 
-                    if(target.type == 'canon' || target.type == 'torpedo' || target.type == 'launcher'){
+                    if(target.type == 'canon' || target.type == 'launcher'){
                         if(player.side != t_player.side){
                             vir_x = opt.width - target.x;
                             vir_y = opt.height - target.y;
@@ -120,7 +120,7 @@ function torpedoCalc(torpedo, player){
                         }
 
                         target_range = Math.sqrt(Math.pow(vir_x - torpedo.x, 2) + Math.pow(vir_y - torpedo.y, 2));
-                        if(target_range < opt.torpedoRadius){ //todo: torpedoRadius перенести из глобальных опций в снаряды
+                        if(target_range < torpedo.damage_radius){
                             target.status = false;
                         }
                     }
@@ -172,8 +172,15 @@ function ammoCalc(ammo, player){
                     }
 
                     target_range = Math.sqrt(Math.pow(vir_x - ammo.x, 2) + Math.pow(vir_y - ammo.y, 2));
-                    if(target_range < opt.canonRadius){ //todo: canonRadius перенести из глобальных опций в снаряды
-                        target.status = false;
+                    if(target_range < ammo.damage_radius){
+                        if(target.type == 'torpedo'){
+                            target.type = 'miss';
+                            target.kind = 'main';
+                            target.reload = opt.missLifeTime;
+                            target.reload_counter = 0;
+                        }else{
+                            target.status = false;
+                        }
                         isMiss = false;
                     }
                 }
@@ -410,7 +417,9 @@ function createShip(player){
             newObj.status = true;
             if(obj.type == 'canon'){
                 newObj.kind = obj.kind;
+                newObj.damage_radius = obj.damage_radius || opt.damageRadius;
             }else{
+                newObj.damage_radius = obj.damage_radius || opt.torpedoRadius;
                 newObj.cone_limit = obj.cone_limit;
                 newObj.cone = 0;
             }
@@ -529,7 +538,8 @@ io.sockets.on('connection', function(socket){
                 });
             }
         }else if(command[0].toUpperCase() == 'ДАЛЬНОСТЬ'){
-            player.distance = parseInt(command[1]);
+            var distance = parseInt(command[1]);
+            player.distance = distance >= opt.minDistance ? distance : opt.minDistance;
         }else if(command[0].toUpperCase() == 'ОГОНЬ'){
             shot = false;
             player.ship.forEach(function(obj){
@@ -549,6 +559,7 @@ io.sockets.on('connection', function(socket){
                                 y: obj.y - c * Math.cos((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
                                 direction: obj.direction + utils.getRandom(0.5, 100),
                                 ammo_speed: obj.ammo_speed,
+                                damage_radius: obj.damage_radius,
                                 distance: player.distance + utils.getRandom(player.distance, 0.5),
                                 distance_counter: 0
                             };
@@ -599,6 +610,7 @@ io.sockets.on('connection', function(socket){
                                 y: obj.y - c * Math.cos((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
                                 direction: obj.direction + ha - index*da,
                                 ammo_speed: obj.ammo_speed,
+                                damage_radius: obj.damage_radius,
                                 distance: obj.range,// + utils.getRandom(player.distance, 0.5),
                                 distance_counter: 0
                             };
