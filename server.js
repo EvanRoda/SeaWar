@@ -323,6 +323,10 @@ function kickPlayer(player_id){
     }
 }
 
+app.get('/', function(request, response) {
+    response.send('Hello World!');
+});
+
 app.use(express.static(path.join(__dirname, 'static')));
 
 server.listen(3000, function(){
