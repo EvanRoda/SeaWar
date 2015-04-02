@@ -329,7 +329,7 @@ app.get('/', function(request, response) {
     response.send('Hello World!');
 });
 
-server.listen(3000, function(){
+server.listen(process.env.PORT || 3000, function(){
     console.log('Express server listening on port ' + 3000);
 });
 
