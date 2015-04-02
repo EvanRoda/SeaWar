@@ -3,6 +3,7 @@
   "height": 810,
   "delay": 60,
   "maxWind": 0.1,
+  "angleSpeed": 20,
   "ammoSpeed": 100,
   "missLifeTime": 2500,
   "canonRadius": 20,

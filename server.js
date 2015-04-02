@@ -220,9 +220,7 @@ function startBattle(){
     });
     world.lobby = temp;
 
-    //todo: Написать функцию распределения игроков по точкам сетки (или даже отказаться от сетки)
-    //в зависимости от типа корабля (торпедоносцы вперед). Или дать игрокам самим выбирать.
-    //
+    // Распределение игроков на поле
     ['leaf', 'fire'].forEach(function(side){
         var cellWidth, cellHeight, yLimit=0, allPlayers, firstRow, secondRow;
         if(counter[side].count <= 3){
@@ -405,7 +403,7 @@ function createShip(player){
             newObj.direction = obj.direction;
             newObj.given_direction = obj.direction;
             newObj.delta_direction = 0;
-            newObj.angle_speed = 20;
+            newObj.angle_speed = obj.angle_speed || opt.angleSpeed;
             newObj.ammo_speed = obj.ammo_speed || opt.ammoSpeed;
             newObj.reload = obj.reload;
             newObj.reload_counter = 0;
