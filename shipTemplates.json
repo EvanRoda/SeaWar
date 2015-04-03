@@ -1,9 +1,31 @@
 [
     {
+        "kind": "icukusima",
+        "name": "Кр. Ицукусима",
+        "class": "canon",
+        "cost": 2,
+        "hull_img": "icukusima.png",
+        "objects": [
+            {"type": "hull", "dx": 0, "dy": 0, "long": 209, "wide": 39},
+            {"type": "floor", "img": "f_icukusima.png", "dx": 0, "dy": 0},
+            {"type": "canon", "img": "cm_icukusima.png", "kind": "main", "dx": 0, "dy": -42, "barrels": [0], "angles": [0, 140], "reload": 8000, "direction": 0},
+
+            {"type": "canon", "img": "cs_icukusima.png", "kind": "second", "dx": 12, "dy": 3, "barrels": [0], "angles": [45, 135], "reload": 3000, "direction": 90, "range": 500},
+            {"type": "canon", "img": "cs_icukusima.png", "kind": "second", "dx": 12, "dy": 15, "barrels": [0], "angles": [45, 135], "reload": 3000, "direction": 90, "range": 500},
+            {"type": "canon", "img": "cs_icukusima.png", "kind": "second", "dx": 12, "dy": 26, "barrels": [0], "angles": [45, 135], "reload": 3000, "direction": 90, "range": 500},
+            {"type": "canon", "img": "cs_icukusima.png", "kind": "second", "dx": 10, "dy": 39, "barrels": [0], "angles": [60, 120], "reload": 3000, "direction": 90, "range": 500},
+            {"type": "canon", "img": "cs_icukusima.png", "kind": "second", "dx": 8, "dy": 49, "barrels": [0], "angles": [60, 120], "reload": 3000, "direction": 90, "range": 500},
+            {"type": "canon", "img": "cs_icukusima.png", "kind": "second", "dx": 7, "dy": 60, "barrels": [0], "angles": [60, 120], "reload": 3000, "direction": 90, "range": 500},
+            {"type": "canon", "img": "cs_icukusima.png", "kind": "second", "dx": 5, "dy": 71, "barrels": [0], "angles": [60, 120], "reload": 3000, "direction": 90, "range": 500},
+            {"type": "canon", "img": "cs_icukusima.png", "kind": "second", "dx": 0, "dy": 93, "barrels": [0], "angles": [60, 120], "reload": 3000, "direction": 90, "range": 500},
+            {"type": "flag", "dx": 0, "dy": 104}
+        ]
+    },
+    {
         "kind": "murakumo",
         "name": "Эсм. Муракумо",
         "class": "torpedo",
-        "cost": 1,
+        "cost": 3,
         "hull_img": "murakumo.png",
         "objects": [
           {"type": "hull", "dx": 0, "dy": 0, "long": 169, "wide": 17},
@@ -19,7 +41,7 @@
         "kind": "novgorod",
         "name": "Бр. Новгород",
         "class": "canon",
-        "cost": 1,
+        "cost": 2,
         "hull_img": "novgorod.png",
         "objects": [
             {"type": "hull", "dx": 0, "dy": 0, "long": 75, "wide": 75},
@@ -31,7 +53,7 @@
         "kind": "georg",
         "name": "Бр. Георгий",
         "class": "canon",
-        "cost": 1,
+        "cost": 5,
         "hull_img": "georg.png",
         "objects": [
           {"type": "hull", "dx": 0, "dy": 0, "long": 241, "wide": 51},
