@@ -45,6 +45,27 @@
           {"type": "flag", "dx": 0, "dy": 120}
         ]
     },
+    {
+        "kind": "aoba",
+        "name": "Кр. Аоба",
+        "class": "torpedo",
+        "cost": 11,
+        "hull_img": "aoba.png",
+        "objects": [
+            {"type": "hull", "dx": 0, "dy": 0, "long": 269, "wide": 39},
+            {"type": "floor", "img": "f_aoba.png", "dx": 0, "dy": 0},
+            {"type": "canon", "img": "cm_aoba.png", "kind": "main", "dx": 0, "dy": -82, "barrels": [3, -3], "angles": [0, 140], "reload": 8000, "direction": 0},
+            {"type": "canon", "img": "cm_aoba.png", "kind": "main", "dx": 0, "dy": -69, "barrels": [3, -3], "angles": [0, 140], "reload": 8000, "direction": 0},
+            {"type": "canon", "img": "cm_aoba.png", "kind": "main", "dx": 0, "dy": 76, "barrels": [3, -3], "angles": [30, 180], "reload": 8000, "direction": 180},
+
+            {"type": "canon", "img": "cs_aoba.png", "kind": "second", "dx": 14, "dy": -9, "barrels": [0], "angles": [10, 170], "reload": 3000, "direction": 0, "range": 500},
+            {"type": "canon", "img": "cs_aoba.png", "kind": "second", "dx": 14, "dy": 12, "barrels": [0], "angles": [10, 170], "reload": 3000, "direction": 180, "range": 500},
+
+            {"type": "launcher", "img": "l_aoba.png", "dx": 14, "dy": 41, "barrels": [-3, -1, 1, 3], "angles": [45, 135], "cone_limit": [1, 15], "ammo_speed": 30, "reload": 30000, "direction": 0},
+
+            {"type": "flag", "dx": 0, "dy": 134}
+        ]
+    },
 
     {
         "kind": "destroyer",

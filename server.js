@@ -579,13 +579,13 @@ io.sockets.on('connection', function(socket){
             player.ship.forEach(function(obj){
                 if(obj.type == 'launcher' && obj.status){
                     if(cone < obj.cone_limit[0]){
-                        obj.cone = obj.cone_limit[0];
+                        obj.cone = -obj.cone_limit[0];
                         socket.emit('messages', {show: true, color: '', strong: 'Минимальный угол', span: ''});
                     }else if(cone > obj.cone_limit[1]){
-                        obj.cone = obj.cone_limit[1];
+                        obj.cone = -obj.cone_limit[1];
                         socket.emit('messages', {show: true, color: '', strong: 'Максимальный угол', span: ''});
                     }else{
-                        obj.cone = cone;
+                        obj.cone = -cone;
                     }
                 }
             });
