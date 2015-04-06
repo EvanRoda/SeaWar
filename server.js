@@ -8,7 +8,6 @@ var _ = require('lodash');
 var shipsTemplates = require('./shipTemplates');
 var utils = require('./utils');
 var opt = require('./options');
-var defaultGrid = require('./grid');
 var bots = require('./bots');
 
 var app = express();
@@ -20,8 +19,6 @@ var server = http.createServer(app);
 
 var intId = null;
 var io;
-
-var grid = utils.extend({}, defaultGrid, true);
 
 var world = {
     battle: {
@@ -47,6 +44,29 @@ function addBotToLobby(){
         world.lobby.push(bot._id);
     });
     io.emit('update_player_list', world);
+}
+
+function botsAI(bot){
+    var otherSide = [], tPlayer;
+    if(bot.target_player){
+        tPlayer = world.players[bot.target_player];
+
+        // todo: Тут бот будет отдавать команды.
+
+        if(tPlayer.isDefeat){
+            bot.target = null;
+        }
+    }else{
+        world.inBattle.forEach(function(id){
+            var temp = world.players[id];
+            if(temp.side != bot.side && !temp.isDefeat){
+                otherSide.push(id);
+            }
+        });
+        if(otherSide.length){
+            bot.target_player = otherSide[_.random(otherSide.length - 1)];
+        }
+    }
 }
 
 function log(a, b){
@@ -276,7 +296,7 @@ function lineUp(firstRow, secondRow){
     var cellWidth = 120, cellHeight, xLimit=0, yLimit=0;
     cellHeight = opt.height / firstRow.length;
     firstRow.forEach(function(id, index){
-        var player = world.players[id], newXLimit = 0;
+        var player = world.players[id], newXLimit;
 
         player.x = (player.wide / 2) + utils.getRandomForCell(cellWidth - player.wide);
         player.y = player.long/2 + yLimit + utils.getRandomForCell(cellHeight * (index+1) - yLimit - player.long);
@@ -382,8 +402,6 @@ function endBattle(winSide){
     addBotToLobby(); //todo: Убрать когда боты будут добавляться руками
     world.inBattle = [];
     world.battle.status = 'wait';
-
-    grid = utils.extend({}, defaultGrid, true);
 }
 
 function deleteDisconnected(){
@@ -452,6 +470,129 @@ function kickPlayer(player_id){
     }
 }
 
+function setCommand(player, command, socket){
+    var shot = false;
+    if(command[0].toUpperCase() == 'НАПРАВЛЕНИЕ'){
+        player.ship.forEach(function(obj){
+            var value = parseInt(command[1]);
+            if(obj.type == 'canon' || obj.type == 'launcher'){
+                if(value < obj.min_angle){
+                    value = obj.min_angle;
+                }else if(value > obj.max_angle){
+                    value = obj.max_angle;
+                }
+                obj.given_direction = value - obj.delta_direction;
+            }
+        });
+    }else if(command[0].toUpperCase() == 'СВЕДЕНИЕ'){
+        var range = parseInt(command[1]);
+        if(range>0){
+            player.ship.forEach(function(obj){
+                if(obj.type == 'canon'){
+                    var dy = player.y - obj.y;
+                    obj.delta_direction = Math.atan(-1*dy/range)*180/Math.PI;
+                    obj.given_direction = obj.given_direction - obj.delta_direction;
+                }
+            });
+        }else{
+            player.ship.forEach(function(obj){
+                if(obj.type == 'canon'){
+                    obj.given_direction = obj.given_direction + obj.delta_direction;
+                    obj.delta_direction = 0;
+                }
+            });
+        }
+    }else if(command[0].toUpperCase() == 'ДАЛЬНОСТЬ'){
+        var distance = parseInt(command[1]);
+        player.distance = distance >= opt.minDistance ? distance : opt.minDistance;
+    }else if(command[0].toUpperCase() == 'ОГОНЬ'){
+        shot = false;
+        player.ship.forEach(function(obj){
+            if(obj.type == 'canon' && obj.status && player.distance <= obj.range ){
+                var dy;
+                if(obj.reload_counter <= 0){
+                    obj.reload_counter = obj.reload;
+                    dy = opt.barrelLength;
+                    obj.barrels.forEach(function(dx){
+                        var c = Math.sqrt(dx*dx + dy*dy);
+                        var alfa = obj.direction * Math.PI / 180;
+                        var beta = Math.asin(dy/c);
+                        var ammo = {
+                            type: 'ammo',
+                            kind: obj.kind,
+                            x: obj.x + c * Math.sin((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
+                            y: obj.y - c * Math.cos((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
+                            direction: obj.direction + utils.getRandom(0.5, 100),
+                            ammo_speed: obj.ammo_speed,
+                            damage_radius: obj.damage_radius,
+                            distance: player.distance + utils.getRandom(player.distance, 0.5),
+                            distance_counter: 0
+                        };
+                        player.ship.push(ammo);
+                        shot = true;
+                    });
+                }else{
+                    if(socket) socket.emit('messages', {show: true, color: '', strong: 'Орудия перезаряжаются', span: ''});
+                }
+            }
+        });
+        if(socket && shot){
+            socket.emit('messages', {show: true, color: '', strong: 'Перезарядка', span: ''});
+        }
+    }else if(command[0].toUpperCase() == 'УГОЛ'){
+        var cone = parseInt(command[1]);
+        player.ship.forEach(function(obj){
+            if(obj.type == 'launcher' && obj.status){
+                if(cone < obj.cone_limit[0]){
+                    obj.cone = -obj.cone_limit[0];
+                    if(socket) socket.emit('messages', {show: true, color: '', strong: 'Минимальный угол', span: ''});
+                }else if(cone > obj.cone_limit[1]){
+                    obj.cone = -obj.cone_limit[1];
+                    if(socket) socket.emit('messages', {show: true, color: '', strong: 'Максимальный угол', span: ''});
+                }else{
+                    obj.cone = -cone;
+                }
+            }
+        });
+    }else if(command[0].toUpperCase() == 'ПУСК'){
+        shot = false;
+        player.ship.forEach(function(obj){
+            if(obj.type == 'launcher' && obj.status){
+                var dy, ha, da;
+                if(obj.reload_counter <= 0){
+                    obj.reload_counter = obj.reload;
+                    dy = opt.barrelLength;
+
+                    ha = obj.barrels.length > 1 ? (obj.cone / 2) : 0;
+                    da = obj.barrels.length > 1 ? (obj.cone / (obj.barrels.length - 1)) : 0;
+                    obj.barrels.forEach(function(dx, index){
+                        var c = Math.sqrt(dx*dx + dy*dy);
+                        var alfa = obj.direction * Math.PI / 180;
+                        var beta = Math.asin(dy/c);
+                        var torpedo = {
+                            type: 'torpedo',
+                            x: obj.x + c * Math.sin((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
+                            y: obj.y - c * Math.cos((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
+                            direction: obj.direction + ha - index*da,
+                            ammo_speed: obj.ammo_speed,
+                            damage_radius: obj.damage_radius,
+                            distance: obj.range,// + utils.getRandom(player.distance, 0.5),
+                            distance_counter: 0
+                        };
+                        player.ship.push(torpedo);
+                        shot = true;
+                    });
+                }else{
+                    if(socket) socket.emit('messages', {show: true, color: '', strong: 'ТА перезаряжаютя', span: ''});
+                }
+            }
+        });
+        if(socket && shot){
+            socket.emit('messages', {show: true, color: '', strong: 'Идет перезарядка ТА', span: ''});
+        }
+    }
+}
+
 app.use(express.static(path.join(__dirname, 'static')));
 
 server.listen(3000, function(){
@@ -506,126 +647,7 @@ io.sockets.on('connection', function(socket){
     socket.on('command', function(data){
         var player = world.players[data.player_id];
         var command =  data.command.split(' ', 2);
-        var shot = false;
-        if(command[0].toUpperCase() == 'НАПРАВЛЕНИЕ'){
-            player.ship.forEach(function(obj){
-                var value = parseInt(command[1]);
-                if(obj.type == 'canon' || obj.type == 'launcher'){
-                    if(value < obj.min_angle){
-                        value = obj.min_angle;
-                    }else if(value > obj.max_angle){
-                        value = obj.max_angle;
-                    }
-                    obj.given_direction = value - obj.delta_direction;
-                }
-            });
-        }else if(command[0].toUpperCase() == 'СВЕДЕНИЕ'){
-            var range = parseInt(command[1]);
-            if(range>0){
-                player.ship.forEach(function(obj){
-                    if(obj.type == 'canon'){
-                        var dy = player.y - obj.y;
-                        obj.delta_direction = Math.atan(-1*dy/range)*180/Math.PI;
-                        obj.given_direction = obj.given_direction - obj.delta_direction;
-                    }
-                });
-            }else{
-                player.ship.forEach(function(obj){
-                    if(obj.type == 'canon'){
-                        obj.given_direction = obj.given_direction + obj.delta_direction;
-                        obj.delta_direction = 0;
-                    }
-                });
-            }
-        }else if(command[0].toUpperCase() == 'ДАЛЬНОСТЬ'){
-            var distance = parseInt(command[1]);
-            player.distance = distance >= opt.minDistance ? distance : opt.minDistance;
-        }else if(command[0].toUpperCase() == 'ОГОНЬ'){
-            shot = false;
-            player.ship.forEach(function(obj){
-                if(obj.type == 'canon' && obj.status && player.distance <= obj.range ){
-                    var dy;
-                    if(obj.reload_counter <= 0){
-                        obj.reload_counter = obj.reload;
-                        dy = opt.barrelLength;
-                        obj.barrels.forEach(function(dx){
-                            var c = Math.sqrt(dx*dx + dy*dy);
-                            var alfa = obj.direction * Math.PI / 180;
-                            var beta = Math.asin(dy/c);
-                            var ammo = {
-                                type: 'ammo',
-                                kind: obj.kind,
-                                x: obj.x + c * Math.sin((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
-                                y: obj.y - c * Math.cos((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
-                                direction: obj.direction + utils.getRandom(0.5, 100),
-                                ammo_speed: obj.ammo_speed,
-                                damage_radius: obj.damage_radius,
-                                distance: player.distance + utils.getRandom(player.distance, 0.5),
-                                distance_counter: 0
-                            };
-                            player.ship.push(ammo);
-                            shot = true;
-                        });
-                    }else{
-                        socket.emit('messages', {show: true, color: '', strong: 'Орудия перезаряжаются', span: ''});
-                    }
-                }
-            });
-            if(shot){
-                socket.emit('messages', {show: true, color: '', strong: 'Перезарядка', span: ''});
-            }
-        }else if(command[0].toUpperCase() == 'УГОЛ'){
-            var cone = parseInt(command[1]);
-            player.ship.forEach(function(obj){
-                if(obj.type == 'launcher' && obj.status){
-                    if(cone < obj.cone_limit[0]){
-                        obj.cone = -obj.cone_limit[0];
-                        socket.emit('messages', {show: true, color: '', strong: 'Минимальный угол', span: ''});
-                    }else if(cone > obj.cone_limit[1]){
-                        obj.cone = -obj.cone_limit[1];
-                        socket.emit('messages', {show: true, color: '', strong: 'Максимальный угол', span: ''});
-                    }else{
-                        obj.cone = -cone;
-                    }
-                }
-            });
-        }else if(command[0].toUpperCase() == 'ПУСК'){
-            shot = false;
-            player.ship.forEach(function(obj){
-                if(obj.type == 'launcher' && obj.status){
-                    var dy, ha, da;
-                    if(obj.reload_counter <= 0){
-                        obj.reload_counter = obj.reload;
-                        dy = opt.barrelLength;
-
-                        ha = obj.barrels.length > 1 ? (obj.cone / 2) : 0;
-                        da = obj.barrels.length > 1 ? (obj.cone / (obj.barrels.length - 1)) : 0;
-                        obj.barrels.forEach(function(dx, index){
-                            var c = Math.sqrt(dx*dx + dy*dy);
-                            var alfa = obj.direction * Math.PI / 180;
-                            var beta = Math.asin(dy/c);
-                            var torpedo = {
-                                type: 'torpedo',
-                                x: obj.x + c * Math.sin((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
-                                y: obj.y - c * Math.cos((dx > 0 ? (Math.PI/2 - beta) : (beta - Math.PI/2)) + alfa),
-                                direction: obj.direction + ha - index*da,
-                                ammo_speed: obj.ammo_speed,
-                                damage_radius: obj.damage_radius,
-                                distance: obj.range,// + utils.getRandom(player.distance, 0.5),
-                                distance_counter: 0
-                            };
-                            player.ship.push(torpedo);
-                            shot = true;
-                        });
-                    }else{
-                        socket.emit('messages', {show: true, color: '', strong: 'ТА перезаряжаютя', span: ''});
-                    }
-                }
-            });
-            if(shot){
-                socket.emit('messages', {show: true, color: '', strong: 'Идет перезарядка ТА', span: ''});
-            }
-        }
+        setCommand(player, command, socket);
     });
 
     // Выкидываем игрока на начальный экран
