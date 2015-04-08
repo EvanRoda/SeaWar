@@ -3,7 +3,7 @@
     "_id": "arny",
     "nickName": "Arny*",
     "is_bot": true,
-    "shipType": "destroyer",
+    "shipType": "icukusima",
     "side": "fire"
   },
   {
@@ -24,7 +24,7 @@
     "_id": "jan2",
     "nickName": "Jan*",
     "is_bot": true,
-    "shipType": "duilioP",
+    "shipType": "aoba",
     "side": "fire"
   }
 ]

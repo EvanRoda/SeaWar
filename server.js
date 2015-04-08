@@ -34,8 +34,8 @@ var world = {
     endCounter: opt.defaultEndCounter,   // ms милисекунды
     windCounter: opt.defaultWindCounter,   // ms милисекунды
     resources: {
-        leaf: 15,
-        fire: 15
+        leaf: 60,
+        fire: 60
     }
 };
 
@@ -46,28 +46,37 @@ function addBotToLobby(){
     io.emit('update_player_list', world);
 }
 
-function botsAI(bot){
-    var otherSide = [], tPlayer;
-    if(bot.target_player){
-        tPlayer = world.players[bot.target_player];
+var botsAI = {
+    targetWatcher: function(bot){
+        var otherSide = [], tPlayer;
+        if(bot.target_player){
+            tPlayer = world.players[bot.target_player];
 
-        // todo: Тут бот будет отдавать команды.
+            // todo: Выбор цели (башня или ТА) по которой стрелять
+            // todo: Определить направление и дальность.
 
-        if(tPlayer.isDefeat){
-            bot.target = null;
-        }
-    }else{
-        world.inBattle.forEach(function(id){
-            var temp = world.players[id];
-            if(temp.side != bot.side && !temp.isDefeat){
-                otherSide.push(id);
+            // todo: Тут бот будет отдавать команды.
+
+            if(tPlayer.isDefeat){
+                bot.target_player = null;
             }
-        });
-        if(otherSide.length){
-            bot.target_player = otherSide[_.random(otherSide.length - 1)];
+        }else{
+            world.inBattle.forEach(function(id){
+                var temp = world.players[id];
+                if(temp.side != bot.side && !temp.isDefeat){
+                    otherSide.push(id);
+                }
+            });
+            if(otherSide.length){
+                bot.target_player = otherSide[_.random(otherSide.length - 1)];
+            }
         }
+    },
+    //Прицеливание
+    aim: function(){
+
     }
-}
+};
 
 function log(a, b){
     io.emit('logging', {a:a, b:b});
