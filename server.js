@@ -46,19 +46,50 @@ function addBotToLobby(){
     io.emit('update_player_list', world);
 }
 
+/**
+ * bot.memory
+ *
+ * target_player - id игрока на которого агрится бот
+ * target - параметры (коордиаты и всякое другое) башни или ТА в которую пытается попасть бот
+ *
+ *
+ *
+ */
+
 var botsAI = {
     targetWatcher: function(bot){
-        var otherSide = [], tPlayer;
-        if(bot.target_player){
-            tPlayer = world.players[bot.target_player];
+        var otherSide = [], tPlayer, newTarget;
+        if(bot.memory.target_player){
+            tPlayer = world.players[bot.memory.target_player];
 
             // todo: Выбор цели (башня или ТА) по которой стрелять
+            if(bot.memory.target){
+                //todo: Проверка статуса цели если false сбрасываем target и выбиреам новую
+
+            }else{
+                newTarget = _.findWhere(tPlayer.ship, function(obj){
+                    return (obj.type == 'canon' || obj.type == 'launcher') && obj.status;
+                });
+                if(newTarget){
+                    bot.memory.target = {
+                        _id: newTarget._id,
+                        x: newTarget.x,
+                        y: newTarget.y,
+                        status: newTarget.status
+                    }
+                }
+            }
+
+            // todo: Задать сведение исходя из расстояния между точками
             // todo: Определить направление и дальность.
+            // todo: Выстрел если все готово.
 
             // todo: Тут бот будет отдавать команды.
+            // Пример отдачи команды
+            this.command(bot, ['Направление', 90], false);
 
             if(tPlayer.isDefeat){
-                bot.target_player = null;
+                bot.memory.target_player = null;
             }
         }else{
             world.inBattle.forEach(function(id){
@@ -68,19 +99,31 @@ var botsAI = {
                 }
             });
             if(otherSide.length){
-                bot.target_player = otherSide[_.random(otherSide.length - 1)];
+                bot.memory.target_player = otherSide[_.random(otherSide.length - 1)];
+                //todo: Возможно после выбора tPlayer, есть смысл формировать словарь из возможных целей
             }
         }
     },
     //Прицеливание
     aim: function(){
 
-    }
+    },
+
+    command: setCommand
 };
 
 function log(a, b){
     io.emit('logging', {a:a, b:b});
 }
+
+// Генератор ID-шников для объектов
+// todo: стандартизировать ID-шники. Отдавть строку фиксированной длины.
+var getId = (function(){
+    var counter = 0;
+    return function(){
+        return ++counter;
+    };
+})();
 
 function canonLauncherCalc(obj, player){
     var delta = null, playerSocket;
@@ -219,6 +262,13 @@ function ammoCalc(ammo, player){
             ammo.type = 'miss';
             ammo.reload = opt.missLifeTime;
             ammo.reload_counter = 0;
+
+            if(player.is_bot && isMiss){
+                //todo: Передать координаты и что-нибудь еще если понадобится
+                botsAI.aim();
+            }else if(player.is_bot && !isMiss){
+                // todo: Сбросить таргет при попадании
+            }
         });
     }
 }
@@ -428,7 +478,9 @@ function createShip(player){
     player.shipClass = template.class;
     template.objects.forEach(function(obj){
         var resources = 0;
+        // todo: Раздать объектам id-шники.
         var newObj = {
+            _id: getId(),
             type: obj.type,
             x: obj.dx,   //player.x + obj.dx,
             y: obj.dy    //player.y + obj.dy
@@ -495,7 +547,7 @@ function setCommand(player, command, socket){
         });
     }else if(command[0].toUpperCase() == 'СВЕДЕНИЕ'){
         var range = parseInt(command[1]);
-        if(range>0){
+        if(range > 0){
             player.ship.forEach(function(obj){
                 if(obj.type == 'canon'){
                     var dy = player.y - obj.y;
@@ -674,6 +726,7 @@ io.sockets.on('connection', function(socket){
 //todo: Добавление ботов в очередь по желанию игрока.
 bots.forEach(function(bot){
     world.players[bot._id] = bot;
+    world.players[bot._id].memory = {};
 });
 addBotToLobby();
 
