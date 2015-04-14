@@ -4,27 +4,63 @@
     "nickName": "Arny*",
     "is_bot": true,
     "shipType": "icukusima",
-    "side": "fire"
+    "side": "fire",
+    "delay": 4000
   },
   {
     "_id": "jan",
     "nickName": "Jan*",
     "is_bot": true,
     "shipType": "duilioP",
-    "side": "fire"
+    "side": "fire",
+    "delay": 3500
   },
   {
     "_id": "rutger",
     "nickName": "Arny*",
     "is_bot": true,
-    "shipType": "murakumo",
-    "side": "fire"
+    "shipType": "georg",
+    "side": "fire",
+    "delay": 6000
   },
   {
     "_id": "jan2",
     "nickName": "Jan*",
     "is_bot": true,
     "shipType": "aoba",
-    "side": "fire"
+    "side": "fire",
+    "delay": 5000
+  },
+  {
+    "_id": "arnyl",
+    "nickName": "Arny*",
+    "is_bot": true,
+    "shipType": "icukusima",
+    "side": "leaf",
+    "delay": 4000
+  },
+  {
+    "_id": "janl",
+    "nickName": "Jan*",
+    "is_bot": true,
+    "shipType": "duilioP",
+    "side": "leaf",
+    "delay": 3500
+  },
+  {
+    "_id": "rutgerl",
+    "nickName": "Arny*",
+    "is_bot": true,
+    "shipType": "georg",
+    "side": "leaf",
+    "delay": 6000
+  },
+  {
+    "_id": "janl2",
+    "nickName": "Jan*",
+    "is_bot": true,
+    "shipType": "aoba",
+    "side": "leaf",
+    "delay": 5000
   }
 ]

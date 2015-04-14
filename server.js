@@ -46,67 +46,172 @@ function addBotToLobby(){
     io.emit('update_player_list', world);
 }
 
-/**
- * bot.memory
- *
- * target_player - id игрока на которого агрится бот
- * target - параметры (коордиаты и всякое другое) башни или ТА в которую пытается попасть бот
- *
- *
- *
- */
-
 var botsAI = {
-    targetWatcher: function(bot){
-        var otherSide = [], tPlayer, newTarget;
-        if(bot.memory.target_player){
-            tPlayer = world.players[bot.memory.target_player];
+    states: {
+        //Тупо ждем конца
+        endIsNear: {
+            action: function(bot){}
+        },
 
-            // todo: Выбор цели (башня или ТА) по которой стрелять
-            if(bot.memory.target){
-                //todo: Проверка статуса цели если false сбрасываем target и выбиреам новую
+        // Выбор нового игрока-цели
+        notTPlayer: {
+            action: function(bot){
+                var otherSide = [];
 
-            }else{
-                newTarget = _.findWhere(tPlayer.ship, function(obj){
+                world.inBattle.forEach(function(id){
+                    var temp = world.players[id];
+                    if(temp.side != bot.side && !temp.isDefeat){
+                        otherSide.push(id);
+                    }
+                });
+
+                if(otherSide.length){
+                    bot.memory.target_player = otherSide[_.random(otherSide.length - 1)];
+                    bot.memory.state = 'notTarget';
+                }else{
+                    bot.memory.state = 'endIsNear';
+                }
+            }
+        },
+
+        //Выбор цели (башня или ТА) по которой стрелять
+        notTarget: {
+            action: function(bot){
+                var tPlayer = world.players[bot.memory.target_player];
+                var newTarget = _.findWhere(tPlayer.ship, function(obj){
                     return (obj.type == 'canon' || obj.type == 'launcher') && obj.status;
                 });
-                if(newTarget){
+
+                if(!tPlayer.isDefeat && newTarget){
                     bot.memory.target = {
                         _id: newTarget._id,
-                        x: newTarget.x,
-                        y: newTarget.y,
-                        status: newTarget.status
+                        x: opt.width - newTarget.x,
+                        y: opt.height - newTarget.y
+                    };
+                    bot.memory.state = 'calculation';
+                }else{
+                    bot.memory.state = 'notTPlayer';
+                }
+            }
+        },
+
+        // Вычисление направления и дальности
+        calculation: {
+            action: function(bot){
+                var dy = bot.y - bot.memory.target.y;
+                bot.memory.range = Math.sqrt(Math.pow(bot.memory.target.x - bot.x, 2) + Math.pow(bot.memory.target.y - bot.y, 2));
+                bot.memory.direction = 90 - Math.atan(dy/bot.memory.range)*180/Math.PI;
+                bot.memory.state = 'reduction';
+            }
+        },
+
+        // Устанавливаем сведение
+        reduction: {
+            action: function(bot){
+                if(botsAI.checkTarget(bot)){
+                    var deltaDelay = bot.delay - bot.memory.delayCounter;
+                    if(deltaDelay < opt.delay){
+                        botsAI.command(bot, ['сведение', bot.memory.range], false);
+                        bot.memory.delayCounter = 0;
+                        bot.memory.state = 'direction';
+                    }else{
+                        bot.memory.delayCounter += opt.delay;
                     }
+                }else{
+                    bot.memory.state = 'notTarget';
                 }
             }
+        },
 
-            // todo: Задать сведение исходя из расстояния между точками
-            // todo: Определить направление и дальность.
-            // todo: Выстрел если все готово.
-
-            // todo: Тут бот будет отдавать команды.
-            // Пример отдачи команды
-            this.command(bot, ['Направление', 90], false);
-
-            if(tPlayer.isDefeat){
-                bot.memory.target_player = null;
-            }
-        }else{
-            world.inBattle.forEach(function(id){
-                var temp = world.players[id];
-                if(temp.side != bot.side && !temp.isDefeat){
-                    otherSide.push(id);
+        // Устанавливаем направление
+        direction: {
+            action: function(bot){
+                if(botsAI.checkTarget(bot)){
+                    var deltaDelay = bot.delay - bot.memory.delayCounter;
+                    if(deltaDelay < opt.delay){
+                        botsAI.command(bot, ['направление', bot.memory.direction], false);
+                        bot.memory.delayCounter = 0;
+                        bot.memory.state = 'range';
+                    }else{
+                        bot.memory.delayCounter += opt.delay;
+                    }
+                }else{
+                    bot.memory.state = 'notTarget';
                 }
-            });
-            if(otherSide.length){
-                bot.memory.target_player = otherSide[_.random(otherSide.length - 1)];
-                //todo: Возможно после выбора tPlayer, есть смысл формировать словарь из возможных целей
+            }
+        },
+
+        // Устанавливаем дальность
+        range: {
+            action: function(bot){
+                if(botsAI.checkTarget(bot)){
+                    var deltaDelay = bot.delay - bot.memory.delayCounter;
+                    if(deltaDelay < opt.delay){
+                        botsAI.command(bot, ['дальность', bot.memory.range], false);
+                        bot.memory.delayCounter = 0;
+                        bot.memory.state = 'shot';
+                    }else{
+                        bot.memory.delayCounter += opt.delay;
+                    }
+                }else{
+                    bot.memory.state = 'notTarget';
+                }
+            }
+        },
+
+        // Стреляем
+        shot: {
+            action: function(bot){
+                if(botsAI.checkTarget(bot)){
+                    botsAI.command(bot, ['огонь'], false);
+                    bot.memory.aim = false;
+                    bot.memory.state = 'wait';
+                }else{
+                    bot.memory.state = 'notTarget';
+                }
+            }
+        },
+
+        // Ждем пока долетит снаряд
+        wait: {
+            action: function(bot){
+                if(botsAI.checkTarget(bot)){
+                    // todo: Ждем пока долетит
+                }else{
+                    bot.memory.state = 'notTarget';
+                }
             }
         }
     },
-    //Прицеливание
-    aim: function(){
 
+    // Проверка статуса цели
+    checkTarget: function(bot){
+        var tPlayer = world.players[bot.memory.target_player];
+        var target = _.findWhere(tPlayer.ship, {_id: bot.memory.target._id});
+        return target.status;
+    },
+
+    // Прицеливание
+    aim: function(bot, coordinates){
+        if(!bot.memory.aim){
+            var dy = bot.y - coordinates[1];
+            var newRange = Math.sqrt(Math.pow(coordinates[0] - bot.x, 2) + Math.pow(coordinates[1] - bot.y, 2));
+            var newDirection = 90 - Math.atan(dy/newRange)*180/Math.PI;
+
+            bot.memory.range = bot.memory.range + (bot.memory.target.x - (coordinates[0]));
+            bot.memory.direction = bot.memory.direction + (bot.memory.direction - newDirection);
+            bot.memory.aim = true;
+            bot.memory.state = 'direction';
+        }
+    },
+
+    tryShot: function(bot){
+        bot.memory.state = 'shot';
+    },
+
+    // Слушатель событий
+    watcher: function(bot){
+        this.states[bot.memory.state].action(bot);
     },
 
     command: setCommand
@@ -117,11 +222,12 @@ function log(a, b){
 }
 
 // Генератор ID-шников для объектов
-// todo: стандартизировать ID-шники. Отдавть строку фиксированной длины.
 var getId = (function(){
     var counter = 0;
     return function(){
-        return ++counter;
+        var temp = ++counter + '';
+        if(temp == '999999999'){temp = '000000000'}
+        return ('000000000').slice(0, -1*(temp.length)) + temp;
     };
 })();
 
@@ -263,12 +369,7 @@ function ammoCalc(ammo, player){
             ammo.reload = opt.missLifeTime;
             ammo.reload_counter = 0;
 
-            if(player.is_bot && isMiss){
-                //todo: Передать координаты и что-нибудь еще если понадобится
-                botsAI.aim();
-            }else if(player.is_bot && !isMiss){
-                // todo: Сбросить таргет при попадании
-            }
+            if(player.is_bot) botsAI.aim(player, [ammo.x, ammo.y]);
         });
     }
 }
@@ -401,6 +502,10 @@ function gameCycle(){
                     }
                 });
 
+                if(player && !player.isDefeat && player.is_bot){
+                    botsAI.watcher(player);
+                }
+
                 alive[player.side] += (!player.isDefeat ? 1 : 0);
 
                 deleteList.forEach(function(obj_index, index){
@@ -478,7 +583,6 @@ function createShip(player){
     player.shipClass = template.class;
     template.objects.forEach(function(obj){
         var resources = 0;
-        // todo: Раздать объектам id-шники.
         var newObj = {
             _id: getId(),
             type: obj.type,
@@ -594,6 +698,7 @@ function setCommand(player, command, socket){
                     });
                 }else{
                     if(socket) socket.emit('messages', {show: true, color: '', strong: 'Орудия перезаряжаются', span: ''});
+                    if(player.is_bot) botsAI.tryShot(bot);
                 }
             }
         });
@@ -726,7 +831,13 @@ io.sockets.on('connection', function(socket){
 //todo: Добавление ботов в очередь по желанию игрока.
 bots.forEach(function(bot){
     world.players[bot._id] = bot;
-    world.players[bot._id].memory = {};
+    world.players[bot._id].memory = {
+        wait: false,
+        target_player: null,
+        target: null,
+        state: 'notTPlayer',
+        delayCounter: 0
+    };
 });
 addBotToLobby();
 
