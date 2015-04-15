@@ -31,12 +31,18 @@ var ui = {
     showShip: $('#show_ship'),
 
     render: function(player, where){
+        var fn='', onclick = '';
+        if(player.is_bot){
+            fn = "addBot('" + player._id + "')";
+            onclick = 'onclick="' + fn + '" class="sim_link"';
+        }
+
         if(player._id === itIsYou._id){
             where.append('<div style="color: #c67605"><h4>'+ player.nickName +'</h4></div>')
         }else if(player.side === 'leaf'){
-            where.append('<div style="color: #39b25a"><h4>'+ player.nickName +'</h4></div>')
+            where.append('<div '+ (player.is_bot && where[0].id == 'all_players' ? onclick : '') + ' style="color: #39b25a"><h4>'+ player.nickName +'</h4></div>')
         }else{
-            where.append('<div style="color: #b21c1f"><h4>'+ player.nickName +'</h4></div>')
+            where.append('<div '+ (player.is_bot && where[0].id == 'all_players' ? onclick : '') + ' style="color: #b21c1f"><h4>'+ player.nickName +'</h4></div>')
         }
     },
 
@@ -412,6 +418,10 @@ function toBattle(){
 
 function leaveBattle(){
     socket.emit('leave_battle');
+}
+
+function addBot(bot_id){
+    socket.emit('add_bot_to_lobby', bot_id);
 }
 
 function markOfNumber(number){

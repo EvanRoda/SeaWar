@@ -39,11 +39,12 @@ var world = {
     }
 };
 
-function addBotToLobby(){
-    bots.forEach(function(bot){
-        world.lobby.push(bot._id);
-    });
-    io.emit('update_player_list', world);
+function addBotToLobby(botId){
+    var check = _.findWhere(world.lobby, botId);
+    if(!check && world.players[botId]){
+        world.lobby.push(botId);
+        io.emit('update_player_list', world);
+    }
 }
 
 var botsAI = {
@@ -563,7 +564,6 @@ function endBattle(winSide){
     });
     deleteDisconnected();
     clearInterval(intId);
-    addBotToLobby(); //todo: Убрать когда боты будут добавляться руками
     world.inBattle = [];
     world.battle.status = 'wait';
 }
@@ -655,6 +655,7 @@ function setCommand(player, command, socket){
             player.ship.forEach(function(obj){
                 if(obj.type == 'canon'){
                     var dy = player.y - obj.y;
+                    obj.given_direction = obj.given_direction + obj.delta_direction;
                     obj.delta_direction = Math.atan(-1*dy/range)*180/Math.PI;
                     obj.given_direction = obj.given_direction - obj.delta_direction;
                 }
@@ -816,6 +817,8 @@ io.sockets.on('connection', function(socket){
         setCommand(player, command, socket);
     });
 
+    socket.on('add_bot_to_lobby', addBotToLobby);
+
     // Выкидываем игрока на начальный экран
     // по кнопке
     socket.on('leave_battle', function(){
@@ -828,7 +831,6 @@ io.sockets.on('connection', function(socket){
     });
 });
 
-//todo: Добавление ботов в очередь по желанию игрока.
 bots.forEach(function(bot){
     world.players[bot._id] = bot;
     world.players[bot._id].memory = {
@@ -839,7 +841,6 @@ bots.forEach(function(bot){
         delayCounter: 0
     };
 });
-addBotToLobby();
 
 /**
  * Модель player (Игрок)
