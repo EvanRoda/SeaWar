@@ -34,8 +34,8 @@ var world = {
     endCounter: opt.defaultEndCounter,   // ms милисекунды
     windCounter: opt.defaultWindCounter,   // ms милисекунды
     resources: {
-        leaf: 60,
-        fire: 60
+        leaf: 11,
+        fire: 11
     }
 };
 
@@ -547,16 +547,22 @@ function gameCycle(){
 function endBattle(winSide){
     world.inBattle.forEach(function(id){
         var player = world.players[id];
+        var damaged = false;
+        var template = {};
         if(!player.isDefeat){
             player.ship.forEach(function(obj){
-                if(obj.type == 'canon' && obj.status){
-                    world.resources[player.side] += obj.barrels.length;
+                if((obj.type == 'canon' && obj.kind == 'main' || obj.type == 'launcher') && !obj.status){
+                    damaged = true;
                 }
             });
+            template = _.findWhere(shipsTemplates, {kind: player.shipType});
+            world.resources[player.side] += damaged ? Math.floor(template.cost/2) : template.cost;
         }
+        player.shipType = '';
     });
+
     if(winSide){
-        world.resources[winSide] += 3;
+        world.resources[winSide] += 0; //Пока награды за победу не будет
     }
 
     world.inBattle.forEach(function(id){
@@ -582,7 +588,6 @@ function createShip(player){
     var template = _.findWhere(shipsTemplates, {kind: player.shipType});
     player.shipClass = template.class;
     template.objects.forEach(function(obj){
-        var resources = 0;
         var newObj = {
             _id: getId(),
             type: obj.type,
@@ -610,7 +615,6 @@ function createShip(player){
             newObj.barrels = obj.barrels;
             newObj.min_angle = obj.angles[0];
             newObj.max_angle = obj.angles[1];
-            resources += obj.barrels.length;
         }else if(obj.type == 'hull'){
             newObj.direction = 0;
             player.long = obj.long; // так проще см. попадание торпед
@@ -618,7 +622,7 @@ function createShip(player){
         }else if(obj.type == 'floor'){
             newObj.direction = 0;
         }
-        world.resources[player.side] -= resources;
+
         player.ship.push(newObj);
     });
     io.emit('buttons', world);
@@ -784,7 +788,14 @@ io.sockets.on('connection', function(socket){
     });
 
     socket.on('set_ship_type', function(type){
+        var template = _.findWhere(shipsTemplates, {kind: type});
+
         world.players[socket.id].shipType = type;
+
+        if(template){
+            world.resources[world.players[socket.id].side] -= template.cost;
+        }
+        io.emit('buttons', world);
     });
 
     socket.on('to_lobby', function(){
