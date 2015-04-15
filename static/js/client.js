@@ -24,6 +24,7 @@ var ui = {
     params: $('#params'),
     commandField: $('#command_line'),
     messageBox: $('#message'),
+    youResources: $('#command_resource'),
     shipContainer: $('#ship_container'),
     allPlayers: $('#all_players'),
     lobbyPlayers: $('#lobby_players'),
@@ -51,6 +52,7 @@ var ui = {
         world_opt = option;
         ui.buttons.leaf.html('<i class="icon-eye-open icon-white"></i> Leaf ' + world_opt.resources.leaf);
         ui.buttons.fire.html('<i class="icon-eye-close icon-white"></i> Fire ' + world_opt.resources.fire);
+        ui.youResources.html(option.resources[itIsYou.side]);
         ui.shipContainer.html('');
         templates.forEach(function(template){
             if(template.cost <= option.resources[itIsYou.side]){
@@ -381,9 +383,9 @@ function openLogin(){
 }
 
 function openSelectShipWindow(){
-    if(!world_opt.players[itIsYou._id].ship || !world_opt.players[itIsYou._id].ship.length){
-        ui.modal.ship.modal('show');
-    }
+    socket.emit('drop_ship_type');
+
+    ui.modal.ship.modal('show');
 }
 
 function setShipType(shipType){
