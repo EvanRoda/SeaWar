@@ -9,7 +9,8 @@ var itIsYou = {
 var ui = {
     modal: {
         login: $('#login_modal'),
-        ship: $('#ship_modal')
+        ship: $('#ship_modal'),
+        help: $('#help')
     },
     buttons: {
         leaf: $('#leaf_button'),
@@ -371,6 +372,14 @@ function gameTick(data){
     if(floors.length){world.add(floors);}
     if(bullets.length){world.add(bullets);}
     world.render();
+}
+
+function openHelp(){
+    ui.modal.help.modal('show');
+}
+
+function openLogin(){
+    ui.modal.login.modal('show');
 }
 
 function openSelectShipWindow(){
