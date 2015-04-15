@@ -15,7 +15,8 @@ var ui = {
     buttons: {
         leaf: $('#leaf_button'),
         fire: $('#fire_button'),
-        toBattle: $('#to_battle')
+        toBattle: $('#to_battle'),
+        readyToggle: $('#ready_toggle')
     },
     screen: {
         battle: $('#battle_screen'),
@@ -86,6 +87,12 @@ var ui = {
     renderNick: function(name){
         itIsYou.nickName = name || itIsYou.nickName;
         ui.showNick.html(itIsYou.nickName);
+    },
+
+    renderReady: function(ready){
+        var is_ready = '<button class="btn btn-success btn-large relative-width-100" type="button" onclick="toBattle()"><i class="fa fa-check-circle-o"></i> Готов</button>';
+        var not_ready= '<button class="btn btn-warning btn-large relative-width-100" type="button" onclick="toBattle()"><i class="fa fa-circle-o"></i> Не готов</button>';
+        ui.buttons.readyToggle.html(ready ? is_ready : not_ready);
     },
 
     renderShipLabel: function(){
@@ -179,6 +186,8 @@ socket.on('show_battle_screen', ui.toBattleScreen);
 socket.on('messages', ui.renderMessage);
 
 socket.on('set_name', ui.renderNick);
+
+socket.on('set_ready', ui.renderReady);
 
 socket.on('logging', function(data){
     console.log(data.a, data.b);
@@ -392,6 +401,7 @@ function setShipType(shipType){
     itIsYou.shipType = shipType;
     socket.emit('set_ship_type', shipType);
     ui.renderShipLabel();
+    ui.renderReady(false);
     toLobby();
     ui.modal.ship.modal('hide');
 }

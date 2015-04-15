@@ -40,7 +40,7 @@ var world = {
 };
 
 function addBotToLobby(botId){
-    var check = _.findWhere(world.lobby, botId);
+    var check = _.find(world.lobby, function(id){return id == botId});
     if(!check && world.players[botId]){
         giveMoney(botId);
         world.lobby.push(botId);
@@ -404,12 +404,16 @@ function startBattle(){
 
         // Набираем игроков в бой, создаем корабли.
         if(counter[player.side].count < 6){
-            counter[player.side].count++;
-            createShip(player);
-            world.inBattle.push(id);
-            counter[player.side][player.shipClass].push(id);
-            player.distance = 300;
-            player.isDefeat = false;
+            if(player.ready || player.is_bot){
+                counter[player.side].count++;
+                createShip(player);
+                world.inBattle.push(id);
+                counter[player.side][player.shipClass].push(id);
+                player.distance = 300;
+                player.isDefeat = false;
+            }else{
+                temp.push(id);
+            }
         }else{
             temp.push(id);
             io.to(id).emit('messages', {show: true, color: 'alert-error', strong: 'Для тебя нет места.', span: ''});
@@ -791,7 +795,13 @@ io.sockets.on('connection', function(socket){
             socket.emit('set_name', data.nickName);
         }
         data._id = socket.id;
-        world.players[data._id] = data;
+        world.players[data._id] = {
+            _id: data._id,
+            nickName: data.nickName,
+            side: data.side,
+            shipType: '',
+            ready: false
+        };
         io.emit('messages', {show: true, color: 'alert-info', strong: 'Игрок ' + data.nickName + ' входит в игру', span: ''});
         io.emit('update_player_list', world);
     });
@@ -818,7 +828,26 @@ io.sockets.on('connection', function(socket){
     });
 
     socket.on('to_battle', function(){
+        var allReady = true;
         var alive = {leaf: 0, fire: 0};
+        var player = world.players[socket.id];
+        player.ready = !player.ready;
+        socket.emit('set_ready', player.ready);
+        io.emit('messages', {show: true, color: (player.ready ? 'alert-success' : ''), strong: player.nickName + (player.ready ? ' готов.' : ' не готов'), span: ''});
+
+        world.lobby.forEach(function(id){
+            if(!world.players[id].is_bot && !world.players[id].ready){
+                allReady = false;
+            }else{
+                alive[world.players[id].side] += 1;
+            }
+        });
+
+        if((allReady && world.battle.status !== 'start' && alive.leaf && alive.fire) || (alive.leaf >= 6 && alive.fire >= 6)){
+            startBattle();
+        }
+
+        /*var alive = {leaf: 0, fire: 0};
         if(world.battle.status === 'start'){
             socket.emit('messages', {show: true, color: '', strong: 'Бой уже начался', span: ''});
         }else if(world.lobby.length <= 1){
@@ -832,7 +861,7 @@ io.sockets.on('connection', function(socket){
             }else{
                 startBattle();
             }
-        }
+        }*/
     });
 
     //Прием команды от игрока
