@@ -11,7 +11,7 @@
     "_id": "jan",
     "nickName": "Jan*",
     "is_bot": true,
-    "shipType": "duilioP",
+    "shipType": "inflexible",
     "side": "fire",
     "delay": 3500
   },
@@ -43,7 +43,7 @@
     "_id": "janl",
     "nickName": "Jan*",
     "is_bot": true,
-    "shipType": "duilioP",
+    "shipType": "inflexible",
     "side": "leaf",
     "delay": 3500
   },

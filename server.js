@@ -34,8 +34,8 @@ var world = {
     endCounter: opt.defaultEndCounter,   // ms милисекунды
     windCounter: opt.defaultWindCounter,   // ms милисекунды
     resources: {
-        leaf: 11,
-        fire: 11
+        leaf: opt.defaultResources,
+        fire: opt.defaultResources
     }
 };
 
