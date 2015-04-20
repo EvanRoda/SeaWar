@@ -571,7 +571,8 @@ function endBattle(winSide){
             template = _.findWhere(shipsTemplates, {kind: player.shipType});
             world.resources[player.side] += damaged ? Math.floor(template.cost/2) : template.cost;
         }
-        player.shipType = '';
+
+        player.shipType = player.is_bot ? player.shipType : '';
     });
 
     if(winSide){
@@ -585,6 +586,14 @@ function endBattle(winSide){
     clearInterval(intId);
     world.inBattle = [];
     world.battle.status = 'wait';
+    if(!world.resources.leaf || !world.resources.fire){
+        world.lobby = [];
+        for(var id in world.players){
+            world.players[id].ship = [];
+            world.players[id].shipType = '';
+        }
+        //todo: Отправить сообщения о победе/поражении всем игрокам
+    }
 }
 
 function deleteDisconnected(){
