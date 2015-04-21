@@ -100,9 +100,11 @@ var botsAI = {
         // Вычисление направления и дальности
         calculation: {
             action: function(bot){
-                var dy = bot.y - bot.memory.target.y;
+                var dx = bot.memory.target.x - bot.x;
+                var dy = bot.memory.target.y - bot.y;
                 bot.memory.range = Math.sqrt(Math.pow(bot.memory.target.x - bot.x, 2) + Math.pow(bot.memory.target.y - bot.y, 2));
-                bot.memory.direction = 90 - Math.atan(dy/bot.memory.range)*180/Math.PI;
+                bot.memory.target_direction = 90 + Math.atan(dy/dx)*180/Math.PI;
+                bot.memory.direction = bot.memory.target_direction;
                 bot.memory.state = 'reduction';
             }
         },
@@ -196,12 +198,12 @@ var botsAI = {
     // Прицеливание
     aim: function(bot, coordinates){
         if(!bot.memory.aim){
-            var dy = bot.y - coordinates[1];
-            var newRange = Math.sqrt(Math.pow(coordinates[0] - bot.x, 2) + Math.pow(coordinates[1] - bot.y, 2));
-            var newDirection = 90 - Math.atan(dy/newRange)*180/Math.PI;
+            var dx = coordinates[0] - bot.x;
+            var dy = coordinates[1] - bot.y;
+            var newDirection = 90 + Math.atan(dy/dx)*180/Math.PI;
 
             bot.memory.range = bot.memory.range + (bot.memory.target.x - (coordinates[0]));
-            bot.memory.direction = bot.memory.direction + (bot.memory.direction - newDirection);
+            bot.memory.direction = bot.memory.target_direction + (bot.memory.target_direction - newDirection);
             bot.memory.aim = true;
             bot.memory.state = 'direction';
         }
@@ -572,7 +574,18 @@ function endBattle(winSide){
             world.resources[player.side] += damaged ? Math.floor(template.cost/2) : template.cost;
         }
 
-        player.shipType = player.is_bot ? player.shipType : '';
+        if(player.is_bot){
+            player.memory = {
+                wait: false,
+                target_player: null,
+                target: null,
+                state: 'notTPlayer',
+                delayCounter: 0
+            };
+        }else{
+            player.shipType = '';
+        }
+
     });
 
     if(winSide){

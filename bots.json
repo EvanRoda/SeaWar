@@ -3,9 +3,9 @@
     "_id": "arny",
     "nickName": "Arny*",
     "is_bot": true,
-    "shipType": "icukusima",
+    "shipType": "iron",
     "side": "fire",
-    "delay": 4000
+    "delay": 12000
   },
   {
     "_id": "jan",
@@ -13,7 +13,7 @@
     "is_bot": true,
     "shipType": "inflexible",
     "side": "fire",
-    "delay": 3500
+    "delay": 7000
   },
   {
     "_id": "rutger",
@@ -21,7 +21,7 @@
     "is_bot": true,
     "shipType": "georg",
     "side": "fire",
-    "delay": 6000
+    "delay": 10000
   },
   {
     "_id": "jan2",
@@ -29,7 +29,7 @@
     "is_bot": true,
     "shipType": "aoba",
     "side": "fire",
-    "delay": 5000
+    "delay": 10000
   },
   {
     "_id": "arnyl",
@@ -37,7 +37,7 @@
     "is_bot": true,
     "shipType": "icukusima",
     "side": "leaf",
-    "delay": 4000
+    "delay": 8000
   },
   {
     "_id": "janl",
@@ -45,7 +45,7 @@
     "is_bot": true,
     "shipType": "inflexible",
     "side": "leaf",
-    "delay": 3500
+    "delay": 7000
   },
   {
     "_id": "rutgerl",
@@ -53,7 +53,7 @@
     "is_bot": true,
     "shipType": "georg",
     "side": "leaf",
-    "delay": 6000
+    "delay": 10000
   },
   {
     "_id": "janl2",
@@ -61,6 +61,6 @@
     "is_bot": true,
     "shipType": "aoba",
     "side": "leaf",
-    "delay": 5000
+    "delay": 10000
   }
 ]

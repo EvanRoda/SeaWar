@@ -82,6 +82,22 @@
         ]
     },
     {
+        "kind": "iron",
+        "name": "Линкор Айрон",
+        "class": "canon",
+        "cost": 10,
+        "hull_img": "iron.png",
+        "objects": [
+            {"type": "hull", "dx": 0, "dy": 0, "long": 348, "wide": 53},
+            {"type": "canon", "img": "cm_iron.png", "kind": "main", "dx": 0, "dy": -93, "barrels": [3, -3], "angles": [0, 155], "reload": 8000, "direction": 0},
+            {"type": "canon", "img": "cm_iron.png", "kind": "main", "dx": 0, "dy": -66, "barrels": [3, -3], "angles": [0, 155], "reload": 8000, "direction": 0},
+            {"type": "canon", "img": "cm_iron.png", "kind": "main", "dx": 0, "dy": 28, "barrels": [3, -3], "angles": [25, 155], "reload": 8000, "direction": 180},
+            {"type": "canon", "img": "cm_iron.png", "kind": "main", "dx": 0, "dy": 113, "barrels": [3, -3], "angles": [25, 180], "reload": 8000, "direction": 180},
+            {"type": "canon", "img": "cm_iron.png", "kind": "main", "dx": 0, "dy": 84, "barrels": [3, -3], "angles": [25, 180], "reload": 8000, "direction": 180},
+            {"type": "flag", "dx": 0, "dy": 173}
+        ]
+    },
+    {
         "kind": "aoba",
         "name": "Кр. Аоба",
         "class": "torpedo",
