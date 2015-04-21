@@ -605,7 +605,8 @@ function endBattle(winSide){
             world.players[id].ship = [];
             world.players[id].shipType = '';
         }
-        //todo: Отправить сообщения о победе/поражении всем игрокам
+
+        io.emit('game_over', world);
     }
 }
 
@@ -868,22 +869,6 @@ io.sockets.on('connection', function(socket){
         if((allReady && world.battle.status !== 'start' && alive.leaf && alive.fire) || (alive.leaf >= 6 && alive.fire >= 6)){
             startBattle();
         }
-
-        /*var alive = {leaf: 0, fire: 0};
-        if(world.battle.status === 'start'){
-            socket.emit('messages', {show: true, color: '', strong: 'Бой уже начался', span: ''});
-        }else if(world.lobby.length <= 1){
-            socket.emit('messages', {show: true, color: '', strong: 'Мало игроков', span: ''});
-        }else{
-            world.lobby.forEach(function(id){
-                alive[world.players[id].side] += 1;
-            });
-            if(!alive.leaf || !alive.fire){
-                socket.emit('messages', {show: true, color: '', strong: 'Ждем противников', span: ''});
-            }else{
-                startBattle();
-            }
-        }*/
     });
 
     //Прием команды от игрока

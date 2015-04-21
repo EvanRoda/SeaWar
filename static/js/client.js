@@ -10,7 +10,8 @@ var ui = {
     modal: {
         login: $('#login_modal'),
         ship: $('#ship_modal'),
-        help: $('#help')
+        help: $('#help'),
+        gameOver: $('#game_over')
     },
     buttons: {
         leaf: $('#leaf_button'),
@@ -25,6 +26,7 @@ var ui = {
     params: $('#params'),
     commandField: $('#command_line'),
     messageBox: $('#message'),
+    endMessage: $('#end_message'),
     youResources: $('#command_resource'),
     shipContainer: $('#ship_container'),
     allPlayers: $('#all_players'),
@@ -111,6 +113,15 @@ var ui = {
         }
     },
 
+    showEndMessage: function(data){
+        if(data.resources[itIsYou.side] > 0){
+            ui.endMessage.html('Ваша команда победила!');
+        }else{
+            ui.endMessage.html('Ваша команда проиграла!');
+        }
+        ui.modal.gameOver.modal('show');
+    },
+
     toBattleScreen: function(){
         ui.buttons.toBattle.hide();
         ui.screen.battle.show();
@@ -188,6 +199,8 @@ socket.on('messages', ui.renderMessage);
 socket.on('set_name', ui.renderNick);
 
 socket.on('set_ready', ui.renderReady);
+
+socket.on('game_over', ui.showEndMessage);
 
 socket.on('logging', function(data){
     console.log(data.a, data.b);
@@ -311,7 +324,7 @@ function gameTick(data){
                     x: obj.x,
                     y: obj.y
                 });
-                //console.log(newObject);
+
                 if(obj.type == 'canon'){
                     if(player._id == itIsYou._id){
                         dist = player.distance;
