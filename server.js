@@ -592,13 +592,11 @@ function endBattle(winSide){
         world.resources[winSide] += 0; //Пока награды за победу не будет
     }
 
-    world.inBattle.forEach(function(id){
-        io.to(id).emit('to_start_screen', world);
-    });
+
     deleteDisconnected();
     clearInterval(intId);
-    world.inBattle = [];
-    world.battle.status = 'wait';
+
+
     if(!world.resources.leaf || !world.resources.fire){
         world.lobby = [];
         for(var id in world.players){
@@ -607,6 +605,14 @@ function endBattle(winSide){
         }
 
         io.emit('game_over', world);
+        //todo: Привести состояие мира к дефолтному
+        //todo: Придумать как отправить событие
+    }else{
+        world.inBattle.forEach(function(id){
+            io.to(id).emit('to_start_screen', world);
+        });
+        world.inBattle = [];
+        world.battle.status = 'wait';
     }
 }
 
