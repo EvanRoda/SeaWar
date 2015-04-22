@@ -592,10 +592,8 @@ function endBattle(winSide){
         world.resources[winSide] += 0; //Пока награды за победу не будет
     }
 
-
     deleteDisconnected();
     clearInterval(intId);
-
 
     if(!world.resources.leaf || !world.resources.fire){
         world.lobby = [];
@@ -605,8 +603,14 @@ function endBattle(winSide){
         }
 
         io.emit('game_over', world);
-        //todo: Привести состояие мира к дефолтному
-        //todo: Придумать как отправить событие
+
+        world.resources = {
+            leaf: opt.defaultResources,
+            fire: opt.defaultResources
+        };
+        world.inBattle = [];
+        world.battle.status = 'wait';
+        io.emit('to_start_screen', world);
     }else{
         world.inBattle.forEach(function(id){
             io.to(id).emit('to_start_screen', world);

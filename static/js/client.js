@@ -211,7 +211,7 @@ function onStart(data){
     ui.renderButtons(data);
     ui.renderLobby(data);
     ui.messageBox.hide();
-    ui.modal.login.modal('show');
+    //ui.modal.login.modal('show');
     ui.modal.ship.modal('hide');
     ui.buttons.toBattle.hide();
     ui.screen.battle.hide();
