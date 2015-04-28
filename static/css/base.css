@@ -1,9 +1,14 @@
+#game_field{
+    border: 1px solid;
+    background-image: url(../images/NewWater.gif);
+}
+
 .relative-width-100 {
     width: 100%;
 }
 
 .padded {
-    padding: 20px;
+    padding: 10px;
 }
 
 .margin-bottom-10 {
@@ -16,4 +21,10 @@
 
 .sim_link:hover{
     color: #656565;
+}
+
+.small-alert{
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
 }

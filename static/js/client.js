@@ -23,9 +23,9 @@ var ui = {
         battle: $('#battle_screen'),
         lobby: $('#lobby')
     },
-    params: $('#params'),
+    //params: $('#params'), todo: Выпилить когда переделаешь худ
     commandField: $('#command_line'),
-    messageBox: $('#message'),
+    messageBox: $('.message-block'),
     endMessage: $('#end_message'),
     youResources: $('#command_resource'),
     shipContainer: $('#ship_container'),
@@ -105,7 +105,7 @@ var ui = {
 
     renderMessage: function(data){
         if(data.show){
-            ui.messageBox.show().removeClass().addClass('alert ' + data.color);
+            ui.messageBox.show().removeClass().addClass('alert message-block small-alert ' + data.color);
             ui.messageBox.find('strong').html(data.strong);
             ui.messageBox.find('span').html(data.span);
         }else{
@@ -382,7 +382,8 @@ function gameTick(data){
                 }
             });
         });
-        ui.params.html('Дал.: ' + dist + ' Нап.: ' + dir + ' Рес.: ' + world_opt.resources[itIsYou.side]);
+        //todo: Переделать худ
+        //ui.params.html('Дал.: ' + dist + ' Нап.: ' + dir + ' Рес.: ' + world_opt.resources[itIsYou.side]);
     }
     if(windMarks.length){world.add(windMarks);}
     if(misses.length){world.add(misses);}

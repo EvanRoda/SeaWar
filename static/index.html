@@ -14,45 +14,28 @@
 </head>
 <body>
     <div class="container padded">
-        <div class="row">
-            <div class="span6">
-                <div class="alert" id="message">
-                    <strong></strong>
-                    <span></span>
-                </div>
-            </div>
-            <div class="span6">
-                <div class="well well-small">
-                    <strong id="show_nick">Ник</strong>
-                    <strong><i class="fa fa-ship"></i></strong>
-                    <strong id="show_ship" class="sim_link" onclick="openSelectShipWindow()">(корабель)</strong>
-                </div>
-            </div>
-        </div>
-        <div id="to_battle" class="row">
-            <div id="ready_toggle" class="offset4 span4">
-                <button class="btn btn-warning btn-large relative-width-100" type="button" onclick="toBattle()"><i class="fa fa-circle-o"></i> Не готов</button>
-            </div>
-        </div>
-
-        <div id="battle_screen">
-            <div class="row">
-                <div class="span6">
-                    <input type="text" placeholder="Type command" id="command_line" class="relative-width-100">
-                </div>
-                <div class="span6">
-                    <button class="btn btn-warning relative-width-100" type="button" onclick="leaveBattle()">Врагу не сдается...</button>
-                    <span id="params"></span>
-                </div>
-            </div>
-            <div class="row">
-                <div class="span12">
-                    <canvas id="game_field" width="954" height="810" style="border: 1px solid; background-image: url(images/NewWater.gif);"></canvas>
-                </div>
-            </div>
-        </div>
-
         <div id="lobby">
+            <div class="row">
+                <div class="span6">
+                    <div class="alert message-block" id="message">
+                        <strong></strong>
+                        <span></span>
+                    </div>
+                </div>
+                <div class="span6">
+                    <div class="well well-small small-alert">
+                        <strong id="show_nick">Ник</strong>
+                        <strong><i class="fa fa-ship"></i></strong>
+                        <strong id="show_ship">(корабель)</strong>
+                    </div>
+                </div>
+            </div>
+            <div id="to_battle" class="row">
+                <div id="ready_toggle" class="offset4 span4">
+                    <button class="btn btn-warning btn-large relative-width-100" type="button" onclick="toBattle()"><i class="fa fa-circle-o"></i> Не готов</button>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="span4"><h3>Все игроки</h3></div>
                 <div class="span4"><h3>В очереди</h3></div>
@@ -62,6 +45,28 @@
                 <div id="all_players" class="span4"></div>
                 <div id="lobby_players" class="span4"></div>
                 <div id="battle_players" class="span4"></div>
+            </div>
+        </div>
+
+        <div id="battle_screen">
+            <div class="row">
+                <div class="span5">
+                    <input type="text" placeholder="Type command" id="command_line" class="relative-width-100">
+                </div>
+                <div class="span6">
+                    <div class="alert message-block small-alert">
+                        <strong></strong>
+                        <span></span>
+                    </div>
+                </div>
+                <div class="span1">
+                    <button class="btn btn-warning relative-width-100" type="button" onclick="leaveBattle()"><i class="fa fa-thumbs-o-down"></i></button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span12">
+                    <canvas id="game_field" width="954" height="810"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -95,12 +100,16 @@
 
     <div id="help" class="modal hide fade">
         <div class="modal-body">
-            <h4>Примеры команд</h4><br/>
+            <h4>Примеры команд</h4>
 
+            <h5>Управление орудиями</h5>
             <div>Направление 90</div>
             <div>Дальность 900</div>
             <div>Сведение 700</div>
             <div>Огонь</div>
+
+            <h5>Управление торпедными аппаратами</h5>
+            <div>Направление 90</div>
             <div>Угол 10</div>
             <div>Пуск</div>
         </div>
@@ -112,12 +121,16 @@
         </div>
     </div>
 
-    <div onclick="openHelp()" class="sim_link" style="position: fixed; top: 70px; left: 20px;">
-        <i class="fa fa-3x fa-question-circle"></i>
+    <div style="position: fixed; top: 20px; left: 20px;">
+        <button class="btn btn-default" type="button" onclick="openLogin()">Логин</button>
     </div>
 
-    <div onclick="openLogin()" class="sim_link" style="position: fixed; top: 20px; left: 20px;">
-        <i class="fa fa-3x fa-play-circle "></i>
+    <div style="position: fixed; top: 70px; left: 20px;">
+        <button class="btn btn-default" type="button" onclick="openSelectShipWindow()">Корабль</button>
+    </div>
+
+    <div style="position: fixed; top: 120px; left: 20px;">
+        <button class="btn btn-default" type="button" onclick="openHelp()">Помощь</button>
     </div>
 
     <script type="text/javascript" src="js/client.js"></script>
