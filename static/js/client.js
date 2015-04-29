@@ -422,11 +422,8 @@ function setShipType(shipType){
 
 function selectSide(side){
     var name = $('#player_name');
-    itIsYou.nickName = name.val();
-    itIsYou.side = side;
-    ui.renderNick();
     ui.modal.login.modal('hide');
-    socket.emit('new_player', itIsYou);
+    socket.emit('new_player', {nickName: name.val(), side: side});
 }
 
 function toLobby(){
@@ -483,7 +480,7 @@ ui.commandField.keydown(function(event){
     if (event.which == 13){
         var command = ui.commandField.val();
         if(command){
-            socket.emit('command', {command: command, player_id: itIsYou._id});
+            socket.emit('command', {command: command});
             ui.messageBox.hide();
         }
         ui.commandField.val('').focus();

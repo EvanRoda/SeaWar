@@ -823,30 +823,37 @@ io.sockets.on('connection', function(socket){
 
     // Создание нового игрока
     socket.on('new_player', function(data){
-        if(!data.nickName){
-            data.nickName = 'Captain' + socket.id;
-            socket.emit('set_name', data.nickName);
+        var check = !!(_.find(world.lobby, function(id){return id == socket.id})) || !!(_.find(world.inBattle, function(id){return id == socket.id}));
+        if(!check){
+            if(!data.nickName){
+                data.nickName = 'Captain' + socket.id;
+                socket.emit('set_name', data.nickName);
+            }
+            data._id = socket.id;
+            world.players[data._id] = {
+                _id: data._id,
+                nickName: data.nickName,
+                side: data.side,
+                shipType: '',
+                ready: false
+            };
+            io.emit('messages', {show: true, color: 'alert-info', strong: 'Игрок ' + data.nickName + ' входит в игру', span: ''});
+            io.emit('update_player_list', world);
         }
-        data._id = socket.id;
-        world.players[data._id] = {
-            _id: data._id,
-            nickName: data.nickName,
-            side: data.side,
-            shipType: '',
-            ready: false
-        };
-        io.emit('messages', {show: true, color: 'alert-info', strong: 'Игрок ' + data.nickName + ' входит в игру', span: ''});
-        io.emit('update_player_list', world);
     });
 
     socket.on('set_ship_type', function(type){
-        world.players[socket.id].shipType = type;
-        giveMoney(socket.id);
+        var check = !!(_.find(world.inBattle, function(id){return id == socket.id}));
+        if(!check){
+            world.players[socket.id].shipType = type;
+            giveMoney(socket.id);
+        }
     });
 
     socket.on('drop_ship_type', function(){
-        var template = null, player = world.players[socket.id];
-        if(player.shipType){
+        var template = null, player = world.players[socket.id], check;
+        check = !!(_.find(world.inBattle, function(id){return id == socket.id}));
+        if(!check && player.shipType){
             template = _.findWhere(shipsTemplates, {kind: player.shipType});
             world.resources[player.side] += template.cost;
 
@@ -883,7 +890,7 @@ io.sockets.on('connection', function(socket){
 
     //Прием команды от игрока
     socket.on('command', function(data){
-        var player = world.players[data.player_id];
+        var player = world.players[socket.id];
         var command =  data.command.split(' ', 2);
         setCommand(player, command, socket);
     });
