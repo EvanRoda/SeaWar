@@ -121,17 +121,9 @@
         </div>
     </div>
 
-    <div style="position: fixed; top: 20px; left: 20px;">
-        <button class="btn btn-default" type="button" onclick="openLogin()">Логин</button>
-    </div>
-
-    <div style="position: fixed; top: 70px; left: 20px;">
-        <button class="btn btn-default" type="button" onclick="openSelectShipWindow()">Корабль</button>
-    </div>
-
-    <div style="position: fixed; top: 120px; left: 20px;">
-        <button class="btn btn-default" type="button" onclick="openHelp()">Помощь</button>
-    </div>
+    <div id="button-sides" onclick="openLogin()"></div>
+    <div id="button-ship" onclick="openSelectShipWindow()"></div>
+    <div id="button-help" onclick="openHelp()"></div>
 
     <script type="text/javascript" src="js/client.js"></script>
 </body>

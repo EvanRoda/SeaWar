@@ -97,9 +97,11 @@ var ui = {
         ui.buttons.readyToggle.html(ready ? is_ready : not_ready);
     },
 
-    renderShipLabel: function(){
-        var ship = findWhere(templates, {kind: itIsYou.shipType});
-
+    renderShipLabel: function(shipType){
+        var ship = findWhere(templates, {kind: shipType});
+        itIsYou.shipType = shipType;
+        ui.renderReady(false);
+        toLobby();
         ui.showShip.html(ship ? ship.name : '(корабель)');
     },
 
@@ -197,6 +199,8 @@ socket.on('show_battle_screen', ui.toBattleScreen);
 socket.on('messages', ui.renderMessage);
 
 socket.on('set_name', ui.renderNick);
+
+socket.on('set_ship_tipe', ui.renderShipLabel);
 
 socket.on('set_ready', ui.renderReady);
 
@@ -413,10 +417,7 @@ function openSelectShipWindow(){
 
 function setShipType(shipType){
     itIsYou.shipType = shipType;
-    socket.emit('set_ship_type', shipType);
-    ui.renderShipLabel();
-    ui.renderReady(false);
-    toLobby();
+    socket.emit('send_ship_type', shipType);
     ui.modal.ship.modal('hide');
 }
 

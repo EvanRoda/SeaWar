@@ -827,8 +827,8 @@ io.sockets.on('connection', function(socket){
         if(!check){
             if(!data.nickName){
                 data.nickName = 'Captain' + socket.id;
-                socket.emit('set_name', data.nickName);
             }
+            socket.emit('set_name', data.nickName);
             data._id = socket.id;
             world.players[data._id] = {
                 _id: data._id,
@@ -842,10 +842,12 @@ io.sockets.on('connection', function(socket){
         }
     });
 
-    socket.on('set_ship_type', function(type){
+    socket.on('send_ship_type', function(type){
         var check = !!(_.find(world.inBattle, function(id){return id == socket.id}));
-        if(!check){
-            world.players[socket.id].shipType = type;
+        var player = world.players[socket.id];
+        if(!check && player){
+            player.shipType = type;
+            socket.emit('set_ship_tipe', player.shipType);
             giveMoney(socket.id);
         }
     });
@@ -853,7 +855,7 @@ io.sockets.on('connection', function(socket){
     socket.on('drop_ship_type', function(){
         var template = null, player = world.players[socket.id], check;
         check = !!(_.find(world.inBattle, function(id){return id == socket.id}));
-        if(!check && player.shipType){
+        if(!check && player && player.shipType){
             template = _.findWhere(shipsTemplates, {kind: player.shipType});
             world.resources[player.side] += template.cost;
 

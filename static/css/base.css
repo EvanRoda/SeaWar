@@ -28,3 +28,47 @@
     padding-bottom: 4px;
     margin-bottom: 10px;
 }
+
+#button-sides{
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 180px;
+    height: 120px;
+    cursor: pointer;
+    background-image: url(../images/ui/button_sides.png);
+}
+
+#button-sides:hover{
+    background-image: url(../images/ui/button_sides_hover.png);
+}
+
+#button-ship{
+    position: fixed;
+    top: 160px;
+    left: 20px;
+    width: 180px;
+    height: 120px;
+    cursor: pointer;
+
+    background-image: url(../images/ui/button_ships.png);
+}
+
+#button-ship:hover{
+    background-image: url(../images/ui/button_ships_hover.png);
+}
+
+#button-help{
+    position: fixed;
+    top: 300px;
+    left: 20px;
+    width: 180px;
+    height: 120px;
+    cursor: pointer;
+
+    background-image: url(../images/ui/button_help.png);
+}
+
+#button-help:hover{
+    background-image: url(../images/ui/button_help_hover.png);
+}
