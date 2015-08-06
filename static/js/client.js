@@ -34,6 +34,7 @@ var ui = {
     battlePlayers: $('#battle_players'),
     showNick: $('#show_nick'),
     showShip: $('#show_ship'),
+    gameField: $('#game_field'),
 
     render: function(player, where){
         var fn='', onclick = '';
@@ -129,10 +130,122 @@ var ui = {
         ui.screen.battle.show();
         ui.screen.lobby.hide();
         ui.commandField.focus();
+
+        var player = world_opt.players[itIsYou._id];
+        aim.grid = {x: player.x, y: player.y};
+        aim.cross = {x: player.x+100, y: player.y};
+        aim.reduction = {x: player.x, y: player.y};
+    }
+};
+
+var aim = {
+    realRange: 1000,
+    sightRange: 400,
+
+    grid: {x:0, y:0},
+    cross: {x: 0, y:0},
+    reduction: {x: 0, y:0},
+
+    mouseDown: function(event){
+        ui.gameField.off('mousedown');
+        var player = world_opt.players[itIsYou._id];
+        var l = Math.sqrt(Math.pow(player.x - event.offsetX, 2) + Math.pow(player.y - event.offsetY, 2));
+
+        if(event.button == 0){
+            if(l < aim.sightRange){
+                aim.cross.x = event.offsetX;
+                aim.cross.y = event.offsetY;
+            }else{
+                //Адов расчет с тангенсами и прочей ...той
+            }
+            ui.gameField.on('mousemove', aim.moveCross);
+            ui.gameField.on('mouseup', aim.sendCross);
+        }else if(event.button == 2){
+            aim.reduction.x = l > aim.sightRange ? aim.sightRange : l;
+            ui.gameField.on('mousemove', aim.moveReduction);
+            ui.gameField.on('mouseup', aim.sendReduction);
+        }
+        event.preventDefault();
+    },
+
+    moveCross: function (event){
+        var player = world_opt.players[itIsYou._id];
+        var l = Math.sqrt(Math.pow(player.x - event.offsetX, 2) + Math.pow(player.y - event.offsetY, 2));
+
+        if(l <= aim.sightRange){
+            aim.cross.x = event.offsetX;
+            aim.cross.y = event.offsetY;
+        }else{
+            //Адов расчет с тангенсами и прочей ...той
+        }
+
+        event.preventDefault();
+    },
+
+    moveReduction: function (event){
+        var player = world_opt.players[itIsYou._id];
+        var l = Math.sqrt(Math.pow(player.x - event.offsetX, 2) + Math.pow(player.y - event.offsetY, 2));
+        aim.reduction.x = l > aim.sightRange ? aim.sightRange : l;
+
+        event.preventDefault();
+    },
+
+    sendCross: function(event){
+        ui.gameField.off('mousemove');
+        ui.gameField.off('mouseup');
+
+        var player = world_opt.players[itIsYou._id],
+            ab = event.offsetX - player.x,
+            bc = player.y - event.offsetY,
+            angle, commandAngle, commandRange,
+            tan = ab != 0 ? bc / ab : Math.Pi/2,
+            l = Math.sqrt(Math.pow(ab, 2) + Math.pow(bc, 2));
+
+        angle = Math.atan(Math.abs(tan)) * 180 / Math.PI;
+        angle = tan > 0 ? 90 - angle : angle + 90;
+
+        if(l <= aim.sightRange){
+            aim.cross.x = event.offsetX;
+            aim.cross.y = event.offsetY;
+
+        }else{
+            l = aim.sightRange;
+        }
+
+        commandRange = 'дальность ' + (l * aim.realRange / aim.sightRange);
+        commandAngle = 'направление ' + angle;
+
+        socket.emit('command', {command: commandRange});
+        socket.emit('command', {command: commandAngle});
+        ui.messageBox.hide();
+        ui.gameField.on('mousedown', aim.mouseDown);
+
+        event.preventDefault();
+    },
+
+    sendReduction: function (event){
+        event.preventDefault();
+        ui.gameField.off('mousemove');
+        ui.gameField.off('mouseup');
+        var command;
+        var player = world_opt.players[itIsYou._id];
+        var l = Math.sqrt(Math.pow(player.x - event.offsetX, 2) + Math.pow(player.y - event.offsetY, 2));
+        aim.reduction.x = l > aim.sightRange ? aim.sightRange : l;
+
+        command = aim.reduction.x * aim.realRange / aim.sightRange;
+        command = 'сведение ' + command;
+
+        socket.emit('command', {command: command});
+        ui.messageBox.hide();
+
+        ui.gameField.on('mousedown', aim.mouseDown);
+
+
     }
 };
 
 var windMarks = [];
+var sightElements = [];
 var hulls = [];
 var canons = [];
 var launchers = [];
@@ -144,6 +257,16 @@ var flags = [];
 var renderer = null;
 
 var skins = {};
+
+var sight = {
+    grid: new Image(),
+    cross: new Image(),
+    reduction: new Image()
+};
+
+sight.grid.src = 'images/sight/grid.png';
+sight.cross.src = 'images/sight/cross.png';
+sight.reduction.src = 'images/sight/reduction.png';
 
 var flag = {
     you: new Image(),
@@ -220,6 +343,8 @@ function onStart(data){
     ui.buttons.toBattle.hide();
     ui.screen.battle.hide();
     ui.screen.lobby.show();
+
+    ui.gameField.on('mousedown', aim.mouseDown);
 }
 
 function createWorld(data){
@@ -267,6 +392,7 @@ function gameTick(data){
     var opt = data.options;
     world_opt = data.world;
     if(windMarks.length){world.remove(windMarks);}
+    if(sightElements.length){world.remove(sightElements);}
     if(hulls.length){world.remove(hulls);}
     if(canons.length){world.remove(canons);}
     if(launchers.length){world.remove(launchers);}
@@ -276,6 +402,7 @@ function gameTick(data){
     if(misses.length){world.remove(misses);}
     if(flags.length){world.remove(flags);}
     windMarks = [];
+    sightElements = [];
     hulls = [];
     canons = [];
     launchers = [];
@@ -285,30 +412,25 @@ function gameTick(data){
     misses = [];
     flags = [];
 
-    var newObject = Physics.body('circle', {
-        mass: 100,
-        radius: 2,
-        x: 477,
-        y: 730
-    });
-    newObject.view = wind_center;
+    var newObject = createObject(wind_center, [477, 730]);
     windMarks.push(newObject);
 
     if(world_opt.windForce){
         var repeat = Math.floor(4 - Math.abs(opt.maxWind/world_opt.windForce));
         var direct = itIsYou.side == 'leaf' ? markOfNumber(world_opt.windForce) : -1 * markOfNumber(world_opt.windForce);
         for(var i = 1; i <= repeat; i++){
-            newObject = Physics.body('circle', {
-                mass: 100,
-                radius: 2,
-                x: 477,
-                y: 730 + direct*12*i
-            });
-            newObject.view = wind;
+            newObject = createObject(wind, [477, 730 + direct*12*i]);
             newObject.state.angular.pos = direct < 0 ? 0 : Math.PI;
             windMarks.push(newObject);
         }
     }
+
+    newObject = createObject(sight.grid, [aim.grid.x, aim.grid.y]);
+    sightElements.push(newObject);
+    newObject = createObject(sight.cross, [aim.cross.x, aim.cross.y]);
+    sightElements.push(newObject);
+    newObject = createObject(sight.reduction, [aim.reduction.x, aim.reduction.y]);
+    sightElements.push(newObject);
 
     if(players.length){
         players.forEach(function(id){
@@ -322,12 +444,7 @@ function gameTick(data){
                 }
 
                 //Рисуем
-                newObject = Physics.body('circle', {
-                    mass: 100,
-                    radius: 2,
-                    x: obj.x,
-                    y: obj.y
-                });
+                newObject = createObject(false, [obj.x, obj.y]);
 
                 if(obj.type == 'canon'){
                     if(player._id == itIsYou._id){
@@ -390,6 +507,7 @@ function gameTick(data){
         //ui.params.html('Дал.: ' + dist + ' Нап.: ' + dir + ' Рес.: ' + world_opt.resources[itIsYou.side]);
     }
     if(windMarks.length){world.add(windMarks);}
+    if(sightElements.length){world.add(sightElements);}
     if(misses.length){world.add(misses);}
     if(torpedos.length){world.add(torpedos);}
     if(hulls.length){world.add(hulls);}
@@ -477,6 +595,19 @@ function findWhere(arr, params){
     return element;
 }
 
+function createObject(image, coord){
+    var newObject = Physics.body('circle', {
+        mass: 100,
+        radius: 2,
+        x: coord[0],
+        y: coord[1]
+    });
+    if(image){
+        newObject.view = image;
+    }
+    return newObject;
+}
+
 ui.commandField.keydown(function(event){
     if (event.which == 13){
         var command = ui.commandField.val();
@@ -485,5 +616,8 @@ ui.commandField.keydown(function(event){
             ui.messageBox.hide();
         }
         ui.commandField.val('').focus();
+    }else if(event.which == 32){
+        socket.emit('command', {command: 'огонь'});
+        ui.messageBox.hide();
     }
 });
