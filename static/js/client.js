@@ -183,11 +183,10 @@ var aim = {
     },
 
     moveReduction: function (event){
+        event.preventDefault();
         var player = world_opt.players[itIsYou._id];
         var l = Math.sqrt(Math.pow(player.x - event.offsetX, 2) + Math.pow(player.y - event.offsetY, 2));
-        aim.reduction.x = l > aim.sightRange ? aim.sightRange : l;
-
-        event.preventDefault();
+        aim.reduction.x = l > aim.sightRange ? aim.sightRange : l + player.x;
     },
 
     sendCross: function(event){
@@ -230,7 +229,7 @@ var aim = {
         var command;
         var player = world_opt.players[itIsYou._id];
         var l = Math.sqrt(Math.pow(player.x - event.offsetX, 2) + Math.pow(player.y - event.offsetY, 2));
-        aim.reduction.x = l > aim.sightRange ? aim.sightRange : l;
+        aim.reduction.x = l > aim.sightRange ? aim.sightRange : l + player.x;
 
         command = aim.reduction.x * aim.realRange / aim.sightRange;
         command = 'сведение ' + command;
