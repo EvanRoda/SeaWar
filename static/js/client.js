@@ -344,6 +344,9 @@ function onStart(data){
     ui.screen.lobby.show();
 
     ui.gameField.on('mousedown', aim.mouseDown);
+    ui.gameField.on('contextmenu', function(event){
+         event.preventDefault();
+    });
 }
 
 function createWorld(data){
