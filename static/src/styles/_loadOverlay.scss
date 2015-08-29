@@ -1,0 +1,23 @@
+#load_overlay {
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  background-color: #000000;
+  opacity: 0.6;
+  top: 0;
+  left: 0;
+
+  .loader {
+    width: 100%;
+    text-align: center;
+    margin: 20% auto;
+
+    div {
+      font-size: 24px;
+
+      i {
+        font-size: 60px;
+      }
+    }
+  }
+}

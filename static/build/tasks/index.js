@@ -1,0 +1,9 @@
+require('./scripts');
+require('./libs');
+require('./styles');
+require('./watch');
+require('./html');
+require('./fonts');
+require('./clean');
+require('./images');
+require('./templates');

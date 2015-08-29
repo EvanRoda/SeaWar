@@ -1,0 +1,203 @@
+//@extend-elements
+//original selectors
+//.ui-select-bootstrap .ui-select-choices-row>a:hover, .ui-select-bootstrap .ui-select-choices-row>a:focus
+%extend_1 {
+  text-decoration: none;
+  color: #262626;
+  background-color: #f5f5f5;
+}
+
+//original selectors
+//.ui-select-bootstrap .ui-select-choices-row.disabled>a, .ui-select-bootstrap .ui-select-choices-row.active.disabled>a
+%extend_2 {
+  color: #777;
+  cursor: not-allowed;
+  background-color: #fff;
+}
+
+
+.ui-select-highlight {
+  font-weight: bold;
+}
+.ui-select-offscreen {
+  clip: rect(0 0 0 0) !important;
+  width: 1px !important;
+  height: 1px !important;
+  border: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  outline: 0 !important;
+  left: 0 !important;
+  top: 0 !important;
+}
+.select2-result-single {
+  padding-left: 0;
+}
+.btn-default-focus {
+  color: #333;
+  background-color: #ebebeb;
+  border-color: #adadad;
+  text-decoration: none;
+  outline-offset: -2px;
+  //Instead of the line below you could use @includebox-shadow($shadow-1, $shadow-2, $shadow-3, $shadow-4, $shadow-5, $shadow-6, $shadow-7, $shadow-8, $shadow-9, $shadow-10)
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+}
+.ui-select-bootstrap {
+  .ui-select-toggle {
+    position: relative;
+    > .caret {
+      position: absolute;
+      height: 10px;
+      top: 50%;
+      right: 10px;
+      margin-top: -2px;
+    }
+  }
+  > {
+    .ui-select-choices {
+      width: 100%;
+      height: auto;
+      max-height: 200px;
+      overflow-x: hidden;
+      margin-top: -1px;
+    }
+    .ui-select-match > {
+      .btn {
+        text-align: left !important;
+      }
+      .caret {
+        position: absolute;
+        top: 45%;
+        right: 15px;
+      }
+    }
+  }
+  .ui-select-choices-row>a {
+    display: block;
+    padding: 3px 20px;
+    clear: both;
+    font-weight: 400;
+    line-height: 1.42857143;
+    color: #333;
+    white-space: nowrap;
+    &:hover {
+      @extend %extend_1;
+    }
+    &:focus {
+      @extend %extend_1;
+    }
+  }
+  .ui-select-choices-row {
+    &.active>a {
+      color: #fff;
+      text-decoration: none;
+      outline: 0;
+      background-color: #428bca;
+    }
+    &.disabled>a {
+      @extend %extend_2;
+    }
+    &.active.disabled>a {
+      @extend %extend_2;
+    }
+  }
+  &.ng-dirty.ng-invalid > button.btn.ui-select-match {
+    border-color: #d44950;
+  }
+}
+.ui-select-multiple {
+  &.ui-select-bootstrap {
+    height: auto;
+    padding: 3px 3px 0 3px;
+    .ui-select-match-item {
+      outline: 0;
+      margin: 0 3px 3px 0;
+    }
+    input.ui-select-search {
+      background-color: transparent !important;
+      border: none;
+      outline: none;
+      height: 1.666666em;
+      margin-bottom: 3px;
+    }
+    .ui-select-match .close {
+      font-size: 1.6em;
+      line-height: 0.75;
+    }
+  }
+  .ui-select-match-item {
+    position: relative;
+    &.dropping-before:before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 100%;
+      height: 100%;
+      margin-right: 2px;
+      border-left: 1px solid #428bca;
+    }
+    &.dropping-after:after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 100%;
+      height: 100%;
+      margin-left: 2px;
+      border-right: 1px solid #428bca;
+    }
+  }
+}
+.ng-dirty.ng-invalid > {
+  a.select2-choice {
+    border-color: #d44950;
+  }
+  div.selectize-input {
+    border-color: #d44950;
+  }
+}
+.select2-locked > .select2-search-choice-close {
+  display: none;
+}
+.select-locked > .ui-select-match-close {
+  display: none;
+}
+body > {
+  .select2-container.open {
+    z-index: 9999;
+  }
+  .ui-select-bootstrap.open {
+    z-index: 1000;
+  }
+}
+.selectize-input.selectize-focus {
+  border-color: #007fbb !important;
+}
+.selectize-control > {
+  .selectize-dropdown {
+    width: 100%;
+  }
+  .selectize-input > input {
+    width: 100%;
+  }
+}
+.input-group > .ui-select-bootstrap {
+  &.dropdown {
+    position: static;
+  }
+  > input.ui-select-search.form-control {
+    //Instead of the line below you could use @includeborder-radius($radius, $vertical-radius)
+    border-radius: 4px;
+    //Instead of the line below you could use @includeborder-top-right-radius($radius)
+    border-top-right-radius: 0;
+    //Instead of the line below you could use @includeborder-bottom-right-radius($radius)
+    border-bottom-right-radius: 0;
+  }
+}
+.ui-select-match.ng-hide-add {
+  display: none !important;
+}
+.ui-select-search.ng-hide-add {
+  display: none !important;
+}
