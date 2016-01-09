@@ -1,13 +1,21 @@
 {
   "name": "SeaWar",
   "version": "0.0.2",
-  "private": true,
+  "private": false,
   "scripts": {
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "express": "3.5.1",
-    "socket.io": "1.3.2",
-    "lodash": "2.4.1"
+    "body-parser": "^1.14.1",
+    "connect-mongo": "^0.8.2",
+    "cookie-parser": "^1.4.0",
+    "crypto": "0.0.3",
+    "express": "4.13.3",
+    "express-session": "^1.12.1",
+    "lodash": "3.10.1",
+    "mongoose": "^4.2.3",
+    "nconf": "^0.8.2",
+    "serve-favicon": "^2.3.0",
+    "socket.io": "1.3.2"
   }
 }

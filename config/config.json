@@ -1,0 +1,25 @@
+{
+  "port": 3000,
+  "mongoose": {
+    "uri": "mongodb://localhost/seawar",
+    "options": {
+      "server": {
+        "socketOptions": {
+          "keepAlive": 1
+        }
+      }
+    }
+  },
+  "session": {
+    "secret": "AllYourBaseAreBelongToUs",
+    "key": "sid",
+    "resave": false,
+    "saveUninitialized": true,
+    "cookie": {
+      "path": "/",
+      "httpOnly": true,
+      "maxAge": null,
+      "secure": false
+    }
+  }
+}

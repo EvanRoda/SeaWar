@@ -1,0 +1,1 @@
+D:\Soft\MongoDB\bin\mongod.exe --dbpath d:\Soft\MongoDB\data -v

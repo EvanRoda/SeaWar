@@ -1,130 +1,28 @@
 <!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet">
-    <link href="css/base.css" rel="stylesheet" media="screen">
-    <script src="bootstrap/js/jquery-2.1.0.min.js"></script>
-    <script src="bootstrap/js/bootstrap.min.js"></script>
-    <script src="bootstrap/js/physicsjs-full-0.6.0.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
+<html ng-app="seaApp">
+    <head lang="en">
+        <meta charset="UTF-8">
+        <title>SeaWar</title>
+        <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 
-</head>
-<body>
-    <div class="container padded">
-        <div id="lobby">
+        <script src="libs/jquery-2.1.4.min.js"></script>
+        <script src="bootstrap/js/bootstrap.min.js"></script>
+        <script src="libs/angular.min.js"></script>
+        <script src="libs/angular-route.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+
+        <script src="app.js"></script>
+        <script src="controllers.js"></script>
+    </head>
+    <body>
+        <div class="container" ng-controller="MenuCtrl">
             <div class="row">
-                <div class="span6">
-                    <div class="alert message-block" id="message">
-                        <strong></strong>
-                        <span></span>
-                    </div>
-                </div>
-                <div class="span6">
-                    <div class="well well-small small-alert">
-                        <strong id="show_nick">Ник</strong>
-                        <strong><i class="fa fa-ship"></i></strong>
-                        <strong id="show_ship">(корабель)</strong>
-                    </div>
-                </div>
-            </div>
-            <div id="to_battle" class="row">
-                <div id="ready_toggle" class="offset4 span4">
-                    <button class="btn btn-warning btn-large relative-width-100" type="button" onclick="toBattle()"><i class="fa fa-circle-o"></i> Не готов</button>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="span4"><h3>Все игроки</h3></div>
-                <div class="span4"><h3>В очереди</h3></div>
-                <div class="span4"><h3>В бою</h3></div>
-            </div>
-            <div class="row">
-                <div id="all_players" class="span4"></div>
-                <div id="lobby_players" class="span4"></div>
-                <div id="battle_players" class="span4"></div>
-            </div>
-        </div>
-
-        <div id="battle_screen">
-            <div class="row">
-                <div class="span5">
-                    <input type="text" placeholder="Type command" id="command_line" class="relative-width-100">
-                </div>
-                <div class="span6">
-                    <div class="alert message-block small-alert">
-                        <strong></strong>
-                        <span></span>
-                    </div>
-                </div>
-                <div class="span1">
-                    <button class="btn btn-warning relative-width-100" type="button" onclick="leaveBattle()"><i class="fa fa-thumbs-o-down"></i></button>
-                </div>
-            </div>
-            <div class="row">
-                <div class="span12">
-                    <canvas id="game_field" width="954" height="810"></canvas>
+                <div ng-view class="col-xs-8"></div>
+                <div class="col-xs-4">
+                    <a href="#/battle">Битва</a>
+                    <a href="#/">Лобби</a>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div id="login_modal" class="modal hide fade">
-        <div class="modal-body">
-            <div>
-                <input type="text" id="player_name" placeholder="Your nickname">
-            </div>
-            <div class="text-center">
-                <h2>Choose your side!</h2>
-            </div>
-            <div class="text-center">
-                <button class="btn btn-success btn-large" type="button" onclick="selectSide('leaf')" id="leaf_button"></button>
-                <button class="btn btn-danger btn-large" type="button" onclick="selectSide('fire')" id="fire_button"></button>
-            </div>
-        </div>
-    </div>
-
-    <div id="ship_modal" class="modal hide fade">
-        <div class="modal-body">
-            <div class="text-center">
-                <h2>
-                    <span>Выбери корабль</span>
-                    <span id="command_resource"></span>
-                </h2>
-            </div>
-            <div id="ship_container" class="text-center"></div>
-        </div>
-    </div>
-
-    <div id="help" class="modal hide fade">
-        <div class="modal-body">
-            <h4>Примеры команд</h4>
-
-            <h5>Управление орудиями</h5>
-            <div>Направление 90</div>
-            <div>Дальность 900</div>
-            <div>Сведение 700</div>
-            <div>Огонь</div>
-
-            <h5>Управление торпедными аппаратами</h5>
-            <div>Направление 90</div>
-            <div>Угол 10</div>
-            <div>Пуск</div>
-        </div>
-    </div>
-
-    <div id="game_over" class="modal hide fade">
-        <div class="modal-body">
-            <h4 id="end_message"></h4>
-        </div>
-    </div>
-
-    <div id="button-sides" onclick="openLogin()"></div>
-    <div id="button-ship" onclick="openSelectShipWindow()"></div>
-    <div id="button-help" onclick="openHelp()"></div>
-
-    <script type="text/javascript" src="js/client.js"></script>
-</body>
+    </body>
 </html>
